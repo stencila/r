@@ -8,7 +8,7 @@ cache: packages
 
 after_success:
   - |
-    if [[ $TRAVIS_R_VERSION == 3.3.0 ]]; then
+    if [[ $TRAVIS_R_VERSION == 3.3.* ]]; then
       Rscript -e 'install.packages('covr'); covr::codecov()';
     fi
 
