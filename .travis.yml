@@ -7,7 +7,7 @@ r:
 cache: packages
 
 after_success:
-  - bash <(curl -s https://codecov.io/bash)
+  - Rscript -e 'covr::codecov()'
 
 notifications:
   webhooks:
