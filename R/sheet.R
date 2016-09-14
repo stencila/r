@@ -1,4 +1,4 @@
-Sheet <- R6::R6Class("Sheet",
+Sheet <- R6Class("Sheet",
   inherit = Component,
   public = list(
   )

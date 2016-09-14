@@ -1,4 +1,4 @@
-Session <- R6::R6Class("Session",
+Session <- R6Class("Session",
   inherit = Component,
   public = list(
   )

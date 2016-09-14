@@ -8,5 +8,8 @@ BugReports: https://github.com/stencila/r/issues
 License: GPL-3
 Version: 0.1.0
 LazyData: TRUE
-Imports: R6
-Suggests: testthat, covr
+Imports:
+  R6
+Suggests:
+  testthat,
+  covr
