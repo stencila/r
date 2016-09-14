@@ -2,9 +2,9 @@ Package: stencila
 Type: Package
 Title: Stencila Documents, Sheets, Contexts and Sessions for R 
 Description: Stencila is a platform for creating, collaborating on, and publishing data driven documents.
-Authors@R: as.person(c(
-    "Nokome Bentley <nokome@stenci.la> [aut, cre]"
-  ))
+Authors@R: c(
+    person("Nokome", "Bentley" email = "<nokome@stenci.la>", role = c("aut", "cre"))
+  )
 URL: https://github.com/stencila/r#readme
 BugReports: https://github.com/stencila/r/issues
 License: GPL-3
