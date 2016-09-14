@@ -1,0 +1,54 @@
+{
+
+	"settings": {
+		"tab_size": 2,
+		"translate_tabs_to_spaces": true
+	},
+
+	"folders":
+	[
+		{
+			"path": ".",
+			"folder_exclude_patterns": [
+				".Rproj.user"
+			]
+		}
+	],
+
+	"build_systems":
+	[
+		{
+			"name": "Build: build the package",
+			"cmd":
+			[
+				"make", "build"
+			],
+			"working_dir": "."
+		},
+		{
+			"name": "Check: check the package",
+			"cmd":
+			[
+				"make", "check"
+			],
+			"working_dir": "."
+		},
+		{
+			"name": "Test all: run all tests",
+			"cmd":
+			[
+				"make", "test"
+			],
+			"working_dir": "."
+		},
+		{
+			"name": "Test one: run an individual test file",
+			"cmd":
+			[
+				"Rscript", "$file_path/$file_name"
+			],
+			"working_dir": "."
+		},
+	]
+}
+

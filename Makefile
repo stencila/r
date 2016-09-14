@@ -7,6 +7,9 @@ build:
 	R CMD build .
 
 check:
+	R CMD check $$(ls stencila_*.tar.gz | tail -n 1)
+
+check-as-cran:
 	R CMD check $$(ls stencila_*.tar.gz | tail -n 1) --as-cran
 
 test:

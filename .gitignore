@@ -1,9 +1,6 @@
 # Sandbox
 .sandbox
 
-# Coverage output
-coverage.json
-
 # History files
 .Rhistory
 
@@ -22,3 +19,6 @@ coverage.json
 # RStudio files
 .Rproj.user/
 .Rproj.user
+
+# Sublime Text files
+*.sublime-workspace
