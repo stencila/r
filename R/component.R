@@ -1,22 +1,21 @@
 Component <- R6Class("Component",
   public = list(
 
-    initialize = function (path = NULL) {
-      path <- if (!is.null(path)) path else ''
+    initialize = function (address=NULL, path=NULL) {
 
-      private$.path <- path
-      if (file.exists(path)) {
-        self$read(path)
+      if (!is.null(address)) {
+        private$.address = instance$resolve(address)
+        if (!is.null(path)) {
+          private$.path = path
+        } else {
+          private$.path = instance$obtain(private$.address)
+          self$read()
+        }
+      } else {
+        private$.address = paste0('mem://', paste0(sample(c(letters, paste(0:9)), 12), collapse=''))
+        private$.path = NULL
       }
 
-      count <- components$count + 1
-      assign(paste0('.', count), self, envir = components)
-      assign('count', count, envir = components)
-
-    },
-
-    path = function () {
-      private$.path
     },
 
     read = function (path = NULL) {
@@ -24,10 +23,10 @@ Component <- R6Class("Component",
         path <- private$.path
       }
 
-      if (file.exists(path)) {
+      if (file.exists(if (is.null(path)) '' else path)) {
         private$.path <- path
       } else {
-        stop("Filesystem path does not exist\n  path: ${path}")
+        stop(paste0("Filesystem path does not exist\n  path: ", path))
       }
 
       private$.path
@@ -50,7 +49,20 @@ Component <- R6Class("Component",
 
   ),
 
+  active = list(
+
+    address = function () {
+      private$.address
+    },
+
+    path = function () {
+      private$.path
+    }
+
+  ),
+
   private = list(
+    .address = NULL,
     .path = NULL
   )
 )
