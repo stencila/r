@@ -9,7 +9,15 @@ License: GPL-3
 Version: 0.1.0
 LazyData: TRUE
 Imports:
-  R6
+  base64enc,
+  DBI,
+  evaluate,
+  httpuv,
+  httr,
+  jsonlite,
+  R6,
+  RSQLite,
+  stringr
 Suggests:
   testthat,
   covr

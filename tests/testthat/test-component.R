@@ -11,20 +11,20 @@ test_that('Component can be read and written', {
   cat('', file = p1)
   cat('', file = p2)
 
-  c = Component$new(p1)
-  expect_equal(c$path, p1, 'Initial path is set')
+  c = Component$new()
+  expect_equal(c$path, NULL, 'Initial path is NULL')
+
+  c$read(p1)
+  expect_equal(c$path, p1, 'Read with arg does sets path')
 
   c$read()
   expect_equal(c$path, p1, 'Read with no arg does not change path')
 
-  c$read(p2)
-  expect_equal(c$path, p2, 'Read with arg does change path')
-
   c$write()
-  expect_equal(c$path, p2, 'Write with no arg does not change path')
+  expect_equal(c$path, p1, 'Write with no arg does not change path')
 
-  c$write(p1)
-  expect_equal(c$path, p1, 'Write with arg does change path')
+  c$write(p2)
+  expect_equal(c$path, p2, 'Write with arg does change path')
 })
 
 test_that('Component read errors correctly', {

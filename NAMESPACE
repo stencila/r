@@ -1,3 +1,13 @@
 exportPattern("^[[:alpha:]]+")
+export("$.ComponentProxy")
+export("$<-.ComponentProxy")
 
+import(base64enc)
+import(DBI)
+import(evaluate)
+import(httpuv)
+import(httr)
+import(jsonlite)
 import(R6)
+import(RSQLite)
+import(stringr)

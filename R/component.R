@@ -1,21 +1,93 @@
+host <- NULL
+
 Component <- R6Class("Component",
   public = list(
 
     initialize = function (address=NULL, path=NULL) {
+      private$.id <- paste(sprintf('%x', sample(0:255,size=32,replace=TRUE)), collapse='')
+      private$.address <- paste0('id://', private$.id)
+      private$.path <- NULL
+      private$.meta <- list()
 
-      if (!is.null(address)) {
-        private$.address = instance$resolve(address)
-        if (!is.null(path)) {
-          private$.path = path
-        } else {
-          private$.path = instance$obtain(private$.address)
-          self$read()
-        }
+      if (!is.null(host)) host$register(self)
+    },
+
+    lengthen = function(address=NULL) {
+      if (is.null(address)) address <- self$address
+
+      if (!anyNA(str_match(address, '^[a-z]+://'))) {
+        address
+      } else if (str_sub(address, 1, 1) == '+'){
+        paste0('new://', str_sub(address, 2))
+      } else if (str_sub(address, 1, 1) == '~'){
+        paste0('id://', str_sub(address, 2))
+      } else if (str_sub(address, 1, 1) == '.' || str_sub(address, 1, 1) == '/'){
+        paste0('file://', suppressWarnings(normalizePath(address)))
+      } else if (str_sub(address, 1, 3) == 'bb/'){
+        paste0('git://bitbucket.org/', str_sub(address, 4))
+      } else if (str_sub(address, 1, 3) == 'gh/'){
+        paste0('git://github.com/', str_sub(address, 4))
+      } else if (str_sub(address, 1, 3) == 'gl/'){
+        paste0('git://gitlab.com/', str_sub(address, 4))
       } else {
-        private$.address = paste0('mem://', paste0(sample(c(letters, paste(0:9)), 12), collapse=''))
-        private$.path = NULL
+        paste0('git://stenci.la/', address)
       }
+    },
 
+    shorten = function(address=NULL) {
+      if (is.null(address)) address <- self$address
+
+      if (str_sub(address, 1, 6) == 'new://'){
+        paste0('+', str_sub(address, 7))
+      } else if (str_sub(address, 1, 5) == 'id://'){
+        paste0('~', str_sub(address, 6))
+      } else if (str_sub(address, 1, 7) == 'file://'){
+        address
+      } else if (str_sub(address, 1, 7) == 'http://' || str_sub(address, 1, 9)== 'https://'){
+        address
+      } else if (str_sub(address, 1, 20) == 'git://bitbucket.org/'){
+        paste0('bb/', str_sub(address, 21))
+      } else if (str_sub(address, 1, 17) == 'git://github.com/'){
+        paste0('gh/', str_sub(address, 18))
+      } else if (str_sub(address, 1, 17) == 'git://gitlab.com/'){
+        paste0('gl/', str_sub(address, 18))
+      } else if (str_sub(address, 1, 16) == 'git://stenci.la/'){
+        str_sub(address, 17)
+      } else {
+        stop(paste0('Unable to shorten address\n address: ', address))
+      }
+    },
+
+    split = function(address=NULL) {
+      if (is.null(address)) address <- self$address
+
+      address <- self$lengthen(address)
+      matches <- str_match(address, '([a-z]+)://([\\w\\-\\./]+)(@([\\w\\-\\.]+))?')
+      if (!is.na(matches[1, 1])) {
+        return(list(
+          scheme = matches[1, 2],
+          path = matches[1, 3],
+          format = tools::file_ext(matches[1, 3]),
+          version = matches[1, 5]
+        ))
+      } else {
+        stop(paste0('Unable to split address\n address: ', address))
+      }
+    },
+
+    dump = function (format, options) {
+      if (format == 'data') {
+        list(
+          type = self$type,
+          id = self$id,
+          address = self$address,
+          url = self$url
+        )
+      } else if (format == 'json') {
+        toJSON(self$dump('data'), auto_unbox=TRUE)
+      } else {
+        stop(paste0('Unhandled format\n  format: ', format))
+      }
     },
 
     read = function (path = NULL) {
@@ -45,11 +117,44 @@ Component <- R6Class("Component",
       private$.path <- path
 
       private$.path
+    },
+
+    show = function (format='html') {
+
+      if (format == 'json') {
+        self$dump('json')
+      } else {
+        "<!DOCTYPE html>
+        <html>
+            <head>
+                %(meta)s
+                <meta name=\"generator\" content=\"stencila-%(package)s-%(version)s\">
+                <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">
+                <link rel=\"stylesheet\" type=\"text/css\" href=\"/web/%(type)s.min.css\">
+            </head>
+            <body>
+                <main id=\"content\">%(content)s</main>
+                <script src=\"/web/%(type)s.min.js\"></script>
+            </body>
+        </html>"
+      }
+    },
+
+    view = function() {
+      instance$view(self)
     }
 
   ),
 
   active = list(
+
+    type = function () {
+      tolower(class(self)[1])
+    },
+
+    id = function () {
+      private$.id
+    },
 
     address = function () {
       private$.address
@@ -57,19 +162,18 @@ Component <- R6Class("Component",
 
     path = function () {
       private$.path
+    },
+
+    url = function () {
+      paste0(host$url, '/', self$shorten())
     }
 
   ),
 
   private = list(
+    .id = NULL,
     .address = NULL,
-    .path = NULL
+    .path = NULL,
+    .meta = NULL
   )
 )
-
-# List of component instances
-# Needs to be an environment to avoid the
-# "cannot change value of locked binding" error
-# when trying to change a package variable
-components <- new.env()
-assign('count', 0, envir = components)

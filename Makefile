@@ -6,6 +6,12 @@ setup:
 build:
 	R CMD build .
 
+install:
+	Rscript -e 'devtools::install()'
+
+run:
+	echo 'library(stencila); host$$startup()' | R --interactive
+
 check:
 	R CMD check $$(ls stencila_*.tar.gz | tail -n 1)
 
