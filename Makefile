@@ -9,8 +9,9 @@ build:
 install:
 	Rscript -e 'devtools::install()'
 
+# The tryCatch here is simply to catch teh `ignoring SIGPIPE signal` that occurs (on Ubuntu Linux at least)
 run:
-	echo 'library(stencila); host$$startup()' | R --interactive
+	echo 'library(stencila); host$$startup(); tryCatch(Sys.sleep(10), error=identity); Sys.sleep(1e6)' | R --no-save --quiet
 
 check:
 	R CMD check $$(ls stencila_*.tar.gz | tail -n 1)
