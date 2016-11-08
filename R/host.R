@@ -246,7 +246,7 @@ Host <- R6Class("Host",
 
     view = function(component=NULL){
       self$serve()
-      url <- paste0(self$url(component), '?token=', private$.token)
+      url <- paste0(self$url, '?token=', private$.token)
       if (Sys.info()[['sysname']] == 'Linux') {
         system(paste('2>/dev/null 1>&2 xdg-open "', url, '"'))
       } else {
