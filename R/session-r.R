@@ -3,21 +3,36 @@ RSession <- R6Class("RSession",
 
   public = list(
 
+    input = NULL,
+    output = NULL,
+
     initialize = function () {
       super$initialize()
-      private$.parent <- NULL
-      private$.children <- list()
-      env <- new.env(parent=parent.frame())
-      env$self <- self
-      env$parent <- private$.parent
-      env$children <- private$.children
-      private$.root <- env
-      private$.scopes <- list(env)
+
+      # Create pipelines
+      self$input <- InputPipeline$new()
+      self$output <- OutputPipeline$new()
+
+      # Root environment with `input` and `output` pipeline variables
+      root <- new.env(parent=parent.frame())
+      root$input <- self$input
+      root$output <- self$output
+      private$.root <- root
+
+      # Put root environment to top of scope stack
+      private$.scopes <- list(root)
     },
 
-    execute = function(code, format = '') {
+    execute = function(code, pipes = list(), format = '') {
       # TODO If format is not specified then default to one based on value. Otherwise
       # attempt to force to particular format e.g plot to json?
+      #
+      # TODO: Setup the input variable, so that it 'knows' if is will call remote session with `!output`, or
+      # just use it's own `.output` value directly
+
+      # Set the input pipes
+      self$input$pipes <- pipes
+
       # `evaluate` returns a list : source code lines interleaved with output, just as if
       # you typed each line in an interactive console.
       result <- evaluate(code, envir=private$.bottom(), output_handler=execute_output_handler)
@@ -57,7 +72,7 @@ RSession <- R6Class("RSession",
         } else if (typeof(last) %in% c('NULL', 'logical', 'integer', 'double', 'character')) {
           # Fundamental types as JSON (atomics and vectors) with fallback to printing
           format <- 'json'
-          content <- tryCatch(toJSON(last, auto_unbox = TRUE), error = identity)
+          content <- tryCatch(toString(toJSON(last, auto_unbox = TRUE)), error = identity)
           if (inherits(content, 'error')) {
             format <- 'text'
             content <- paste(capture.output(print(last)), collapse = '\n')
@@ -75,9 +90,11 @@ RSession <- R6Class("RSession",
           )
         }
       }
+
       list(
         errors = errors,
-        output = output
+        output = output,
+        pipes = I(names(self$output$pipes)) # I() prevents unboxing if only one pipe name
       )
     },
 
@@ -97,46 +114,21 @@ RSession <- R6Class("RSession",
       assign(name, value, envir=private$.bottom())
     },
 
-    spawn = function(type) {
-      child <- host$open(paste0('new://session-', type))
-      child$parent <- self
-      private$.children[[type]] <- child
-    },
-
-    #' Get a child using a name
-    child = function(name) {
-      private$.children[[name]]
-    },
-
-    sibling = function(name) {
-      if (private$.parent) {
-        stop('This session does not have a parent, and thus, doesn\'t have siblings')
-      } else {
-        private$.parent$child(name)
-      }
+    supply = function(name) {
+      self$output$pipes[[name]]
     }
+
   ),
 
   active = list(
 
     type = function () {
       'session-r'
-    },
-
-    parent = function (value) {
-      if (missing(value)) {
-        private$.parent
-      } else {
-        private$.parent <- value
-        private$.root$parent <- private$.parent
-      }
     }
 
   ),
 
   private = list(
-    .parent = NULL,
-    .children = NULL,
     .root = NULL,
     .scopes = NULL,
 

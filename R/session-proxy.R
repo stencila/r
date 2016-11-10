@@ -17,6 +17,10 @@ SessionProxy <- function(type, url) {
     self[['.call']]('print', expr)
   }
 
+  self[['supply']] <- function(name) {
+    self[['.call']]('supply', name)
+  }
+
   class(self) <- c('SessionProxy', class(self))
   self
 }
