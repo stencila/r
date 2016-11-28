@@ -76,7 +76,7 @@ Component <- R6Class("Component",
       }
     },
 
-    dump = function (format, options) {
+    dump = function (format = 'data', options = list()) {
       if (format == 'data') {
         list(
           type = self$type,
