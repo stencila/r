@@ -15,13 +15,14 @@ Component <- R6Class("Component",
     lengthen = function(address=NULL) {
       if (is.null(address)) address <- self$address
 
+      c1 = str_sub(address, 1, 1)
       if (!anyNA(str_match(address, '^[a-z]+://'))) {
         address
-      } else if (str_sub(address, 1, 1) == '+'){
+      } else if (c1 == '+'){
         paste0('new://', str_sub(address, 2))
-      } else if (str_sub(address, 1, 1) == '~'){
+      } else if (c1 == '*'){
         paste0('id://', str_sub(address, 2))
-      } else if (str_sub(address, 1, 1) == '.' || str_sub(address, 1, 1) == '/'){
+      } else if (c1 == '.' || c1 == '/' || c1 == '~'){
         paste0('file://', suppressWarnings(normalizePath(address)))
       } else if (str_sub(address, 1, 3) == 'bb/'){
         paste0('git://bitbucket.org/', str_sub(address, 4))
@@ -40,7 +41,7 @@ Component <- R6Class("Component",
       if (str_sub(address, 1, 6) == 'new://'){
         paste0('+', str_sub(address, 7))
       } else if (str_sub(address, 1, 5) == 'id://'){
-        paste0('~', str_sub(address, 6))
+        paste0('*', str_sub(address, 6))
       } else if (str_sub(address, 1, 7) == 'file://'){
         address
       } else if (str_sub(address, 1, 7) == 'http://' || str_sub(address, 1, 9)== 'https://'){
