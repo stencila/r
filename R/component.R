@@ -125,19 +125,18 @@ Component <- R6Class("Component",
       if (format == 'json') {
         self$dump('json')
       } else {
-        "<!DOCTYPE html>
+        paste0("<!DOCTYPE html>
         <html>
             <head>
-                %(meta)s
-                <meta name=\"generator\" content=\"stencila-%(package)s-%(version)s\">
+                <meta name=\"generator\" content=\"stencila-r-", version, ">
                 <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">
-                <link rel=\"stylesheet\" type=\"text/css\" href=\"/web/%(type)s.min.css\">
+                <link rel=\"stylesheet\" type=\"text/css\" href=\"/web/", self$type, ".min.css\">
             </head>
             <body>
-                <main id=\"content\">%(content)s</main>
-                <script src=\"/web/%(type)s.min.js\"></script>
+                <script id=\"data\" data-format=\"json\" type=\"application/json\">", self$dump('json'), "</script>
+                <script src=\"/web/", self$type, ".min.js\"></script>
             </body>
-        </html>"
+        </html>")
       }
     },
 
