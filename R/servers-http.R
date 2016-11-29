@@ -118,7 +118,7 @@ HttpServer <- R6Class("HttpServer",
       component <- private$.host$open(address)
       if (!is.null(component)) {
         result <- component[[name]]
-        content <- toString(toJSON(result, auto_unbox=TRUE))
+        content <- jsonify(result)
         list(body = content, status = 200, headers = list('Content-Type' = 'application/json'))
       } else {
         self$error404(request, address)
@@ -144,7 +144,7 @@ HttpServer <- R6Class("HttpServer",
           if (inherits(result, 'Component')) {
             content <- result$dump('json')
           } else {
-            content <- toString(toJSON(result, auto_unbox=TRUE))
+            content <- jsonify(result)
           }
           list(body = content, status = 200, headers = list('Content-Type' = 'application/json'))
         } else {
@@ -210,3 +210,8 @@ HttpServer <- R6Class("HttpServer",
     .server = NULL
   )
 )
+
+
+jsonify <- function(value) {
+  toString(toJSON(value, auto_unbox=TRUE, null='null'))
+}
