@@ -23,6 +23,16 @@ RSession <- R6Class("RSession",
       private$.scopes <- list(root)
     },
 
+    dump = function (format = 'data', options = list()) {
+      if (format == 'data') {
+        data <- super$dump('data', options)
+        data[['list']] <- self$list()
+        data
+      } else {
+        super$dump(format, options)
+      }
+    },
+
     execute = function(code, pipes = list(), format = '') {
       # TODO If format is not specified then default to one based on value. Otherwise
       # attempt to force to particular format e.g plot to json?
@@ -91,6 +101,10 @@ RSession <- R6Class("RSession",
         }
       }
 
+      if (length(errors) == 0) {
+        errors <- NULL
+      }
+
       list(
         errors = errors,
         output = output,
@@ -104,6 +118,19 @@ RSession <- R6Class("RSession",
       } else {
         evaluate(expr, envir=private$.bottom(), output_handler=print_output_handler)[[2]]
       }
+    },
+
+    list = function() {
+      bottom <-private$.bottom()
+      objs <- list()
+      for (name in ls(envir=bottom)) {
+        obj <- bottom[[name]]
+        objs[[name]] <- list(
+          type = class(obj),
+          length = length(obj)
+        )
+      }
+      objs
     },
 
     get = function (name) {
@@ -124,6 +151,10 @@ RSession <- R6Class("RSession",
 
     type = function () {
       'session-r'
+    },
+
+    kind = function () {
+      'session'
     }
 
   ),
