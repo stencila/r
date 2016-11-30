@@ -109,6 +109,8 @@ ComponentProxy <- function(type, url) {
   self
 }
 
+setClass('ComponentProxy')
+
 '$.ComponentProxy' <- function(proxy, name) {
   if (exists(name, envir=proxy)) {
     get(name, envir=proxy)

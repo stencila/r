@@ -182,6 +182,8 @@ Component <- R6Class("Component",
   )
 )
 
+setClass('Component')
+
 # Create a hook for conversion of components to JSON
 asJSON <- jsonlite:::asJSON
 setMethod("asJSON", "Component", function(x, ...) {
