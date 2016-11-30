@@ -6,9 +6,7 @@
 
 ### Status
 
-<div align="center">
-  <img src="http://blog.stenci.la/wip.png" alt="WIP">
-</div> 
+![](http://blog.stenci.la/wip.png)
 This is very much a work in progress. See our [main repo](https://github.com/stencila/stencila) for more details.
 
 ### Development
