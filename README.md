@@ -1,10 +1,15 @@
-## `stencila/r`
+## `stencila/r` : Stencila for R
 
 [![Build status](https://travis-ci.org/stencila/r.svg?branch=master)](https://travis-ci.org/stencila/r)
 [![Code coverage](https://codecov.io/gh/stencila/r/branch/master/graph/badge.svg)](https://codecov.io/gh/stencila/r)
 [![Chat](https://badges.gitter.im/stencila/stencila.svg)](https://gitter.im/stencila/stencila)
 
-Stencila components for R
+### Status
+
+<div align="center">
+  <img src="http://blog.stenci.la/wip.png" alt="WIP">
+</div> 
+This is very much a work in progress. See our [main repo](https://github.com/stencila/stencila) for more details.
 
 ### Development
 
