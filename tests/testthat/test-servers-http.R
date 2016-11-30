@@ -15,7 +15,7 @@ test_that("HttpServer can serve", {
 test_that("HttpServer routes to endpoints correctly", {
   s = HttpServer$new(NULL)
 
-  expect_equal(s$route('EGT', '/web/some/file.js'), list(s$web, 'some/file.js'))
+  expect_equal(s$route('GET', '/web/some/file.js'), list(s$web, 'some/file.js'))
   expect_equal(s$route('GET', '/favicon.ico'), list(s$web, 'images/favicon.ico'))
 
   expect_equal(s$route('GET', '/!name'), list(s$get, NULL, 'name'))
@@ -27,7 +27,7 @@ test_that("HttpServer routes to endpoints correctly", {
   expect_equal(s$route('POST', '/!method'), list(s$call, NULL, 'method'))
   expect_equal(s$route('POST', '/git://some/address!method'), list(s$call, 'git://some/address', 'method'))
 
-  expect_equal(s$route('GET', '/'), list(s$show, ''))
+  expect_equal(s$route('GET', '/'), list(s$show, NULL))
   expect_equal(s$route('GET', '/file://some/address'), list(s$show, 'file://some/address'))
 })
 
