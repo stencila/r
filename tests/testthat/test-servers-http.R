@@ -44,7 +44,7 @@ test_that("HttpServer get method works", {
 
   r = s$get(list(), c$address, 'type')
   expect_equal(r$status, 200)
-  expect_equal(r$body, '"session-r"')
+  expect_equal(r$body, '"r-session"')
 })
 
 test_that("HttpServer call component method works", {

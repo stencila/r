@@ -2,7 +2,7 @@ test_that("Session can be constructed", {
   s <- RSession$new()
 
   expect_equal(class(s)[1], "RSession")
-  expect_equal(s$type, "session-r")
+  expect_equal(s$type, "r-session")
 })
 
 test_that("Session execute", {

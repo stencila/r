@@ -150,7 +150,7 @@ RSession <- R6Class("RSession",
   active = list(
 
     type = function () {
-      'session-r'
+      'r-session'
     },
 
     kind = function () {
