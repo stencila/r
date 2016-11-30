@@ -100,7 +100,9 @@ HttpServer <- R6Class("HttpServer",
           return(list(self$call, address, name))
         }
       }
-      return(list(self$show, str_sub(path, 2)))
+      address <- str_sub(path, 2)
+      if (address == '') address <- NULL
+      return(list(self$show, address))
     },
 
     #' Provide a response to an OPTIONS request
