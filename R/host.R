@@ -23,6 +23,30 @@ Host <- R6Class("Host",
       private$.token <- paste0(sample(c(letters, paste(0:9)), 12), collapse='')
     },
 
+    dump = function (format = 'data', options = list()) {
+      if (format == 'data') {
+        data <- super$dump('data', options)
+        data$package <- 'r'
+        data$components <- self$components
+        data$schemes <- self$schemes
+        data$types <- self$types
+        data$peers <- self$peers
+        data
+      } else {
+        super$dump(format, options)
+      }
+    },
+
+    schemes = list(
+      'new' = list(enabled=TRUE),
+      'id' = list(enabled=TRUE),
+      'file' = list(enabled=TRUE)
+    ),
+
+    types = list(
+      'r-session' = list(formats=NULL)
+    ),
+
     # When trying to make this a private member accessible through a getter
     # it failed to work (weirdly). So, just use a public member.
     components = list(),
@@ -45,7 +69,7 @@ Host <- R6Class("Host",
       version <- parts$version
       if (scheme == 'new') {
         class = switch(path,
-          'session-r' = RSession,
+          'r-session' = RSession,
           NULL
         )
         if (!is.null(class)) {
@@ -75,6 +99,7 @@ Host <- R6Class("Host",
 
       proxy <- self$ask(address)
       if (!is.null(proxy)) {
+        self$register(proxy)
         return(proxy)
       }
 
@@ -188,7 +213,7 @@ Host <- R6Class("Host",
                 data <- fromJSON(text)
                 type <- data$type
                 url <- data$url
-                if (str_sub(type, 1, 7) == 'session') {
+                if (str_sub(type, str_length(type)-6) == 'session') {
                   return(SessionProxy(type, url))
                 } else if (type == 'document') {
                   return(DocumentProxy(type, url))
@@ -264,7 +289,7 @@ Host <- R6Class("Host",
         id = self$id,
         url = self$url,
         schemes = c('new', 'id', 'file'),
-        types = c('session-r', ''), # Additional empty string to prevent unboxing in conversion to JSON
+        types = c('r-session', ''), # Additional empty string to prevent unboxing in conversion to JSON
         formats = c('', '')
       )
     },
