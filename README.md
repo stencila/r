@@ -7,9 +7,18 @@
 ### Status
 
 ![](http://blog.stenci.la/wip.png)
+
 This is very much a work in progress. See our [main repo](https://github.com/stencila/stencila) for more details.
 
-### Development
+### Install
+
+Right now this package isn't on CRAN, but you can install it from here using the [`devtools`](https://github.com/hadley/devtools) package from within R,
+
+```
+devtools::install_github("stencila/r")
+```
+
+### Develop
 
 Most development tasks can be run using `make` or RStudio keyboard shortcuts.
 
