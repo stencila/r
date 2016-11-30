@@ -25,6 +25,21 @@ ComponentProxy <- function(type, url) {
     self$.local <- FALSE
   }
 
+  self[['dump']] <- function(format='data') {
+    if (format == 'data') {
+      list(
+        type = self$.type,
+        id = self$id,
+        address = self$address,
+        url = self$.url
+      )
+    } else if (format == 'json') {
+      toJSON(self$dump(), auto_unbox=TRUE)
+    } else {
+      stop(paste('Unhandled format:', format))
+    }
+  }
+
   self$.get <- function(name) {
     if (self$.local) {
       host$open(self$.address)[[name]]
@@ -86,6 +101,10 @@ ComponentProxy <- function(type, url) {
     }
   }
 
+  self[['show']] <- function(format='html') {
+    self[['.call']]('show', format)
+  }
+
   class(self) <- 'ComponentProxy'
   self
 }
@@ -108,3 +127,8 @@ ComponentProxy <- function(type, url) {
 'print.ComponentProxy' <- function(proxy) {
   cat(class(proxy)[1], '(', proxy[['.type']], ', ', proxy[['.url']], ')\n', sep='')
 }
+
+asJSON <- jsonlite:::asJSON
+setMethod("asJSON", "ComponentProxy", function(x, ...) {
+  x$dump('json')
+})

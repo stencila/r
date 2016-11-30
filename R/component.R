@@ -130,11 +130,11 @@ Component <- R6Class("Component",
             <head>
                 <meta name=\"generator\" content=\"stencila-r-", version, ">
                 <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">
-                <link rel=\"stylesheet\" type=\"text/css\" href=\"/web/", self$type, ".min.css\">
+                <link rel=\"stylesheet\" type=\"text/css\" href=\"/web/", self$kind, ".min.css\">
             </head>
             <body>
                 <script id=\"data\" data-format=\"json\" type=\"application/json\">", self$dump('json'), "</script>
-                <script src=\"/web/", self$type, ".min.js\"></script>
+                <script src=\"/web/", self$kind, ".min.js\"></script>
             </body>
         </html>")
       }
@@ -150,6 +150,10 @@ Component <- R6Class("Component",
 
     type = function () {
       tolower(class(self)[1])
+    },
+
+    kind = function () {
+      self$type
     },
 
     id = function () {
@@ -177,3 +181,10 @@ Component <- R6Class("Component",
     .meta = NULL
   )
 )
+
+# Create a hook for conversion of components to JSON
+asJSON <- jsonlite:::asJSON
+setMethod("asJSON", "Component", function(x, ...) {
+  x$dump('json')
+})
+
