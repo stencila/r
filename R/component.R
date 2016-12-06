@@ -5,7 +5,8 @@ Component <- R6Class("Component",
 
     initialize = function (address=NULL, path=NULL) {
       private$.id <- paste(sprintf('%x', sample(0:255,size=32,replace=TRUE)), collapse='')
-      private$.address <- paste0('id://', private$.id)
+      if (is.null(address))  address <- paste0('name://', substr(private$.id, 1, 5), '-', self$type)
+      private$.address <- address
       private$.path <- NULL
       private$.meta <- list()
 
@@ -21,30 +22,45 @@ Component <- R6Class("Component",
       } else if (c1 == '+'){
         paste0('new://', str_sub(address, 2))
       } else if (c1 == '*'){
-        paste0('id://', str_sub(address, 2))
+        paste0('name://', str_sub(address, 2))
       } else if (c1 == '.' || c1 == '/' || c1 == '~'){
         paste0('file://', suppressWarnings(normalizePath(address)))
-      } else if (str_sub(address, 1, 3) == 'bb/'){
-        paste0('git://bitbucket.org/', str_sub(address, 4))
-      } else if (str_sub(address, 1, 3) == 'gh/'){
-        paste0('git://github.com/', str_sub(address, 4))
-      } else if (str_sub(address, 1, 3) == 'gl/'){
-        paste0('git://gitlab.com/', str_sub(address, 4))
       } else {
-        paste0('git://stenci.la/', address)
+        match <- str_match(address, '^([a-z]+)(:/?/?)(.+)$')
+        if (!anyNA(match)) {
+          alias <- match[1, 2]
+          path <- match[1, 4]
+          if (alias %in% c('id', 'http', 'https')) {
+            paste0(alias, '://', path)
+          } else if (alias == 'file') {
+            # Only arrive here with `file:/foo` since with
+            # `file:` with two or more slashes is already "long"
+            paste0('file:///', path)
+          } else if (alias == 'bb') {
+            paste0('git://bitbucket.org/', path)
+          } else if (alias == 'gh') {
+            paste0('git://github.com/', path)
+          } else if (alias == 'gl') {
+            paste0('git://gitlab.com/', path)
+          } else {
+            stop(paste0('Unknown scheme alias.\n alias: ', alias))
+          }
+        } else {
+          paste0('st://', address)
+        }
       }
     },
 
-    shorten = function(address=NULL) {
+    short = function(address=NULL) {
       if (is.null(address)) address <- self$address
 
       if (str_sub(address, 1, 6) == 'new://'){
         paste0('+', str_sub(address, 7))
-      } else if (str_sub(address, 1, 5) == 'id://'){
-        paste0('*', str_sub(address, 6))
+      } else if (str_sub(address, 1, 7) == 'name://'){
+        paste0('*', str_sub(address, 8))
       } else if (str_sub(address, 1, 7) == 'file://'){
         address
-      } else if (str_sub(address, 1, 7) == 'http://' || str_sub(address, 1, 9)== 'https://'){
+      } else if (str_sub(address, 1, 7) == 'http://' || str_sub(address, 1, 8)== 'https://'){
         address
       } else if (str_sub(address, 1, 20) == 'git://bitbucket.org/'){
         paste0('bb/', str_sub(address, 21))
@@ -55,7 +71,8 @@ Component <- R6Class("Component",
       } else if (str_sub(address, 1, 16) == 'git://stenci.la/'){
         str_sub(address, 17)
       } else {
-        stop(paste0('Unable to shorten address\n address: ', address))
+        matches <- str_match(address, '([a-z]+)://(.+)$')
+        paste0(matches[1,2], ':', matches[1,3])
       }
     },
 
@@ -80,8 +97,10 @@ Component <- R6Class("Component",
       if (format == 'data') {
         list(
           type = self$type,
+          kind = self$kind,
           id = self$id,
           address = self$address,
+          short = self$short(),
           url = self$url
         )
       } else if (format == 'json') {
@@ -121,7 +140,6 @@ Component <- R6Class("Component",
     },
 
     show = function (format='html') {
-
       if (format == 'json') {
         self$dump('json')
       } else {
@@ -141,7 +159,7 @@ Component <- R6Class("Component",
     },
 
     view = function() {
-      instance$view(self)
+      host$view(self)
     }
 
   ),
@@ -169,7 +187,7 @@ Component <- R6Class("Component",
     },
 
     url = function () {
-      paste0(host$url, '/', self$shorten())
+      paste0(host$url, '/', self$short())
     }
 
   ),

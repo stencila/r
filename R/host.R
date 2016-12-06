@@ -62,13 +62,16 @@ Host <- R6Class("Host",
       if (is.null(address)) return(self)
 
       address <- self$lengthen(address)
+
       parts <- self$split(address)
       scheme <- parts$scheme
       path <- parts$path
       format <- parts$format
       version <- parts$version
+
       if (scheme == 'new') {
         class = switch(path,
+          'datatable' = Datatable,
           'r-session' = RSession,
           NULL
         )
@@ -81,7 +84,16 @@ Host <- R6Class("Host",
         if (scheme == 'id') {
           if (component$id == path) return(component)
         } else {
-          if (component$address == paste0(scheme, '://', path)) return(component)
+          if (component$address == address) return(component)
+        }
+      }
+
+      if (scheme == 'file') {
+        format <- file_ext(path)
+        if (format == 'csv') {
+          component <- Datatable$new()
+          component$read(path, format)
+          return(component)
         }
       }
 
@@ -198,6 +210,7 @@ Host <- R6Class("Host",
           self$peers <- c(self$peers, list(manifest))
         }
       }
+      self$peers
     },
 
     ask = function (address) {
@@ -254,7 +267,7 @@ Host <- R6Class("Host",
       server <- HttpServer$new(self)
       server$serve()
       self$servers[['http']] <- server
-      dbSendStatement(self$db, sprintf('INSERT INTO hosts VALUES ("%s", "%s")', self$id, self$url))
+      private$.address <- paste0('name://local-', server$port, '-', self$type)
       self$url
     },
 
@@ -304,6 +317,14 @@ Host <- R6Class("Host",
   ),
 
   active = list(
+
+    type = function () {
+      'r-host'
+    },
+
+    kind = function () {
+      'host'
+    },
 
     db = function() {
       if (is.null(private$.db)) {

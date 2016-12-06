@@ -17,7 +17,9 @@ Imports:
   jsonlite,
   R6,
   RSQLite,
-  stringr
+  stringr,
+  tools,
+  xtable
 Suggests:
   testthat,
   covr
