@@ -30,7 +30,7 @@ ComponentProxy <- function(type, url) {
       list(
         type = self$.type,
         id = self$id,
-        address = self$address,
+        address = self$.address,
         url = self$.url
       )
     } else if (format == 'json') {
@@ -109,12 +109,12 @@ ComponentProxy <- function(type, url) {
   self
 }
 
-setClass('ComponentProxy')
+methods::setClass('ComponentProxy')
 
 '$.ComponentProxy' <- function(proxy, name) {
   if (exists(name, envir=proxy)) {
     get(name, envir=proxy)
-  } else if (name == 'url' || name == 'type') {
+  } else if (name == 'url' || name == 'type' || name == 'address') {
     get(paste0('.', name), envir=proxy)
   } else {
     get('.get', envir=proxy)(name)
@@ -131,6 +131,6 @@ setClass('ComponentProxy')
 }
 
 asJSON <- jsonlite:::asJSON
-setMethod("asJSON", "ComponentProxy", function(x, ...) {
+methods::setMethod("asJSON", "ComponentProxy", function(x, ...) {
   x$dump('json')
 })

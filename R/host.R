@@ -1,4 +1,5 @@
-library(DBI)
+#' The host instance
+host <- NULL
 
 Host <- R6Class("Host",
   inherit = Component,
@@ -61,7 +62,7 @@ Host <- R6Class("Host",
     open = function(address) {
       if (is.null(address)) return(self)
 
-      address <- self$lengthen(address)
+      address <- self$long(address)
 
       parts <- self$split(address)
       scheme <- parts$scheme

@@ -1,20 +1,30 @@
-host <- NULL
+#' Stencila home directory
+home = path.expand('~/.stencila')
 
+#' The abstract base class for all Stencila components
 Component <- R6Class("Component",
   public = list(
 
+    #' Initialize this component
+    #'
+    #' @param address The address for this component
+    #' @param address The path for this component
     initialize = function (address=NULL, path=NULL) {
       private$.id <- paste(sprintf('%x', sample(0:255,size=32,replace=TRUE)), collapse='')
-      if (is.null(address))  address <- paste0('name://', substr(private$.id, 1, 5), '-', self$type)
-      private$.address <- address
-      private$.path <- NULL
+
+      if (!is.null(address)) private$.address <- self$long(address)
+      else private$.address <- paste0('name://', substr(private$.id, 1, 5), '-', self$type)
+
+      if (!is.null(path)) private$.path <- path
+      else private$.path <- NULL
+
       private$.meta <- list()
 
       if (!is.null(host)) host$register(self)
     },
 
-    lengthen = function(address=NULL) {
-      if (is.null(address)) address <- self$address
+    long = function(address=NULL) {
+      if (is.null(address)) address <- private$.address
 
       c1 = str_sub(address, 1, 1)
       if (!anyNA(str_match(address, '^[a-z]+://'))) {
@@ -79,7 +89,7 @@ Component <- R6Class("Component",
     split = function(address=NULL) {
       if (is.null(address)) address <- self$address
 
-      address <- self$lengthen(address)
+      address <- self$long(address)
       matches <- str_match(address, '([a-z]+)://([\\w\\-\\./]+)(@([\\w\\-\\.]+))?')
       if (!is.na(matches[1, 1])) {
         return(list(
@@ -200,11 +210,11 @@ Component <- R6Class("Component",
   )
 )
 
-setClass('Component')
+methods::setClass('Component')
 
 # Create a hook for conversion of components to JSON
 asJSON <- jsonlite:::asJSON
-setMethod("asJSON", "Component", function(x, ...) {
+methods::setMethod("asJSON", "Component", function(x, ...) {
   x$dump('json')
 })
 
