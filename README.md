@@ -27,6 +27,7 @@ Task                                                    | `make`                
 Install dependencies                                    | `make setup`          | 
 Run tests                                               | `make test`           | `Ctrl+Shift+T`
 Run tests with coverage                                 | `make cover`          |
+Build documentation                                     | `make docs`           | `devtools::document()`
 Check the package                                       | `make check`          | `Ctrl+Shift+E`
 Build                                                   | `make build`          | `Ctrl+Shift+B`
 Clean                                                   | `make clean`          |

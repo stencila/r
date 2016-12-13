@@ -1,7 +1,8 @@
 Package: stencila
 Type: Package
 Title: Documents, Sheets, Contexts and Sessions for R
-Description: The Stencila platform is for creating, collaborating on, and publishing data driven documents.
+Description: The Stencila platform is for creating, collaborating on, and
+    publishing data driven documents.
 Authors@R: c(person("Nokome", "Bentley", email = "nokome@stenci.la", role = c("aut", "cre")))
 URL: https://github.com/stencila/r#readme
 BugReports: https://github.com/stencila/r/issues
@@ -9,17 +10,19 @@ License: GPL-3
 Version: 0.1.0
 LazyData: TRUE
 Imports:
-  base64enc,
-  DBI,
-  evaluate,
-  httpuv,
-  httr,
-  jsonlite,
-  R6,
-  RSQLite,
-  stringr,
-  tools,
-  xtable
+    base64enc,
+    DBI,
+    evaluate,
+    httpuv,
+    httr,
+    jsonlite,
+    R6,
+    readr,
+    RSQLite,
+    stringr,
+    tools,
+    xtable
 Suggests:
-  testthat,
-  covr
+    testthat,
+    covr
+RoxygenNote: 5.0.1
