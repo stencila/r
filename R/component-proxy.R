@@ -111,6 +111,7 @@ ComponentProxy <- function(type, url) {
 
 methods::setClass('ComponentProxy')
 
+#' @export
 '$.ComponentProxy' <- function(proxy, name) {
   if (exists(name, envir=proxy)) {
     get(name, envir=proxy)
@@ -121,11 +122,13 @@ methods::setClass('ComponentProxy')
   }
 }
 
+#' @export
 '$<-.ComponentProxy' <- function(proxy, name, value) {
   get('.set', envir=proxy)(name, value)
   proxy
 }
 
+#' @export
 'print.ComponentProxy' <- function(proxy) {
   cat(class(proxy)[1], '(', proxy[['.type']], ', ', proxy[['.url']], ')\n', sep='')
 }

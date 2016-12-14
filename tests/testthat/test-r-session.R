@@ -29,12 +29,12 @@ test_that("RSession execute with base graphics returns a PNG", {
   expect_equal(str_sub(res$output$value, 1, 21), 'data:image/png;base64')
 })
 
-test_that("RSession execute with a ggplot returns a PNG", {
-  if (require('ggplot2', quietly=T)) {
+if (require('ggplot2', quietly=T)) {
+  test_that("RSession execute with a ggplot returns a PNG", {
     s <- RSession$new()
     res <- s$execute('library(ggplot2); ggplot(diamonds) + geom_point(aes(x=carat, y=price))')
     expect_equal(res$output$format, 'png')
     expect_equal(str_sub(res$output$value, 1, 21), 'data:image/png;base64')
-  }
-})
+  })
+}
 

@@ -1,6 +1,9 @@
 #' The host instance
+#'
+#' @export
 host <- NULL
 
+#' The Host class
 Host <- R6Class("Host",
   inherit = Component,
   public = list(
@@ -45,7 +48,8 @@ Host <- R6Class("Host",
     ),
 
     types = list(
-      'r-session' = list(formats=NULL)
+      'r-session' = list(formats=NULL),
+      'sqlite-session' = list(formats=NULL)
     ),
 
     # When trying to make this a private member accessible through a getter
@@ -74,6 +78,7 @@ Host <- R6Class("Host",
         class = switch(path,
           'datatable' = Datatable,
           'r-session' = RSession,
+          'sqlite-session' = SqliteSession,
           NULL
         )
         if (!is.null(class)) {
@@ -303,7 +308,7 @@ Host <- R6Class("Host",
         id = self$id,
         url = self$url,
         schemes = c('new', 'id', 'file'),
-        types = c('r-session', ''), # Additional empty string to prevent unboxing in conversion to JSON
+        types = c('r-session', 'sqlite-session'),
         formats = c('', '')
       )
     },

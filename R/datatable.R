@@ -1,3 +1,4 @@
+#' @export
 Datatable <- R6Class("Datatable",
   inherit = Component,
 

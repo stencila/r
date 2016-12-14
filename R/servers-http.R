@@ -1,6 +1,18 @@
+#' A HttpServer
+#'
+#' Normally there is no need to create a new \code{HttpServer}. Instead
+#' use the \code{serve} method of \code{host}
+#'
+#' @name HttpServer
 HttpServer <- R6Class("HttpServer",
   public = list(
 
+    #' @section \code{initialize} method:
+    #' \describe{
+    #'   \item{host}{The host to be served}
+    #'   \item{address}{The address to listen on}
+    #'   \item{address}{The port to listen on}
+    #' }
     initialize = function(host, address='127.0.0.1', port=2000) {
       private$.host <- host
       private$.address <- address
@@ -8,6 +20,10 @@ HttpServer <- R6Class("HttpServer",
       private$.server <- NULL
     },
 
+    #' @section \code{serve} method:
+    #' \describe{
+    #'   \item{on}{The host to be served}
+    #' }
     serve = function(on=TRUE) {
       if (on) {
         if (is.null(private$.server)) {
@@ -105,8 +121,8 @@ HttpServer <- R6Class("HttpServer",
       return(list(self$show, address))
     },
 
-    #' Provide a response to an OPTIONS request
-    #' Necessary for preflighted CORS requests (https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS#Preflighted_requests)
+    # Provide a response to an OPTIONS request
+    # Necessary for preflighted CORS requests (https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS#Preflighted_requests)
     options = function(request, path) {
       list(body = '', status = 200, headers = list())
     },

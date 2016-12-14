@@ -2,13 +2,15 @@
 home = path.expand('~/.stencila')
 
 #' The abstract base class for all Stencila components
+#' @importFrom R6 R6Class
+#' @name Component
 Component <- R6Class("Component",
   public = list(
 
-    #' Initialize this component
-    #'
-    #' @param address The address for this component
-    #' @param address The path for this component
+    # Initialize this component
+    #
+    # @param address The address for this component
+    # @param address The path for this component
     initialize = function (address=NULL, path=NULL) {
       private$.id <- paste(sprintf('%x', sample(0:255,size=32,replace=TRUE)), collapse='')
 

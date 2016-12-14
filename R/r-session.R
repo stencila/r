@@ -1,3 +1,4 @@
+#' @export
 RSession <- R6Class("RSession",
   inherit = Session,
 
@@ -116,7 +117,7 @@ RSession <- R6Class("RSession",
   )
 )
 
-#' Custom output handler for the `execute` directive
+# Custom output handler for the `execute` directive
 execute_output_handler = evaluate::new_output_handler(
   # No `visible` argument so that only visible results get converted to string
   value = function(value) {
@@ -124,9 +125,9 @@ execute_output_handler = evaluate::new_output_handler(
   }
 )
 
-#' Custom output handler for the `print` directive
-#' This converts a value to a plain string instead of the decorated output that you get
-#' when using R's `print()` e.g "42" versus "[1] 42\n"
+# Custom output handler for the `print` directive
+# This converts a value to a plain string instead of the decorated output that you get
+# when using R's `print()` e.g "42" versus "[1] 42\n"
 print_output_handler = evaluate::new_output_handler(
   # Include invisible argumet so that everything gets converted to string
   value = function(value, invisible) {
