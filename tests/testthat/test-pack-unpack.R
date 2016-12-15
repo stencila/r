@@ -119,7 +119,7 @@ describe('unpack()', {
 
     expect_equal(unpack(list(type='int',format='url',value=s$url,name='a')), 1)
     expect_equal(unpack(list(type='flt',format='url',value=s$url,name='pi')), pi)
-    expect_equal(unpack(list(type='tab',format='url',value=s$url,name='c')), list(a=1,b=2))
+    expect_equal(unpack(list(type='tab',format='url',value=s$url,name='b')), list(a=1,b=2))
   })
 })
 
