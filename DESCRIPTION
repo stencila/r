@@ -16,10 +16,12 @@ Imports:
     httpuv,
     httr,
     jsonlite,
+    methods,
     R6,
     readr,
     RSQLite,
     stringr,
+    tibble,
     tools,
     xtable
 Suggests:

@@ -10,8 +10,10 @@
 #' @import httr
 #' @import httpuv
 #' @import jsonlite
+#' @import methods
 #' @importFrom R6 R6Class
 #' @importFrom readr read_csv read_tsv
+#' @import RSQLite
 #' @import stringr
 #' @importFrom tibble data_frame
 #' @import tools
