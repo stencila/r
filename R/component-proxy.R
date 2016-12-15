@@ -61,7 +61,8 @@ ComponentProxy <- function(type, url) {
 
   self$.set <- function(name, value) {
     if (self$.local) {
-      host$open(self$.address)[[name]] <- value
+      com <- host$open(self$.address)
+      com[[name]] <- value
     } else {
         response <- PUT(
         paste0(self[['.url']], '!', name),
