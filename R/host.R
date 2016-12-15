@@ -1,9 +1,12 @@
 #' The host instance
-#'
+#' 
+#' @rdname Host
 #' @export
 host <- NULL
 
 #' The Host class
+#'
+#' @rdname Host
 Host <- R6Class("Host",
   inherit = Component,
   public = list(
