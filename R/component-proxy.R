@@ -130,8 +130,8 @@ methods::setClass('ComponentProxy')
 }
 
 #' @export
-'print.ComponentProxy' <- function(proxy) {
-  cat(class(proxy)[1], '(', proxy[['.type']], ', ', proxy[['.url']], ')\n', sep='')
+'print.ComponentProxy' <- function(x, ...) {
+  cat(class(x)[1], '(', x[['.type']], ', ', x[['.url']], ')\n', sep='')
 }
 
 asJSON <- jsonlite:::asJSON
