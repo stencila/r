@@ -151,6 +151,15 @@ Component <- R6Class("Component",
       private$.path
     },
 
+    #' @section \code{serve} method:
+    #' Ensures that this component is being served.
+    #' A convienience method which simply serves the `host` and
+    #' returns this components URL
+    serve = function() {
+      host$serve()
+      self$url
+    },
+
     show = function (format='html') {
       if (format == 'json') {
         self$dump('json')

@@ -11,5 +11,11 @@ Component
 \description{
 The abstract base class for all Stencila components
 }
+\section{\code{serve} method}{
+
+Ensures that this component is being served.
+A convienience method which simply serves the `host` and
+returns this components URL
+}
 \keyword{datasets}
 

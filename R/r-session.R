@@ -90,7 +90,7 @@ RSession <- R6Class("RSession",
     },
 
     get = function (name) {
-      self$pack(get(name, envir=private$.bottom()))
+      pack(get(name, envir=private$.bottom()))
     },
 
     set = function (name, value) {

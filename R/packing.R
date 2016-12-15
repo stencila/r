@@ -82,31 +82,45 @@ unpack <- function(package) {
   }
 
   type <- package$type
-  if (is.null(type)) type <- ''
   format <- package$format
   value <- package$value
-  if (type == 'bool') {
-    as.logical(value)
-  } else if (type == 'int') {
-    as.integer(value)
-  } else if (type == 'float') {
-    as.double(value)
-  } else if (type == 'char' || type == 'str') {
-    as.character(value)
-  } else if (type == 'table') {
-    if (format == 'csv') {
-      read_csv(value)
-    } else if (format == 'tsv') {
-      read_tsv(value)
+
+  if (format == 'url') {
+    # Use a session proxy to get the data and unpack it
+    name <- package$name
+    if (!is.character(name)) {
+      stop("A remote package (format `url`) should have a string `name` field")
+    }
+    proxy <- SessionProxy(type='session', url=value)
+    package <- proxy$get(name)
+    unpack(package)
+  } else {
+    if (type == 'null') {
+      NULL
+    } else if (type == 'bool') {
+      as.logical(value)
+    } else if (type == 'int') {
+      as.integer(value)
+    } else if (type == 'flt') {
+      as.double(value)
+    } else if (type == 'str') {
+      as.character(value)
+    } else if (type == 'obj') {
+      fromJSON(value)
+    } else if (type == 'arr') {
+      obj <- fromJSON(value)
+      if (is.list(obj) && length(obj)==0) obj <- vector()
+      obj
+    } else if (type == 'tab') {
+      if (format == 'csv') {
+        read_csv(value)
+      } else if (format == 'tsv') {
+        read_tsv(value)
+      } else {
+        stop(paste0('Unable to unpack\n  type: ', type, '\n  format: ', format))
+      }
     } else {
       stop(paste0('Unable to unpack\n  type: ', type, '\n  format: ', format))
     }
-  } else if (format == 'json') {
-    fromJSON(value)
-  } else if (type == 'fetch') {
-    proxy <- SessionProxy(type='session', url=format)
-    proxy$get(value)
-  } else {
-    stop(paste0('Unable to unpack\n  type: ', type, '\n  format: ', format))
   }
 }
