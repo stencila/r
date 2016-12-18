@@ -51,9 +51,9 @@ test_that("HttpServer call component method works", {
   s = HttpServer$new(host)
   c = RSession$new()
 
-  r = s$call(list(body='{"expr":"6*7"}'), c$address, 'print')
+  r = s$call(list(body='{"code":"6*7"}'), c$address, 'execute')
   expect_equal(r$status, 200)
-  expect_equal(r$body, '"42"')
+  expect_equal(fromJSON(r$body)$output$value, "42")
 })
 
 test_that("HttpServer call host method works", {

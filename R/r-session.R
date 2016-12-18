@@ -7,14 +7,8 @@ RSession <- R6Class("RSession",
     initialize = function () {
       super$initialize()
 
-      # Root environment with `input` and `output` pipeline variables
-      root <- new.env(parent=parent.frame())
-      root$input <- self$input
-      root$output <- self$output
-      private$.root <- root
-
-      # Put root environment to top of scope stack
-      private$.scopes <- list(root)
+      # Create scope stack
+      self$scopes <- list(new.env(parent=parent.frame()))
     },
 
     dump = function (format = 'data', options = list()) {
@@ -27,74 +21,92 @@ RSession <- R6Class("RSession",
       }
     },
 
-    execute = function(code, args = NULL, format = '') {
-      # TODO If format is not specified then default to one based on value. Otherwise
-      # attempt to force to particular format e.g plot to json?
-      #
-      # TODO: Setup the input variable, so that it 'knows' if is will call remote session with `!output`, or
-      # just use it's own `.output` value directly
+    #' @section \code{scopes} property:
+    #'
+    #' List of this session's scopes
+    scopes = NULL,
 
-      for (arg in names(args)) {
-        self$set(arg, unpack(args[[arg]]))
+    #' @section \code{enter()} method:
+    #'
+    #' Exit the current scope
+    enter = function () {
+      self$scopes[[length(self$scopes)+1]] <- new.env(parent=self$bottom)
+    },
+
+    #' @section \code{exit()} method:
+    #'
+    #' Exit the current scope
+    exit = function () {
+      if (length(self$scopes) == 1) {
+        stop('Can not exit the top scope; unbalanced enter()/exit() calls')
+      }
+      self$scopes[[length(self$scopes)]] <- NULL
+    },
+
+    #' @section \code{set()} method:
+    #'
+    #' Set a session variable from a data package
+    #'
+    #' \describe{
+    #'   \item{name}{Name of the variable}
+    #'   \item{package}{The data package}
+    #' }
+    set = function (name, package) {
+      assign(name, unpack(package), envir=self$bottom)
+      invisible(self)
+    },
+
+    #' @section \code{get()} method:
+    #'
+    #' Get a session variable as a data package
+    #'
+    #' \describe{
+    #'   \item{name}{Name of the variable}
+    #' }
+    get = function (name) {
+      pack(get(name, envir=self$bottom))
+    },
+
+    #' @section \code{execute} method:
+    #'
+    #' Execute code within the session
+    #'
+    #' \describe{
+    #'   \item{code}{R code to be executed}
+    #'   \item{inputs}{Name of the variable}
+    #'   \item{package}{The data package}
+    #' }
+    execute = function(code, inputs = NULL) {
+      # Set each input variable
+      for (input in names(inputs)) {
+        self$set(input, inputs[[input]])
       }
 
       code <- str_trim(code)
-      if (nchar(code) == 0) return(list(
-        errors = list(),
-        output = list()
-      ))
-
-      # `evaluate` returns a list : source code lines interleaved with output, just as if
-      # you typed each line in an interactive console.
-      result <- evaluate(code, envir=private$.bottom(), output_handler=execute_output_handler)
-      errors <- NULL
-      output <- NULL
-      # Find any errors
-      if (length(result) > 1) {
-        for (line in seq(2, length(result), 2)) {
-          out <- result[[line]]
-          if (inherits(out, 'error')) {
-            if (is.null(errors)) errors <- list()
-            errors[[toString(line/2)]] <- out$message
-          }
-        }
-        # Last line is the output
-        output <- pack(result[[length(result)]])
-      }
-
-      list(
-        errors = errors,
-        output = output
-      )
-    },
-
-    print = function (expr) {
-      if (missing(expr)) {
-        invisible(cat(str(self)))
+      if (nchar(code) == 0) {
+        list(errors = NULL, output = NULL)
       } else {
-        evaluate(expr, envir=private$.bottom(), output_handler=print_output_handler)[[2]]
+        # `evaluate` returns a list : source code lines interleaved with output, just as if
+        # you typed each line in an interactive console.
+        result <- evaluate(code, envir=self$bottom, output_handler=execute_output_handler)
+        
+        # Extract errors and output
+        errors <- NULL
+        output <- NULL
+        if (length(result) > 1) {
+          for (line in seq(2, length(result), 2)) {
+            out <- result[[line]]
+            if (inherits(out, 'error')) {
+              if (is.null(errors)) errors <- list()
+              errors[[toString(line/2)]] <- out$message
+            }
+          }
+          # Last line is the output
+          output <- pack(result[[length(result)]])
+        }
+
+        list(errors = errors, output = output)
       }
-    },
-
-    list = function() {
-      bottom <-private$.bottom()
-      objs <- list()
-      for (name in ls(envir=bottom)) {
-        obj <- bottom[[name]]
-        objs[[name]] <- list(
-          type = class(obj),
-          length = length(obj)
-        )
-      }
-      objs
-    },
-
-    get = function (name) {
-      pack(get(name, envir=private$.bottom()))
-    },
-
-    set = function (name, value) {
-      assign(name, value, envir=private$.bottom())
     }
 
   ),
@@ -103,17 +115,22 @@ RSession <- R6Class("RSession",
 
     type = function () {
       'r-session'
+    },
+
+    #' @section \code{top} property:
+    #'
+    #' The top scope in this session
+    top = function () {
+      self$scopes[[1]]
+    },
+
+    #' @section \code{bottom} property:
+    #'
+    #' The bottom scope in this session
+    bottom = function () {
+      self$scopes[[length(self$scopes)]]
     }
 
-  ),
-
-  private = list(
-    .root = NULL,
-    .scopes = NULL,
-
-    .bottom = function() {
-      private$.scopes[[length(private$.scopes)]]
-    }
   )
 )
 
