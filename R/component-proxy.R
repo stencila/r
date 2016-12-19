@@ -20,10 +20,14 @@ ComponentProxy <- function(type, url) {
   host_parts <- parse_url(host$url)
   if (com_parts$hostname == host_parts$hostname && com_parts$port == host_parts$port) {
     self$.local <- TRUE
-    self$.address <- com_parts$path
   } else {
     self$.local <- FALSE
   }
+
+  # Determine full address from the URL path
+  # (only actuqally used for local instances)
+  self$.address <- Component$new()$long(com_parts$path)
+
 
   self[['dump']] <- function(format='data') {
     if (format == 'data') {
@@ -40,7 +44,7 @@ ComponentProxy <- function(type, url) {
     }
   }
 
-  self$.get <- function(name) {
+  self[['.get']] <- function(name) {
     if (self$.local) {
       host$open(self$.address)[[name]]
     } else {
@@ -59,7 +63,7 @@ ComponentProxy <- function(type, url) {
     }
   }
 
-  self$.set <- function(name, value) {
+  self[['.set']] <- function(name, value) {
     if (self$.local) {
       com <- host$open(self$.address)
       com[[name]] <- value
@@ -78,7 +82,7 @@ ComponentProxy <- function(type, url) {
     }
   }
 
-  self$.call <- function(name, ...) {
+  self[['.call']] <- function(name, ...) {
     if (self$.local) {
       host$open(self$.address)[[name]](...)
     } else {
