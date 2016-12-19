@@ -2,6 +2,7 @@
 #'
 #' @param object The R object to be packaged
 #' @return Data package as an R list
+#' @export
 pack <- function(object) {
   len <- length(object)
   type <- tolower(typeof(object))
@@ -68,6 +69,7 @@ pack <- function(object) {
 #'
 #' @param package The data package as a \code{list} or JSON string
 #' @return A R object
+#' @export
 unpack <- function(package) {
   # If necessary convert JSON to list
   if (inherits(package, "character")) {
