@@ -12,7 +12,7 @@ Component <- R6Class("Component",
     # @param address The address for this component
     # @param address The path for this component
     initialize = function (address=NULL, path=NULL) {
-      private$.id <- paste(sprintf('%x', sample(0:255,size=32,replace=TRUE)), collapse='')
+      private$.id <- paste(sprintf('%02x', sample(0:255,size=32,replace=TRUE)), collapse='')
 
       if (!is.null(address)) private$.address <- self$long(address)
       else private$.address <- paste0('name://', substr(private$.id, 1, 5), '-', self$type)
@@ -29,13 +29,16 @@ Component <- R6Class("Component",
       if (is.null(address)) address <- private$.address
 
       c1 = str_sub(address, 1, 1)
-      if (!anyNA(str_match(address, '^[a-z]+://'))) {
+      if (!anyNA(str_match(address, '^(new|id|name|file|http|https|git|dat|st)://'))) {
         address
       } else if (c1 == '+'){
         paste0('new://', str_sub(address, 2))
       } else if (c1 == '*'){
         paste0('name://', str_sub(address, 2))
       } else if (c1 == '.' || c1 == '/' || c1 == '~'){
+        if (str_sub(address, 1, 2) == './') {
+          address <- file.path(getwd(),str_sub(address, 3))
+        }
         paste0('file://', suppressWarnings(normalizePath(address)))
       } else {
         match <- str_match(address, '^([a-z]+)(:/?/?)(.+)$')
@@ -71,17 +74,15 @@ Component <- R6Class("Component",
       } else if (str_sub(address, 1, 7) == 'name://'){
         paste0('*', str_sub(address, 8))
       } else if (str_sub(address, 1, 7) == 'file://'){
-        address
-      } else if (str_sub(address, 1, 7) == 'http://' || str_sub(address, 1, 8)== 'https://'){
-        address
+        paste0('file:', str_sub(address, 8))
+      } else if (str_sub(address, 1, 5) == 'st://'){
+        str_sub(address, 6)
       } else if (str_sub(address, 1, 20) == 'git://bitbucket.org/'){
-        paste0('bb/', str_sub(address, 21))
+        paste0('bb:', str_sub(address, 21))
       } else if (str_sub(address, 1, 17) == 'git://github.com/'){
-        paste0('gh/', str_sub(address, 18))
+        paste0('gh:', str_sub(address, 18))
       } else if (str_sub(address, 1, 17) == 'git://gitlab.com/'){
-        paste0('gl/', str_sub(address, 18))
-      } else if (str_sub(address, 1, 16) == 'git://stenci.la/'){
-        str_sub(address, 17)
+        paste0('gl:', str_sub(address, 18))
       } else {
         matches <- str_match(address, '([a-z]+)://(.+)$')
         paste0(matches[1,2], ':', matches[1,3])
@@ -94,10 +95,12 @@ Component <- R6Class("Component",
       address <- self$long(address)
       matches <- str_match(address, '([a-z]+)://([\\w\\-\\./]+)(@([\\w\\-\\.]+))?')
       if (!is.na(matches[1, 1])) {
+        ext <- tools::file_ext(matches[1, 3])
+        if (nchar(ext)==0) ext <- NA
         return(list(
           scheme = matches[1, 2],
           path = matches[1, 3],
-          format = tools::file_ext(matches[1, 3]),
+          format = ext,
           version = matches[1, 5]
         ))
       } else {

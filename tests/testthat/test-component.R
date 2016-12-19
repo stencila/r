@@ -5,31 +5,31 @@ describe('Component', {
     expect_equal(class(c)[1], "Component")
   })
 
-  it('has an id', function (t) {
+  it('has an id', {
     c = Component$new()
 
     expect_equal(nchar(c$id), 64)
   })
 
-  it('address is long on construction', function (t) {
+  it('address is long on construction', {
     c = Component$new('/dir')
     expect_equal(c$address, 'file:///dir')
   })
 
-  it('address defaults to name scheme', function (t) {
+  it('address defaults to name scheme', {
     c = Component$new()
     expect_equal(str_sub(c$address, 1, 7), 'name://')
   })
 
-  it('address can be lengthend', function (t) {
+  it('address can be lengthend', {
     c = Component$new()
 
     expect_equal(c$long('new://document'), 'new://document')
     expect_equal(c$long('+document'), 'new://document')
     expect_equal(c$long('*aaaaaaaa'), 'name://aaaaaaaa')
-    expect_equal(c$long('./report.docx'), 'file://' + process.cwd() + '/report.docx')
+    expect_equal(c$long('./report.docx'), paste0('file://', getwd(), '/report.docx'))
     expect_equal(c$long('/some/dir/report.docx'), 'file:///some/dir/report.docx')
-    expect_equal(c$long('~/report.docx'), 'file://' + os.homedir() + '/report.docx')
+    expect_equal(c$long('~/report.docx'), paste0('file://', path.expand('~'), '/report.docx'))
     expect_equal(c$long('https://foo.com/report.md'), 'https://foo.com/report.md')
     expect_equal(c$long('bb:foo/bar/report.md'), 'git://bitbucket.org/foo/bar/report.md')
     expect_equal(c$long('gh:/foo/bar/report.md'), 'git://github.com/foo/bar/report.md')
@@ -37,7 +37,7 @@ describe('Component', {
     expect_equal(c$long('stats/t-test'), 'st://stats/t-test')
   })
 
-  it('address can be shotened', function (t) {
+  it('address can be shortened', {
     c = Component$new()
 
     expect_equal(c$short('new://document'), '+document')
@@ -50,9 +50,9 @@ describe('Component', {
     expect_equal(c$short('st://stats/t-test'), 'stats/t-test')
   })
 
-  it('address can be lengthend and then shortened', function (t) {
+  it('address can be lengthend and then shortened', {
     c = Component$new()
-    ls = function(c) c$short(c$long(address))
+    ls = function(address) c$short(c$long(address))
 
     expect_equal(ls('+document'), '+document')
     expect_equal(ls('new://document'), '+document')
@@ -62,13 +62,13 @@ describe('Component', {
     expect_equal(ls('gh:foo/bar/report.md@1.1.0'), 'gh:foo/bar/report.md@1.1.0')
   })
 
-  it('address can be split', function (t) {
+  it('address can be split', {
     c = Component$new()
 
-    expect_equal(c$split('+document'), list(scheme='new', path='document', format=NULL, version=NULL))
-    expect_equal(c$split('*aaaaaaaa'), list(scheme='name', path='aaaaaaaa', format=NULL, version=NULL))
-    expect_equal(c$split('stats/t-test'), list(scheme='st', path='stats/t-test', format=NULL, version=NULL))
-    expect_equal(c$split('stats/t-test@1.1.0'), list(scheme='st', path='stats/t-test', format=NULL, version='1.1.0'))
+    expect_equal(c$split('+document'), list(scheme='new', path='document', format=NA, version=as.character(NA)))
+    expect_equal(c$split('*aaaaaaaa'), list(scheme='name', path='aaaaaaaa', format=NA, version=as.character(NA)))
+    expect_equal(c$split('stats/t-test'), list(scheme='st', path='stats/t-test', format=NA, version=as.character(NA)))
+    expect_equal(c$split('stats/t-test@1.1.0'), list(scheme='st', path='stats/t-test', format=NA, version='1.1.0'))
   })
 
 
