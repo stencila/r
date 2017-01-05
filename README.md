@@ -20,6 +20,8 @@ devtools::install_github("stencila/r")
 
 ### Develop
 
+Want to help out with development? Great, there's a lot to do! To get started, read our contributor [code of conduct](CONDUCT.md), then [get in touch](https://gitter.im/stencila/stencila) or checkout the [platform-wide, cross-repository kanban board](https://github.com/orgs/stencila/projects/1).
+
 Most development tasks can be run using `make` or RStudio keyboard shortcuts.
 
 Task                                                    | `make`                | RStudio         |
