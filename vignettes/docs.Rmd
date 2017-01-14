@@ -7,7 +7,7 @@ output:
   packagedocs::package_docs:
     toc: true
     toc_collapse: false
-redirect: http://stencila.github.io/r#readme
+redirect: http://stencila.github.io/r
 vignette: |
   %\VignetteIndexEntry{stencila Documentation}
   %\VignetteEngine{packagedocs::redirect}
