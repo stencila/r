@@ -7,3 +7,4 @@
 ^Makefile$
 ^LICENSE$
 ^stencila_.+\.tar\.gz$
+^_gh-pages$

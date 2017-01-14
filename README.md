@@ -12,11 +12,19 @@ This is very much a work in progress. See our [main repo](https://github.com/ste
 
 ### Install
 
-Right now this package isn't on CRAN, but you can install it from here using the [`devtools`](https://github.com/hadley/devtools) package from within R,
+Right now this package isn't on CRAN, but you can install it from this repo using the [`devtools`](https://github.com/hadley/devtools) package,
 
-```
+```r
 devtools::install_github("stencila/r")
 ```
+
+### Use
+
+Documentation is available at https://stencila.github.io/r
+
+### Discuss
+
+We love feedback. Create a [new issue](https://github.com/stencila/r/issues/new), add to [existing issues](https://github.com/stencila/r/issues) or [chat](https://gitter.im/stencila/stencila) with members of the community.
 
 ### Develop
 
@@ -29,9 +37,9 @@ Task                                                    | `make`                
 Install dependencies                                    | `make setup`          | 
 Run tests                                               | `make test`           | `Ctrl+Shift+T`
 Run tests with coverage                                 | `make cover`          |
-Build documentation                                     | `make docs`           | `devtools::document()`
+Build documentation                                     | `make docs`           | `packagedocs::build_vignettes()`
 Check the package                                       | `make check`          | `Ctrl+Shift+E`
 Build                                                   | `make build`          | `Ctrl+Shift+B`
 Clean                                                   | `make clean`          |
 
-Unit tests live in the `tests` folder and are mostly written using the [`testthat`](https://github.com/hadley/testthat) test harness.
+Unit tests live in the `tests` folder and are mostly written using the [`testthat`](https://github.com/hadley/testthat) test harness. Documentation is written using `roxygen2` and `vignettes/*.Rmd` files and generated using [`packagedocs`](http://hafen.github.io/packagedocs/).

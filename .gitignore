@@ -3,22 +3,19 @@
 
 # History files
 .Rhistory
-
 # Session Data files
 .RData
-
 # Example code in package build process
 *-Ex.R
-
 # Output files from R CMD build
 /*.tar.gz
-
 # Output files from R CMD check
 /*.Rcheck/
-
 # RStudio files
 .Rproj.user/
 .Rproj.user
-
 # Sublime Text files
 *.sublime-workspace
+
+inst/doc
+_gh-pages

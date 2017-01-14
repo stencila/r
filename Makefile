@@ -10,7 +10,7 @@ install:
 	Rscript -e 'devtools::install()'
 
 docs:
-	Rscript -e 'library(R6); devtools::document()'
+	Rscript -e 'packagedocs::build_vignettes()'
 
 # The tryCatch here is simply to catch teh `ignoring SIGPIPE signal` that occurs (on Ubuntu Linux at least)
 run:

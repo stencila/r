@@ -26,5 +26,7 @@ Imports:
     xtable
 Suggests:
     testthat,
-    covr
+    covr,
+    packagedocs
 RoxygenNote: 5.0.1
+VignetteBuilder: packagedocs

@@ -1,0 +1,34 @@
+---
+title: "stencila/r"
+subtitle: "Stencila for R"
+author: ""
+copyright: "Contributors"
+output:
+  packagedocs::package_docs:
+    toc: true
+    toc_collapse: false
+redirect: http://stencila.github.io/r#readme
+vignette: |
+  %\VignetteIndexEntry{stencila Documentation}
+  %\VignetteEngine{packagedocs::redirect}
+  %\VignetteEncoding{UTF-8}
+navpills: |
+  <li class="active"><a href='docs.html'><i class='fa fa-play'></i> Guide</a></li>
+  <li><a href='rd.html'><i class='fa fa-book'></i> Reference</a></li>
+  <li><a href='https://github.com/stencila/r#readme'><i class='fa fa-github'></i> Repo</a></li>
+---
+
+```{r global_options, include=FALSE}
+# R output pre blocks are styled by default to indicate output
+knitr::opts_chunk$set(comment = NA)
+
+# shorthand for rd_link() - see ?packagedocs::rd_link for more information
+rdl <- function(x) packagedocs::rd_link(deparse(substitute(x)))
+```
+
+# Quick start
+
+```r()
+d <- stencila::Document$new()
+d$view()
+```
