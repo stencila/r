@@ -13,7 +13,7 @@ vignette: |
   %\VignetteEngine{packagedocs::redirect}
   %\VignetteEncoding{UTF-8}
 navpills: |
-  <li class="active"><a href='docs.html'><i class='fa fa-play'></i> Guide</a></li>
+  <li class="active"><a href='index.html'><i class='fa fa-play'></i> Guide</a></li>
   <li><a href='rd.html'><i class='fa fa-book'></i> Reference</a></li>
   <li><a href='https://github.com/stencila/r#readme'><i class='fa fa-github'></i> Repo</a></li>
 ---
@@ -26,9 +26,6 @@ knitr::opts_chunk$set(comment = NA)
 rdl <- function(x) packagedocs::rd_link(deparse(substitute(x)))
 ```
 
-# Quick start
+![](http://blog.stenci.la/wip.png) 
 
-```r()
-d <- stencila::Document$new()
-d$view()
-```
+Work in progress. Thanks for your patience.

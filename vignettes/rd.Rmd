@@ -7,13 +7,13 @@ output:
   packagedocs::package_docs_rd:
     toc: true
     toc_collapse: false
-redirect: http://stencila.github.io/r
+redirect: http://stencila.github.io/r/rd.html
 vignette: |
   %\VignetteIndexEntry{stencila Package Reference}
   %\VignetteEngine{packagedocs::redirect}
   %\VignetteEncoding{UTF-8}
 navpills: |
-  <li><a href='docs.html'><i class='fa fa-play'></i> Guide</a></li>
+  <li><a href='index.html'><i class='fa fa-play'></i> Guide</a></li>
   <li class="active"><a href='rd.html'><i class='fa fa-book'></i> Reference</a></li>
   <li><a href='https://github.com/stencila/r#readme'><i class='fa fa-github'></i> Repo</a></li>
 ---

@@ -1,6 +1,6 @@
 Package: stencila
 Type: Package
-Title: Documents, Sheets, Contexts and Sessions for R
+Title: Stencila for R
 Description: The Stencila platform is for creating, collaborating on, and
     publishing data driven documents.
 Authors@R: c(person("Nokome", "Bentley", email = "nokome@stenci.la", role = c("aut", "cre")))
