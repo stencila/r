@@ -17,7 +17,7 @@ sections:
     topics:
       - Component
       - Host
-  -section_name: Functions
+  - section_name: Functions
     topics:
       - pack
       - unpack
