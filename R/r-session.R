@@ -14,7 +14,6 @@ RSession <- R6Class("RSession",
     dump = function (format = 'data', options = list()) {
       if (format == 'data') {
         data <- super$dump('data', options)
-        data[['list']] <- self$list()
         data
       } else {
         super$dump(format, options)
