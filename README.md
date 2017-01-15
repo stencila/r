@@ -20,7 +20,22 @@ devtools::install_github("stencila/r")
 
 ### Use
 
-Documentation is available at https://stencila.github.io/r
+The various [Stencila packages](https://github.com/stencila/stencila#packages) can act as a network of diverse peers, each providing diffing capabilities. At the moment, the capabilities of this R package are relatively limited, so it will be most useful when used in conjunction with the Stencila [`node`](https://github.com/stencila/node) package. Start up a `node` host and then in R,
+
+```r
+library(stencila)
+
+# Start up the host so that it can serve up 
+# components and find peers
+host$startup()
+
+# Open an example document and view it in the browser
+path <- system.file('examples/mtcars.md', package='stencila')
+doc <- host$open(path)
+doc$view()
+```
+
+More documentation is available at https://stencila.github.io/r
 
 ### Discuss
 
