@@ -4,6 +4,7 @@ setup:
 	Rscript -e 'install.packages(c("devtools","roxygen2","testthat","covr"),repo="http://cloud.r-project.org/")'
 
 build:
+	Rscript -e 'devtools::document()'
 	R CMD build .
 
 install:
