@@ -40,18 +40,18 @@ test_that("HttpServer web method works", {
 
 test_that("HttpServer get method works", {
   s = HttpServer$new(host)
-  c = RSession$new()
+  c = RContext$new()
 
   r = s$get(list(), c$address, 'type')
   expect_equal(r$status, 200)
-  expect_equal(r$body, '"r-session"')
+  expect_equal(r$body, '"r-host"')
 })
 
 test_that("HttpServer call component method works", {
   s = HttpServer$new(host)
-  c = RSession$new()
+  c = RContext$new()
 
-  r = s$call(list(body='{"code":"6*7"}'), c$address, 'execute')
+  r = s$call(list(body='{"code":"6*7"}'), c$address, 'run')
   expect_equal(r$status, 200)
   expect_equal(fromJSON(r$body)$output$value, "42")
 })

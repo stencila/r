@@ -8,11 +8,9 @@ host <- NULL
 #'
 #' @rdname Host
 Host <- R6Class("Host",
-  inherit = Component,
   public = list(
 
     initialize = function () {
-      super$initialize()
       self$components <- list()
 
       private$.home = path.expand('~/.stencila')

@@ -5,7 +5,7 @@
 \alias{Host}
 \alias{host}
 \title{The host instance}
-\format{An object of class \code{Host} (inherits from \code{Component}, \code{R6}) of length 36.}
+\format{An object of class \code{Host} (inherits from \code{R6}) of length 27.}
 \usage{
 host
 
