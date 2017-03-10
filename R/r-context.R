@@ -86,10 +86,12 @@ RContext <- R6Class('RContext',
       # `all.names` just parses out all variable names, it does not doo dependency analysis
       # Package `codetools` or something similar probably nees to be used
       # But see http://adv-r.had.co.nz/Expressions.html#ast-funs
-      all <- all.names(parse(text=code))
+      names <- all.names(parse(text=code))
       # Exclude name in base environment (which includes functions like '+', '-', 'if')
-      in_base <- all %in% ls(baseenv())
-      all[!in_base]
+      in_base <- names %in% ls(baseenv())
+      names <- names[!in_base]
+      # all.names includes duplicates, so...
+      unique(names)
     }
 
   ),
