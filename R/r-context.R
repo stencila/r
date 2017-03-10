@@ -35,23 +35,9 @@ RContext <- R6Class('RContext',
     #'   \item{options}{Any execution options}
     #' }
     run = function(code, options = list()) {
-      errors <- NULL
-      output <- NULL
-      code <- str_trim(code)
-      if (nchar(code) > 0) {
-        # `evaluate` returns a list : source code lines interleaved with output (just as if
-        # you typed each line in an interactive console). Using custom handler so that the
-        # value is returned
-        result <- evaluate(code, envir=private$scope, output_handler=evaluate_output_handler)
-
-        if (length(result) > 1) {
-          # Extract errors
-          errors <- private$errors(result)
-          # Last line is the output value
-          output <- pack(result[[length(result)]])
-        }
-      }
-      list(errors = errors, output = output)
+        # Do eval and process into a result
+        evaluation <- evaluate(code, envir=private$scope, output_handler=evaluate_output_handler)
+        private$result(evaluation)
     },
 
     #' @section \code{call} method:
@@ -60,47 +46,81 @@ RContext <- R6Class('RContext',
     #'
     #' \describe{
     #'   \item{code}{R code to be executed}
-    #'   \item{inputs}{Name of the variable}
-    #'   \item{package}{The data package}
+    #'   \item{args}{A list with a data pack for each argument}
     #' }
-    call = function(code, inputs = NULL) {
-      # Set each input variable
-      for (input in names(inputs)) {
-        self$set(input, inputs[[input]])
-      }
-
+    call = function(code, args = NULL) {
       # Create a local enviroment for execution
-      local <- emptyenv()
+      local <- new.env(parent=baseenv())
+      for (arg in names(args)) local[[arg]] <- unpack(args[[arg]])
 
-      errors <- NULL
-      output <- NULL
-      code <- str_trim(code)
-      if (nchar(code) > 0) {
-        # `evaluate` returns a list : source code lines interleaved with output (just as if
-        # you typed each line in an interactive console).
-        result <- evaluate(code, envir=local, output_handler=evaluate_output_handler)
-
-        # Extract errors and output
-
-        list(errors = errors, output = output)
+      # Overide the return function so that we capture the first returned
+      # value and stop exeution (the `stop_on_error` below)
+      returned <- NULL
+      has_returned <- FALSE
+      local[['return']] <- function (value) {
+        returned <<- value
+        has_returned <<- TRUE
+        stop('Returned')
       }
+
+      # Do eval and process into a result
+      evaluation <- evaluate(code, envir=local, stop_on_error=1L, output_handler=evaluate_output_handler)
+      result <- private$result(evaluation)
+
+      # If returned a value, use that as output
+      if (has_returned) result$output <- pack(returned)
+
+      result
+    },
+
+    #' @section \code{depends} method:
+    #'
+    #' Returns an array of all variable names not declared within
+    #' the piece of code. This might include global functions and variables used
+    #' within the piece of code.
+    #'
+    #' \describe{
+    #'   \item{code}{R code}
+    #' }
+    depends = function(code) {
+      # `all.names` just parses out all variable names, it does not doo dependency analysis
+      # Package `codetools` or something similar probably nees to be used
+      # But see http://adv-r.had.co.nz/Expressions.html#ast-funs
+      all <- all.names(parse(text=code))
+      # Exclude name in base environment (which includes functions like '+', '-', 'if')
+      in_base <- all %in% ls(baseenv())
+      all[!in_base]
     }
+
   ),
 
   private = list(
     # Context's scope
     scope = NULL,
 
-    # Extract errors from an `evaluate` result
-    errors = function (result) {
+    # Extract errors and the last value from an `evaluate` result
+    # Note that not all source items will have a value (e.g. an emptyline)
+    # Also, sometimes lines are sometimes groupd together so we need to count lines
+    result = function (evaluation) {
+      line <- 0
       errors <- list()
-      for (line in seq(2, length(result), 2)) {
-        out <- result[[line]]
-        if (inherits(out, 'error')) {
-          errors[[toString(line/2)]] <- out$message
+      last_value <- NULL
+      value <- FALSE
+      for (item in evaluation) {
+        if (inherits(item, 'source')) {
+          line <- line + max(1, str_count(item, '\n'))
+        } else if (inherits(item, 'error')) {
+          errors[[toString(line)]] <- item$message
+        } else {
+          last_value <- item
+          value <- TRUE
         }
       }
-      errors
+
+      if (length(errors) == 0) errors <- NULL
+      output <- if (value) pack(last_value) else NULL
+
+      list(errors=errors, output=output)
     }
   )
 )
@@ -113,4 +133,3 @@ evaluate_output_handler = evaluate::new_output_handler(
     value
   }
 )
-

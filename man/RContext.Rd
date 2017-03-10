@@ -40,8 +40,19 @@ Run R code within the context's global scope (execute a code "chunk")
 
 \describe{
   \item{code}{R code to be executed}
-  \item{inputs}{Name of the variable}
-  \item{package}{The data package}
+  \item{args}{A list with a data pack for each argument}
+}
+}
+
+\section{\code{depends} method}{
+
+
+Returns an array of all variable names not declared within
+the piece of code. This might include global functions and variables used
+within the piece of code.
+
+\describe{
+  \item{code}{R code}
 }
 }
 \keyword{datasets}

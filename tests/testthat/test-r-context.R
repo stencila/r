@@ -5,7 +5,6 @@ describe('RContext', {
     expect_equal(class(s)[1], "RContext")
   })
 
-
   it("has an run method", {
     expect_equal(s$run(''), list(errors=NULL, output=NULL))
 
@@ -33,4 +32,44 @@ describe('RContext', {
     }
   })
 
+  it("has an a call method", {
+    expect_equal(s$call(''), list(errors=NULL, output=NULL))
+
+    # Takes arguments
+    expect_equal(s$call('list(a_is=a,b_is=b)',list(a=pack(42),b=pack('foo')))$output, pack(list(a_is=42,b_is='foo')))
+
+    # Scope is local...
+    expect_equal(s$call('x <- 42')$output, NULL)
+    expect_equal(s$call('x')$errors$`1`, "object 'x' not found")
+
+    # Last value is returned as per usual
+    expect_equal(s$call('foo <- "bar"\nfoo'), list(errors=NULL, output=pack('bar')))
+
+    # return() function can also be used - outputs the first returned value
+    expect_equal(s$call('return(2)\nreturn("not this")')$output$content, '2')
+
+    # Works multiline
+    func <- 'if(x==1){
+      "x is 1"
+    } else if(x==2){
+      return("x is 2")
+    } else {
+      "x is ?"
+    }'
+    expect_equal(unpack(s$call(func,list(x=pack(1)))$output), "x is 1")
+    expect_equal(unpack(s$call(func,list(x=pack(2)))$output), "x is 2")
+    expect_equal(unpack(s$call(func,list(x=pack(3)))$output), "x is ?")
+
+    # Reports errors as expected
+    expect_equal(s$call('x')$errors$`1`, "object 'x' not found")
+    expect_equal(s$call('\nx\n')$errors$`2`, "object 'x' not found")
+    expect_equal(s$call('1\nx')$errors$`2`, "object 'x' not found")
+    expect_equal(s$call('\n\nx')$errors$`3`, "object 'x' not found")
+  })
+
+  it("has an a depends method", {
+    expect_equal(s$depends('x'), 'x')
+    expect_equal(s$depends('x+y/z+foo()'), c('x','y','z','foo'))
+    expect_equal(s$depends('x<-1\nx+y/z+foo()'), c('x','y','z','foo'))
+  })
 })
