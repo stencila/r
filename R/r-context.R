@@ -26,29 +26,29 @@ RContext <- R6Class('RContext',
       private$scope <- env
     },
 
-    #' @section \code{run} method:
+    #' @section \code{runCode} method:
     #'
-    #' Run R code within the context's scope (execute a code "chunk")
+    #' Run R code within the context's scope (i.e. execute a code "chunk")
     #'
     #' \describe{
     #'   \item{code}{R code to be executed}
     #'   \item{options}{Any execution options}
     #' }
-    run = function(code, options = list()) {
+    runCode = function(code, options = list()) {
         # Do eval and process into a result
         evaluation <- evaluate(code, envir=private$scope, output_handler=evaluate_output_handler)
         private$result(evaluation)
     },
 
-    #' @section \code{call} method:
+    #' @section \code{callCode} method:
     #'
-    #' Run R code within the context's global scope (execute a code "chunk")
+    #' Run R code within the context's global scope (i.e. execute a code "chunk")
     #'
     #' \describe{
     #'   \item{code}{R code to be executed}
     #'   \item{args}{A list with a data pack for each argument}
     #' }
-    call = function(code, args = NULL) {
+    callCode = function(code, args = NULL) {
       # Create a local enviroment for execution
       local <- new.env(parent=baseenv())
       for (arg in names(args)) local[[arg]] <- unpack(args[[arg]])
@@ -73,7 +73,7 @@ RContext <- R6Class('RContext',
       result
     },
 
-    #' @section \code{depends} method:
+    #' @section \code{codeDependencies} method:
     #'
     #' Returns an array of all variable names not declared within
     #' the piece of code. This might include global functions and variables used
@@ -82,7 +82,7 @@ RContext <- R6Class('RContext',
     #' \describe{
     #'   \item{code}{R code}
     #' }
-    depends = function(code) {
+    codeDependencies = function(code) {
       # `all.names` just parses out all variable names, it does not doo dependency analysis
       # Package `codetools` or something similar probably nees to be used
       # But see http://adv-r.had.co.nz/Expressions.html#ast-funs
