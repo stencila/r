@@ -20,3 +20,16 @@
 #' @importFrom utils capture.output write.csv
 #' @importFrom xtable xtable
 NULL
+
+# Get the version 
+version <- tryCatch(toString(packageVersion("stencila")), error = '0.0.0')
+
+# Hooks for namespace events
+# See https://stat.ethz.ch/R-manual/R-devel/library/base/html/ns-hooks.html
+
+# Called when namespace is loaded
+.onLoad <- function (libname, pkgname) {
+  # This appears to be better than instantiating 'globally'
+  # which causes issues with bindings
+  host <<- Host$new()
+}

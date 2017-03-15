@@ -1,5 +1,5 @@
 #' The host instance
-#' 
+#'
 #' @rdname Host
 #' @export
 host <- NULL
@@ -67,9 +67,9 @@ Host <- R6Class("Host",
     open = function(address) {
       if (is.null(address)) return(self)
 
-      address <- self$long(address)
+      address <- long(address)
 
-      parts <- self$split(address)
+      parts <- split(address)
       scheme <- parts$scheme
       path <- parts$path
       format <- parts$format
@@ -77,9 +77,7 @@ Host <- R6Class("Host",
 
       if (scheme == 'new') {
         class = switch(path,
-          'datatable' = Datatable,
-          'r-session' = RSession,
-          'sqlite-session' = SqliteSession,
+          'r-session' = RContext,
           NULL
         )
         if (!is.null(class)) {
@@ -359,9 +357,88 @@ Host <- R6Class("Host",
   ),
 
   private = list(
+    .address = NULL,
     .home = NULL,
     .logs = NULL,
     .db = NULL,
     .token = NULL
   )
 )
+
+
+long = function(address) {
+  c1 = str_sub(address, 1, 1)
+  if (!anyNA(str_match(address, '^(new|id|name|file|http|https|git|dat|st)://'))) {
+    address
+  } else if (c1 == '+'){
+    paste0('new://', str_sub(address, 2))
+  } else if (c1 == '*'){
+    paste0('name://', str_sub(address, 2))
+  } else if (c1 == '.' || c1 == '/' || c1 == '~'){
+    if (str_sub(address, 1, 2) == './') {
+      address <- file.path(getwd(),str_sub(address, 3))
+    }
+    paste0('file://', suppressWarnings(normalizePath(address)))
+  } else {
+    match <- str_match(address, '^([a-z]+)(:/?/?)(.+)$')
+    if (!anyNA(match)) {
+      alias <- match[1, 2]
+      path <- match[1, 4]
+      if (alias %in% c('id', 'http', 'https')) {
+        paste0(alias, '://', path)
+      } else if (alias == 'file') {
+        # Only arrive here with `file:/foo` since with
+        # `file:` with two or more slashes is already "long"
+        paste0('file:///', path)
+      } else if (alias == 'bb') {
+        paste0('git://bitbucket.org/', path)
+      } else if (alias == 'gh') {
+        paste0('git://github.com/', path)
+      } else if (alias == 'gl') {
+        paste0('git://gitlab.com/', path)
+      } else {
+        stop(paste0('Unknown scheme alias.\n alias: ', alias))
+      }
+    } else {
+      paste0('st://', address)
+    }
+  }
+}
+
+short = function(address) {
+  if (str_sub(address, 1, 6) == 'new://'){
+    paste0('+', str_sub(address, 7))
+  } else if (str_sub(address, 1, 7) == 'name://'){
+    paste0('*', str_sub(address, 8))
+  } else if (str_sub(address, 1, 7) == 'file://'){
+    paste0('file:', str_sub(address, 8))
+  } else if (str_sub(address, 1, 5) == 'st://'){
+    str_sub(address, 6)
+  } else if (str_sub(address, 1, 20) == 'git://bitbucket.org/'){
+    paste0('bb:', str_sub(address, 21))
+  } else if (str_sub(address, 1, 17) == 'git://github.com/'){
+    paste0('gh:', str_sub(address, 18))
+  } else if (str_sub(address, 1, 17) == 'git://gitlab.com/'){
+    paste0('gl:', str_sub(address, 18))
+  } else {
+    matches <- str_match(address, '([a-z]+)://(.+)$')
+    paste0(matches[1,2], ':', matches[1,3])
+  }
+}
+
+split = function(address) {
+  address <- long(address)
+  matches <- str_match(address, '([a-z]+)://([\\w\\-\\./]+)(@([\\w\\-\\.]+))?')
+  if (!is.na(matches[1, 1])) {
+    ext <- tools::file_ext(matches[1, 3])
+    if (nchar(ext)==0) ext <- NA
+    return(list(
+      scheme = matches[1, 2],
+      path = matches[1, 3],
+      format = ext,
+      version = matches[1, 5]
+    ))
+  } else {
+    stop(paste0('Unable to split address\n address: ', address))
+  }
+}

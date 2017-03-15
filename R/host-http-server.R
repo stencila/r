@@ -4,7 +4,7 @@
 #' use the \code{serve} method of \code{host}
 #'
 #' @name HttpServer
-HttpServer <- R6Class("HttpServer",
+HostHttpServer <- R6Class("HttpServer",
   public = list(
 
     #' @section \code{initialize} method:
@@ -20,35 +20,37 @@ HttpServer <- R6Class("HttpServer",
       private$.server <- NULL
     },
 
-    #' @section \code{serve} method:
-    #' \describe{
-    #'   \item{on}{The host to be served}
-    #' }
-    serve = function(on=TRUE) {
-      if (on) {
-        if (is.null(private$.server)) {
-          while (private$.port < 65535) {
-            result <- tryCatch(
-              startDaemonizedServer(private$.address, private$.port, list(call=self$handle)),
-              error = identity
-            )
-            if (inherits(result, 'error')) {
-              if (result$message == 'Failed to create server') {
-                private$.port <- private$.port + 10
-              } else {
-                stop(result$message)
-              }
+    #' @section \code{start} method:
+    #'
+    #' Start the server
+    start = function() {
+      if (is.null(private$.server)) {
+        while (private$.port < 65535) {
+          result <- tryCatch(
+            startDaemonizedServer(private$.address, private$.port, list(call=self$handle)),
+            error = identity
+          )
+          if (inherits(result, 'error')) {
+            if (result$message == 'Failed to create server') {
+              private$.port <- private$.port + 10
             } else {
-              private$.server <- result
-              break
+              stop(result$message)
             }
+          } else {
+            private$.server <- result
+            break
           }
         }
-      } else {
-        if (!is.null(private$.server)) {
-          stopDaemonizedServer(private$.server)
-          private$.server <- NULL
-        }
+      }
+    },
+
+    #' @section \code{stop} method:
+    #'
+    #' Stop the server
+    stop = function() {
+      if (!is.null(private$.server)) {
+        stopDaemonizedServer(private$.server)
+        private$.server <- NULL
       }
     },
 
@@ -93,32 +95,23 @@ HttpServer <- R6Class("HttpServer",
       }
     },
 
-    route = function(method, path) {
-      if (method == 'OPTIONS') {
-        return(list(self$options, path))
+    route = function(verb, path) {
+      if (verb == 'OPTIONS') return(list(self$options))
+      if (path == '/') return(list(self$home))
+      if (path == '/favicon.ico') return(list(self$static, 'favicon.ico'))
+      if (str_sub(path, 1, 8) == '/static/') return(list(self$static, str_sub(path, 9)))
+
+      match <- str_match(path, '^/(.+?)(!(.+))?$')
+      if (!is.na(match[1, 1])) {
+        id <- match[1, 2]
+        method <- match[1, 4]
+
+        if (verb == 'POST') return(list(self$post, id))
+        else if (verb == 'GET') return(list(self$get, id))
+        else if (verb == 'PUT') return(list(self$put, id, method))
+        else if (verb == 'DELETE') return(list(self$delete, id))
       }
-      if (path == '/favicon.ico'){
-        return(list(self$web, 'images/favicon.ico'))
-      }
-      if (str_sub(path, 1, 5) == '/web/') {
-        return(list(self$web, str_sub(path, 6)))
-      }
-      match <- str_match(path, '^/(.+?)?!(.+)$')
-      if (!is.na(match[1,1])) {
-        address = match[1, 2]
-        if (is.na(address)) address <- NULL
-        name = match[1, 3]
-        if (method == 'GET') {
-          return(list(self$get, address, name))
-        } else if (method == 'PUT') {
-          return(list(self$set, address, name))
-        } else if (method == 'POST') {
-          return(list(self$call, address, name))
-        }
-      }
-      address <- str_sub(path, 2)
-      if (address == '') address <- NULL
-      return(list(self$show, address))
+      return(NULL)
     },
 
     # Provide a response to an OPTIONS request
@@ -127,10 +120,11 @@ HttpServer <- R6Class("HttpServer",
       list(body = '', status = 200, headers = list())
     },
 
-    web = function(request, path) {
-      url <- paste0('http://127.0.0.1:9000/web/', path)
-      list(body = '', status = 302, headers = list('Location' = url))
-    },
+    home = function(){},
+
+    static = function(){},
+
+    post = function(){},
 
     get = function(request, address, name) {
       component <- private$.host$open(address)
@@ -143,10 +137,7 @@ HttpServer <- R6Class("HttpServer",
       }
     },
 
-    set = function(request, address, name) {
-    },
-
-    call = function(request, address, name) {
+    put = function(request, address, name) {
       component = private$.host$open(address)
       if (!is.null(component)) {
         if (!is.null(request$body) && nchar(request$body) > 0) {
@@ -173,23 +164,7 @@ HttpServer <- R6Class("HttpServer",
       }
     },
 
-    show = function(request, address) {
-      component = private$.host$open(address)
-      scheme = private$.host$split(address)$scheme
-      if (!is.null(component)) {
-        if (!is.na(str_match(request$accept,'application/json')[1,1])) {
-          list(body = component$show('json'), status = 200, headers = list('Content-Type' = 'application/json'))
-        } else {
-          if (scheme == 'new') {
-            list(body = '', status = 302, headers = list('Location' = component$url))
-          } else {
-            list(body = component$show('html'), status = 200, headers= list('Content-Type' = 'text/html'))
-          }
-        }
-      } else {
-        self$error404(request, address)
-      }
-    },
+    delete = function(){},
 
     error404 = function(request, what='') {
       list(body = paste0('Not found: ', what), status = 404, headers = list('Content-Type' = 'text/html'))

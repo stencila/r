@@ -22,10 +22,10 @@ Create a new \code{RContext}
 }
 }
 
-\section{\code{run} method}{
+\section{\code{runCode} method}{
 
 
-Run R code within the context's scope (execute a code "chunk")
+Run R code within the context's scope (i.e. execute a code "chunk")
 
 \describe{
   \item{code}{R code to be executed}
@@ -33,10 +33,10 @@ Run R code within the context's scope (execute a code "chunk")
 }
 }
 
-\section{\code{call} method}{
+\section{\code{callCode} method}{
 
 
-Run R code within the context's global scope (execute a code "chunk")
+Run R code within the context's global scope (i.e. execute a code "chunk")
 
 \describe{
   \item{code}{R code to be executed}
@@ -44,7 +44,7 @@ Run R code within the context's global scope (execute a code "chunk")
 }
 }
 
-\section{\code{depends} method}{
+\section{\code{codeDependencies} method}{
 
 
 Returns an array of all variable names not declared within
