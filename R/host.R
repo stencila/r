@@ -12,16 +12,16 @@ TYPES <- list(
 
 #' A `Host` allows you to create, get, run methods of, and delete instances of various types.
 #' The types can be thought of a "services" provided by the host e.g. `NoteContext`, `FileSystemStorer`
-#' 
+#'
 #' The API of a host is similar to that of a HTTP server. It's methods names
 #' (e.g. `post`, `get`) are similar to HTTP methods (e.g. `POST`, `GET`) but
-#' the sematics sometimes differ (e.g. a host's `put()` method is used to call an 
+#' the sematics sometimes differ (e.g. a host's `put()` method is used to call an
 #' instance method)
-#' 
+#'
 #' A `Host` is not limited to beng served by HTTP and it's methods are exposed by both `HostHttpServer`
 #' and `HostWebsocketServer`. Those other classes are responsible for tasks associated with
 #' their communication protocol (e.g. serialising and deserialising objects).
-#' 
+#'
 #' This is a singleton class. There should only ever be one `Host`
 #' in memory in each process (although, for purposes of testing, this is not enforced)
 #'
@@ -56,12 +56,12 @@ Host <- R6Class("Host",
     #' @section \code{post} method:
     #'
     #' Create a new instance of a type
-    #' 
+    #'
     #' \describe{
     #'   \item{type}{Type of instance}
     #'   \item{options}{Options to be passed to type constructor}
     #' }
-    #' 
+    #'
     #' Returns the ID string of the newly created instance
     post = function (type, options = list()) {
       Class <- TYPES[[type]]
@@ -78,11 +78,11 @@ Host <- R6Class("Host",
     #' @section \code{get} method:
     #'
     #' Get an instance
-    #' 
+    #'
     #' \describe{
     #'   \item{id}{ID of instance}
     #' }
-    #' 
+    #'
     #' Returns the instance
     get  = function (id) {
       instance <- private$.instances[[id]]
@@ -96,7 +96,7 @@ Host <- R6Class("Host",
     #' @section \code{put} method:
     #'
     #' Call a method of an instance
-    #' 
+    #'
     #' \describe{
     #'   \item{id}{ID of instance}
     #'   \item{method}{Name of instance method}
@@ -121,7 +121,7 @@ Host <- R6Class("Host",
     #' @section \code{delete} method:
     #'
     #' Delete an instance
-    #' 
+    #'
     #' \describe{
     #'   \item{id}{ID of the instance}
     #' }
@@ -139,7 +139,7 @@ Host <- R6Class("Host",
     #' Start serving this host
     #'
     #' Currently, HTTP is the only server available
-    #' for hosts. We plan to implement a `HostWebsocketServer` soon. 
+    #' for hosts. We plan to implement a `HostWebsocketServer` soon.
     start  = function () {
       if (is.null(private$.servers[['http']])) {
         server <- HostHttpServer$new(self)
@@ -164,15 +164,21 @@ Host <- R6Class("Host",
     #' @section \code{view} method:
     #'
     #' View this host in the browser. Opens the default browser at the URL of this host
-    view  = function () {
+    view  = function (external=FALSE) {
       # Difficult to test headlessly, so don't include in coverage
       # nocov start
       self$start()
       url <- private$.servers[['http']]$url
-      if (Sys.info()[['sysname']] == 'Linux') {
-        system(paste0('2>/dev/null 1>&2 xdg-open "', url, '"'))
+      # See if there is a `viewer` option (defined by RStudio if we are in RStudio)
+      viewer <- getOption('viewer')
+      if (is.null(viewer) || external) {
+        # Use builtin function to open the URL in a new browser window/tab
+        utils::browseURL(url)
       } else {
-        system(paste0('open "', url, '"'))
+        # Use the `rstudioapi` function to view in a pane
+        # Arbitrarily large height to produce max height while still maintaining
+        # the visibility of other panes above or below.
+        viewer(url, height = 5000)
       }
       invisible(self)
       # nocov end
@@ -183,7 +189,7 @@ Host <- R6Class("Host",
     #' @section \code{servers} method:
     #'
     #' Get a list of server names for this host. Servers are identified by the protocol shorthand
-    #' e.g. `http` for `HostHttpServer` 
+    #' e.g. `http` for `HostHttpServer`
     servers = function () {
       names(private$.servers)
     }
