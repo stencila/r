@@ -30,3 +30,9 @@ Suggests:
     packagedocs
 RoxygenNote: 5.0.1
 VignetteBuilder: packagedocs
+Collate:
+    'host-http-server.R'
+    'r-context.R'
+    'host.R'
+    'main.R'
+    'value.R'

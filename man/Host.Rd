@@ -4,17 +4,114 @@
 \name{host}
 \alias{Host}
 \alias{host}
-\title{The host instance}
-\format{An object of class \code{Host} (inherits from \code{R6}) of length 27.}
+\title{The host singleton instance}
+\format{An object of class \code{Host} (inherits from \code{R6}) of length 12.}
 \usage{
 host
 
 Host
 }
 \description{
-The host instance
+The host singleton instance
 
-The Host class
+The API of a host is similar to that of a HTTP server. It's methods names
+(e.g. `post`, `get`) are similar to HTTP methods (e.g. `POST`, `GET`) but
+the sematics sometimes differ (e.g. a host's `put()` method is used to call an 
+instance method)
+}
+\details{
+A `Host` is not limited to beng served by HTTP and it's methods are exposed by both `HostHttpServer`
+and `HostWebsocketServer`. Those other classes are responsible for tasks associated with
+their communication protocol (e.g. serialising and deserialising objects).
+
+This is a singleton class. There should only ever be one `Host`
+in memory in each process (although, for purposes of testing, this is not enforced)
+}
+\section{\code{options} method}{
+
+
+Get a manifest for this host
+
+The manifest describes the host and it's capabilities. It is used
+by peer hosts to determine which "types" this host provides and
+which "instances" have already been instantiated.
+}
+
+\section{\code{post} method}{
+
+
+Create a new instance of a type
+
+\describe{
+  \item{type}{Type of instance}
+  \item{options}{Options to be passed to type constructor}
+}
+
+Returns the ID string of the newly created instance
+}
+
+\section{\code{get} method}{
+
+
+Get an instance
+
+\describe{
+  \item{id}{ID of instance}
+}
+
+Returns the instance
+}
+
+\section{\code{put} method}{
+
+
+Call a method of an instance
+
+\describe{
+  \item{id}{ID of instance}
+  \item{method}{Name of instance method}
+  \item{args}{A list of of method arguments}
+}
+
+Returns the result of the method call
+}
+
+\section{\code{delete} method}{
+
+
+Delete an instance
+
+\describe{
+  \item{id}{ID of the instance}
+}
+}
+
+\section{\code{start} method}{
+
+
+Start serving this host
+
+Currently, HTTP is the only server available
+for hosts. We plan to implement a `HostWebsocketServer` soon.
+}
+
+\section{\code{stop} method}{
+
+
+Stop serving this host. Stops all servers that are currently serving this host
+}
+
+\section{\code{view} method}{
+
+
+View this host in the browser. Opens the default browser at the URL of this host
+}
+
+\section{\code{servers} method}{
+
+
+Get a list of server names for this host. Servers are identified by the protocol shorthand
+e.g. `http` for `HostHttpServer`
 }
 \keyword{datasets}
 
