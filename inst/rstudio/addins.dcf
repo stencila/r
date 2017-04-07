@@ -1,0 +1,9 @@
+Name: Open with Stencila
+Description: Opens the file currently open in the source editor using Stencila
+Binding: addin_doc_open
+Interactive: false
+
+Name: Insert into Stencila Doc
+Description: Inserts a `run` R cell at the current cursor position of the current Stencila Document
+Binding: addin_doc_insert
+Interactive: false
