@@ -28,6 +28,7 @@ Suggests:
 RoxygenNote: 6.0.1
 Collate:
     'file-storer.R'
+    'addins.R'
     'host-http-server.R'
     'sqlite-context.R'
     'r-context.R'
