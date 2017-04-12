@@ -62,24 +62,26 @@ test_that("HostHttpServer.post", {
 
   r = s$post(list(), 'RContext')
   expect_equal(r$status, 200)
+  expect_equal(r$headers[['Content-Type']], 'application/json')
 })
 
 test_that("HostHttpServer.get", {
   s = HostHttpServer$new(host)
 
   r1 = s$post(list(), 'RContext')
-  r2 = s$get(list(), r1$body)
+  r2 = s$get(list(), fromJSON(r1$body))
   expect_equal(r2$status, 200)
-  expect_equal(r2$body, '"r-host"')
+  expect_equal(r2$headers[['Content-Type']], 'application/json')
+  expect_equal(r2$body, '{}')
 })
 
 test_that("HostHttpServer.put", {
-  skip('Refactoring API')
-
   s = HostHttpServer$new(host)
-  c = RContext$new()
 
-  r = s$call(list(body='{"code":"6*7"}'), c$address, 'run')
-  #expect_equal(r$status, 200)
-  #expect_equal(fromJSON(r$body)$output$value, "42")
+  r1 = s$post(list(), 'RContext')
+  id = fromJSON(r1$body)
+  r2 = s$put(list(body='{"code":"6*7"}'), id, 'runCode')
+  expect_equal(r2$status, 200)
+  expect_equal(r2$headers[['Content-Type']], 'application/json')
+  expect_equal(fromJSON(r2$body)$output$content, '42')
 })

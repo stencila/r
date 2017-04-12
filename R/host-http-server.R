@@ -136,7 +136,7 @@ HostHttpServer <- R6Class("HttpServer",
         self$static(request, 'index.html')
       } else {
         list(
-          body = jsonify(private$.host$options()),
+          body = to_json(private$.host$options()),
           status = 200,
           headers = list('Content-Type'='application/json')
         )
@@ -170,7 +170,7 @@ HostHttpServer <- R6Class("HttpServer",
 
     post = function(request, type) {
       list(
-        body = private$.host$post(type),
+        body = to_json(private$.host$post(type)),
         status = 200,
         headers = list('Content-Type'='application/json')
       )
@@ -178,15 +178,13 @@ HostHttpServer <- R6Class("HttpServer",
 
     get = function(request, id) {
       list(
-        body = jsonify(private$.host$get(id)),
+        body = to_json(private$.host$get(id)),
         status = 200,
         headers = list('Content-Type'='application/json')
       )
     },
 
-    put = function(request, address, name) {
-      component = private$.host$open(address)
-      if (!is.null(component)) {
+    put = function(request, id, method) {
         if (!is.null(request$body) && nchar(request$body) > 0) {
           args <- fromJSON(request$body, simplifyDataFrame=FALSE)
           # Vectors need to converted into a list for `do.call` below
@@ -194,21 +192,11 @@ HostHttpServer <- R6Class("HttpServer",
         } else {
           args <- list()
         }
-        method <- component[[name]]
-        if (!is.null(method)) {
-          result <- do.call(method, args)
-          if (inherits(result, 'Component')) {
-            content <- result$dump('json')
-          } else {
-            content <- jsonify(result)
-          }
-          list(body = content, status = 200, headers = list('Content-Type' = 'application/json'))
-        } else {
-          self$error404(request, paste0(address, '$', name))
-        }
-      } else {
-        self$error404(request, address)
-      }
+        list(
+          body = to_json(private$.host$put(id, method, args)),
+          status = 200,
+          headers = list('Content-Type'='application/json')
+        )
     },
 
     delete = function(){},
@@ -243,15 +231,27 @@ HostHttpServer <- R6Class("HttpServer",
     .server = NULL
   )
 )
-
+# Does request accept JSON
 accepts_json <- function(request) {
   accept <- request$headers[['Accept']]
   if (is.null(accept)) FALSE
   else str_detect(accept, 'application/json')
 }
 
-jsonify <- function(value) {
-  toString(toJSON(value, auto_unbox=TRUE, null='null'))
+# Convert a value to JSON
+to_json <- function(value) {
+  # jsonlite converts empty R lists to empty JSON arrays, override that
+  if (is.list(value) & length(value)==0) '{}'
+  else toString(jsonlite::toJSON(value, auto_unbox=TRUE, null='null'))
 }
-
+# Create a hook for conversion of R6 instances to JSON
+methods::setClass('R6')
+asJSON <- jsonlite:::asJSON
+methods::setMethod('asJSON', 'R6', function(x, ...) {
+  members <- list()
+  for(name in ls(x, sorted=FALSE)) {
+    if (!is.function(x[[name]])) members[[name]] <- x[[name]]
+  }
+  to_json(members)
+})
 
