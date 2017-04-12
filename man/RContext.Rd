@@ -55,5 +55,5 @@ within the piece of code.
   \item{code}{R code}
 }
 }
-\keyword{datasets}
 
+\keyword{datasets}

@@ -16,6 +16,7 @@ Imports:
     httpuv,
     httr,
     jsonlite,
+    mime,
     methods,
     R6,
     readr,
@@ -28,7 +29,7 @@ Suggests:
     testthat,
     covr,
     packagedocs
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1
 VignetteBuilder: packagedocs
 Collate:
     'host-http-server.R'

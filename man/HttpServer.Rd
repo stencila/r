@@ -2,8 +2,8 @@
 % Please edit documentation in R/host-http-server.R
 \docType{data}
 \name{HttpServer}
-\alias{HostHttpServer}
 \alias{HttpServer}
+\alias{HostHttpServer}
 \title{A HttpServer}
 \format{An object of class \code{R6ClassGenerator} of length 24.}
 \usage{
@@ -33,5 +33,5 @@ Start the server
 
 Stop the server
 }
-\keyword{datasets}
 
+\keyword{datasets}

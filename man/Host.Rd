@@ -2,8 +2,8 @@
 % Please edit documentation in R/host.R
 \docType{data}
 \name{host}
-\alias{Host}
 \alias{host}
+\alias{Host}
 \title{The host singleton instance}
 \format{An object of class \code{Host} (inherits from \code{R6}) of length 12.}
 \usage{
@@ -16,7 +16,7 @@ The host singleton instance
 
 The API of a host is similar to that of a HTTP server. It's methods names
 (e.g. `post`, `get`) are similar to HTTP methods (e.g. `POST`, `GET`) but
-the sematics sometimes differ (e.g. a host's `put()` method is used to call an 
+the sematics sometimes differ (e.g. a host's `put()` method is used to call an
 instance method)
 }
 \details{
@@ -113,5 +113,5 @@ View this host in the browser. Opens the default browser at the URL of this host
 Get a list of server names for this host. Servers are identified by the protocol shorthand
 e.g. `http` for `HostHttpServer`
 }
-\keyword{datasets}
 
+\keyword{datasets}

@@ -1,15 +1,16 @@
 test_that("HostHttpServer$stop+start", {
   s = HostHttpServer$new(NULL)
 
+  expect_equal(s$url, NULL)
+
   s$start()
-  expect_equal(s$status, 'on')
   expect_true(str_detect(s$url,'^http://127.0.0.1'))
 
   # Unfortunately this timesout here. But will work from a separate R process.
   #r = GET(s$origin, timeout(10))
 
   s$stop()
-  expect_equal(s$status, 'off')
+  expect_equal(s$url, NULL)
 })
 
 test_that("HostHttpServer.route", {
@@ -30,33 +31,46 @@ test_that("HostHttpServer.route", {
 })
 
 test_that("HostHttpServer.home", {
-  skip('Refactoring API')
-
   s = HostHttpServer$new(host)
 
-  r = s$call(list(body='{"manifest":{}}'), NULL, 'hello')
+  r = s$home(list(headers=list('Accept'='application/json')))
   expect_equal(r$status, 200)
-  expect_equal(fromJSON(r$body)$stencila, TRUE)
+  expect_equal(fromJSON(r$body), host$options())
+
+  r = s$home(list())
+  expect_equal(r$status, 200)
+  expect_equal(r$headers[['Content-Type']], 'text/html')
 })
 
 test_that("HostHttpServer.static", {
-  skip('Refactoring API')
-
   s = HostHttpServer$new(host)
-  r = s$static(list(), 'some/file.js')
+
+  r = s$static(list(), 'logo-name-beta.svg')
   expect_equal(r$status, 200)
-  expect_true(!is.na(r$headers[['Location']]))
+  expect_equal(r$headers[['Content-Type']], 'image/svg+xml')
+  expect_equal(str_sub(r$body, 1, 54), '<?xml version="1.0" encoding="UTF-8" standalone="no"?>')
+
+  r = s$static(list(), 'foo.bar')
+  expect_equal(r$status, 404)
+
+  r = s$static(list(), '../DESCRIPTION')
+  expect_equal(r$status, 403)
+})
+
+test_that("HostHttpServer.post", {
+  s = HostHttpServer$new(host)
+
+  r = s$post(list(), 'RContext')
+  expect_equal(r$status, 200)
 })
 
 test_that("HostHttpServer.get", {
-  skip('Refactoring API')
-
   s = HostHttpServer$new(host)
-  c = RContext$new()
 
-  r = s$get(list(), c$address, 'type')
-  expect_equal(r$status, 200)
-  expect_equal(r$body, '"r-host"')
+  r1 = s$post(list(), 'RContext')
+  r2 = s$get(list(), r1$body)
+  expect_equal(r2$status, 200)
+  expect_equal(r2$body, '"r-host"')
 })
 
 test_that("HostHttpServer.put", {

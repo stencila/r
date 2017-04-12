@@ -1,7 +1,7 @@
-#' A HttpServer
+#' A HTTP server for a `Host`
 #'
-#' Normally there is no need to create a new \code{HttpServer}. Instead
-#' use the \code{serve} method of \code{host}
+#' Normally there is no need to create a new \code{HostHttpServer}, instead
+#' use the \code{start} method of the \code{host} nstance.
 #'
 #' @name HttpServer
 HostHttpServer <- R6Class("HttpServer",
@@ -10,12 +10,11 @@ HostHttpServer <- R6Class("HttpServer",
     #' @section \code{initialize} method:
     #' \describe{
     #'   \item{host}{The host to be served}
-    #'   \item{address}{The address to listen on}
-    #'   \item{address}{The port to listen on}
+    #'   \item{port}{The port to listen on}
     #' }
-    initialize = function(host, address='127.0.0.1', port=2000) {
+    initialize = function(host, port=2000) {
       private$.host <- host
-      private$.address <- address
+      private$.address <- '127.0.0.1'
       private$.port <- port
       private$.server <- NULL
     },
@@ -54,6 +53,9 @@ HostHttpServer <- R6Class("HttpServer",
       }
     },
 
+    #' @section \code{handle} method:
+    #'
+    #' Handle a HTTP request
     handle = function(env) {
       # Get variables from request environment, possibilities include
       #
@@ -95,8 +97,12 @@ HostHttpServer <- R6Class("HttpServer",
       }
     },
 
+    #' @section \code{route} method:
+    #'
+    #' Route a HTTP request
     route = function(verb, path) {
       if (verb == 'OPTIONS') return(list(self$options))
+
       if (path == '/') return(list(self$home))
       if (path == '/favicon.ico') return(list(self$static, 'favicon.ico'))
       if (str_sub(path, 1, 8) == '/static/') return(list(self$static, str_sub(path, 9)))
@@ -105,36 +111,77 @@ HostHttpServer <- R6Class("HttpServer",
       if (!is.na(match[1, 1])) {
         id <- match[1, 2]
         method <- match[1, 4]
-
-        if (verb == 'POST') return(list(self$post, id))
-        else if (verb == 'GET') return(list(self$get, id))
-        else if (verb == 'PUT') return(list(self$put, id, method))
-        else if (verb == 'DELETE') return(list(self$delete, id))
+        if (verb == 'POST' & !is.null(id)) return(list(self$post, id))
+        else if (verb == 'GET' & !is.null(id)) return(list(self$get, id))
+        else if (verb == 'PUT' & !is.null(id) & !is.null(method)) return(list(self$put, id, method))
+        else if (verb == 'DELETE' & !is.null(id)) return(list(self$delete, id))
       }
+
       return(NULL)
     },
 
-    # Provide a response to an OPTIONS request
-    # Necessary for preflighted CORS requests (https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS#Preflighted_requests)
-    options = function(request, path) {
+    #' @section \code{options} method:
+    #'
+    #' Handle OPTIONS request
+    #' Necessary for preflighted CORS requests (https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS#Preflighted_requests)
+    options = function(request) {
       list(body = '', status = 200, headers = list())
     },
 
-    home = function(){},
-
-    static = function(){},
-
-    post = function(){},
-
-    get = function(request, address, name) {
-      component <- private$.host$open(address)
-      if (!is.null(component)) {
-        result <- component[[name]]
-        content <- jsonify(result)
-        list(body = content, status = 200, headers = list('Content-Type' = 'application/json'))
+    #' @section \code{home} method:
+    #'
+    #' Handle a request to `home`
+    home = function(request) {
+      if (!accepts_json(request)) {
+        self$static(request, 'index.html')
       } else {
-        self$error404(request, address)
+        list(
+          body = jsonify(private$.host$options()),
+          status = 200,
+          headers = list('Content-Type'='application/json')
+        )
       }
+    },
+
+    #' @section \code{home} method:
+    #'
+    #' Handle a request for a static file
+    static = function(request, path) {
+      static_path <- normalizePath(system.file('static', package = 'stencila'))
+      requested_path <- suppressWarnings(normalizePath(file.path(static_path, path)))
+      if (!str_detect(requested_path, paste0('^', static_path)) | str_detect(requested_path, '\\.\\./')) {
+        # Don't allow any request outside of static folder
+        self$error403()
+      } else if (!file.exists(requested_path)) {
+        self$error404()
+      } else {
+        file_connection <- file(requested_path, 'r')
+        lines <- suppressWarnings(readLines(file_connection))
+        content <- paste(lines, collapse='\n')
+        close(file_connection)
+        mimetype <- mime::guess_type(path)
+        list(
+          body = content,
+          status = 200,
+          headers = list('Content-Type'=mimetype)
+        )
+      }
+    },
+
+    post = function(request, type) {
+      list(
+        body = private$.host$post(type),
+        status = 200,
+        headers = list('Content-Type'='application/json')
+      )
+    },
+
+    get = function(request, id) {
+      list(
+        body = jsonify(private$.host$get(id)),
+        status = 200,
+        headers = list('Content-Type'='application/json')
+      )
     },
 
     put = function(request, address, name) {
@@ -166,6 +213,10 @@ HostHttpServer <- R6Class("HttpServer",
 
     delete = function(){},
 
+    error403 = function(request, what='') {
+      list(body = paste0('Unauthorized ', what), status = 403, headers = list('Content-Type' = 'text/html'))
+    },
+
     error404 = function(request, what='') {
       list(body = paste0('Not found: ', what), status = 404, headers = list('Content-Type' = 'text/html'))
     },
@@ -178,20 +229,9 @@ HostHttpServer <- R6Class("HttpServer",
 
   active = list(
 
-    address = function() {
-      private$.address
-    },
-
-    port = function() {
-      private$.port
-    },
-
     url = function() {
-      paste0('http://', private$.address, ':', private$.port)
-    },
-
-    status = function() {
-      if (is.null(private$.server)) 'off' else 'on'
+      if (is.null(private$.server)) NULL
+      else paste0('http://', private$.address, ':', private$.port)
     }
 
   ),
@@ -204,7 +244,14 @@ HostHttpServer <- R6Class("HttpServer",
   )
 )
 
+accepts_json <- function(request) {
+  accept <- request$headers[['Accept']]
+  if (is.null(accept)) FALSE
+  else str_detect(accept, 'application/json')
+}
 
 jsonify <- function(value) {
   toString(toJSON(value, auto_unbox=TRUE, null='null'))
 }
+
+
