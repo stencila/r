@@ -4,21 +4,20 @@
 \name{HttpServer}
 \alias{HttpServer}
 \alias{HostHttpServer}
-\title{A HttpServer}
+\title{A HTTP server for a `Host`}
 \format{An object of class \code{R6ClassGenerator} of length 24.}
 \usage{
 HostHttpServer
 }
 \description{
-Normally there is no need to create a new \code{HttpServer}. Instead
-use the \code{serve} method of \code{host}
+Normally there is no need to create a new \code{HostHttpServer}, instead
+use the \code{start} method of the \code{host} nstance.
 }
 \section{\code{initialize} method}{
 
 \describe{
   \item{host}{The host to be served}
-  \item{address}{The address to listen on}
-  \item{address}{The port to listen on}
+  \item{port}{The port to listen on}
 }
 }
 
@@ -32,6 +31,35 @@ Start the server
 
 
 Stop the server
+}
+
+\section{\code{handle} method}{
+
+
+Handle a HTTP request
+}
+
+\section{\code{route} method}{
+
+
+Route a HTTP request
+}
+
+\section{\code{options} method}{
+
+
+Handle OPTIONS request
+Necessary for preflighted CORS requests (https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS#Preflighted_requests)
+}
+
+\section{\code{home} method}{
+
+
+Handle a request to `home`
+
+
+
+Handle a request for a static file
 }
 
 \keyword{datasets}
