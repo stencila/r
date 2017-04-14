@@ -2,7 +2,7 @@
 % Please edit documentation in R/value.R
 \name{pack}
 \alias{pack}
-\title{Pack a value into a package}
+\title{Pack a R value into a package}
 \usage{
 pack(value)
 }
@@ -13,5 +13,5 @@ pack(value)
 A package as an R \code{list}
 }
 \description{
-Pack a value into a package
+Pack a R value into a package
 }
