@@ -2,34 +2,16 @@
 % Please edit documentation in R/value.R
 \name{type}
 \alias{type}
-\alias{pack}
-\alias{unpack}
 \title{Get the type code for a value}
 \usage{
 type(value)
-
-pack(value)
-
-unpack(package)
 }
 \arguments{
 \item{value}{A R Value}
-
-\item{package}{The package as a \code{list} or JSON string}
-
-\item{value}{The R value to be packaged}
 }
 \value{
 Type code for value
-
-A package as an R \code{list}
-
-A R value
 }
 \description{
 Get the type code for a value
-
-Pack a value into a package
-
-Unpack a package into a R value
 }

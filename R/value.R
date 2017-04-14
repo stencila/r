@@ -1,6 +1,5 @@
 #' Get the type code for a value
 #'
-#' @rdname value
 #' @param value A R Value
 #' @return Type code for value
 #' @export
@@ -36,9 +35,8 @@ type <- function(value) {
   }
 }
 
-#' Pack a value into a package
+#' Pack a R value into a package
 #'
-#' @rdname value
 #' @param value The R value to be packaged
 #' @return A package as an R \code{list}
 #' @export
@@ -81,7 +79,6 @@ pack <- function(value) {
 
 #' Unpack a package into a R value
 #'
-#' @rdname value
 #' @param package The package as a \code{list} or JSON string
 #' @return A R value
 #' @export

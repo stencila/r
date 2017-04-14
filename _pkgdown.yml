@@ -22,3 +22,5 @@ reference:
   - title: Functions
     contents:
       - type
+      - pack
+      - unpack
