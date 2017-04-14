@@ -73,15 +73,16 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
       request <- list(
         path = httpuv::decodeURIComponent(env$PATH_INFO),
         method = env$REQUEST_METHOD,
-        body = paste(env$rook.input$read_lines(), collapse=''),
-        accept = env$HTTP_ACCEPT
+        headers = list(
+          Accept = env$HTTP_ACCEPT
+        ),
+        body = paste(env$rook.input$read_lines(), collapse='')
       )
       response <- tryCatch({
           endpoint <- self$route(request$method, request$path)
           method <- endpoint[[1]]
-          args <- endpoint[2:length(endpoint)]
-          args <- c(list(request=request), args)
-          do.call(method, args)
+          if (length(endpoint) == 1) method(request)
+          else do.call(method, c(list(request=request), endpoint[2:length(endpoint)]))
         },
         error = identity
       )
@@ -213,7 +214,7 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
     #' @section delete():
     #'
     #' Handle a DELETE request
-    delete = function(){
+    delete = function(request, id) {
       stop('Not yet implemeted')
     },
 
@@ -226,7 +227,7 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
     },
 
     error500 = function(request, error) {
-      list(body = paste0('Error: ', toString(error)), status = 500, headers = list('Content-Type' = 'text/html'))
+      list(body = paste0('Error: ', toString(error)), status = 500, headers = list('Content-Type' = 'text/html'))  # nocov
     }
 
   ),

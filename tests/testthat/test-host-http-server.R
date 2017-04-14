@@ -30,6 +30,28 @@ test_that("HostHttpServer.route", {
   expect_equal(s$route('DELETE', '/id'), list(s$delete, 'id'))
 })
 
+test_that("HostHttpServer.handle", {
+  s = HostHttpServer$new(host)
+
+  r <- s$handle(list(
+    PATH_INFO = '/',
+    REQUEST_METHOD = 'GET',
+    HTTP_ACCEPT = '',
+    rook.input = list(read_lines = function() NULL)
+  ))
+  expect_equal(r$status, 200)
+  expect_equal(str_sub(r$body, 1, 23), '<!doctype html>\n<html>\n')
+
+  r <- s$handle(list(
+    PATH_INFO = '/',
+    REQUEST_METHOD = 'GET',
+    HTTP_ACCEPT = 'application/json',
+    rook.input = list(read_lines = function() NULL)
+  ))
+  expect_equal(r$status, 200)
+  expect_equal(str_sub(r$body, 1, 22), '{"stencila":{"package"')
+})
+
 test_that("HostHttpServer.home", {
   s = HostHttpServer$new(host)
 
