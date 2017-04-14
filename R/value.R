@@ -13,25 +13,25 @@ type <- function(value) {
       'null'
     } else {
       switch(type,
-         logical = 'bool',
-         integer = 'int',
-         double = 'flt',
-         character = 'str',
+         logical = 'boolean',
+         integer = 'integer',
+         double = 'float',
+         character = 'string',
          type
       )
     }
   } else if (inherits(value, 'data.frame') || inherits(value, 'matrix')) {
-    'tab'
+    'table'
   } else if (inherits(value, 'recordedplot') || inherits(value, 'ggplot')) {
     'plot'
   } else if (is.list(value)) {
     type <- value$type
     if (typeof(type) == 'character' && length(type) == 1) type
-    else 'obj'
+    else 'object'
   } else if (is.vector(value)) {
-    'arr'
+    'array'
   } else {
-    'unk'
+    'unknown'
   }
 }
 
@@ -47,31 +47,41 @@ pack <- function(value) {
   # Of couse, the order of these if statements is important. Rearrange with caution (and testing!)
   if (type_ == 'null') {
     content <- 'null'
-  } else if (type_ == 'bool') {
+  } else if (type_ == 'boolean') {
     content <- ifelse(value, 'true', 'false')
-  } else if (type_ %in% c('int', 'flt', 'str')) {
+  } else if (type_ %in% c('integer', 'float', 'string')) {
     content <- toString(value)
-  } else if (type_ == 'tab') {
-    format <- 'csv'
-    content <- capture.output(write.csv(value, file=stdout(), row.names=FALSE, quote=FALSE))
-    content <- paste(content, collapse='\n')
+  } else if (type_ == 'table') {
+    format <- 'json'
+    content <- toString(toJSON(list(
+      type = 'table',
+      data = lapply(as.data.frame(value), function(column) {
+        if (is.ordered(column)) type <- 'ordinal'
+        else if (is.factor(column)) type <- 'nominal'
+        else type <- 'quantitative'
+        list(
+          values = column,
+          type = type
+        )
+      })
+    ), auto_unbox = TRUE))
   } else if (type_ == 'plot') {
     format <- 'png'
-    path <- tempfile(fileext=paste0('.',format))
+    path <- tempfile(fileext=paste0('.', format))
     png(path)
     if (inherits(value, 'recordedplot')) replayPlot(value)
     else print(value)
     dev.off()
-    content <- base64enc::dataURI(file=path, mime="image/png")
-  } else if (type_ == 'unk') {
+    content <- base64enc::base64encode(path)
+  } else if (type_ == 'unknown') {
     # Unknown types serialised using `print` which may be customised
     # e.g. `print.table` is used for the results of `summary`
     content <- paste(capture.output(print(value)), collapse = '\n')
   } else {
-    # Catches 'obj', 'arr' and custom types
+    # Catches 'object', 'array' and custom types
     format <- 'json'
     content <- toString(toJSON(value, auto_unbox = TRUE, force = TRUE))
-    if (type_ == 'obj' && content == '[]') content <- '{}'
+    if (type_ == 'object' && content == '[]') content <- '{}'
   }
 
   list(type=type_, format=format, content=content)
@@ -101,25 +111,27 @@ unpack <- function(package) {
 
   if (type == 'null') {
     NULL
-  } else if (type == 'bool') {
+  } else if (type == 'boolean') {
     as.logical(content)
-  } else if (type == 'int') {
+  } else if (type == 'integer') {
     as.integer(content)
-  } else if (type == 'flt') {
+  } else if (type == 'float') {
     as.double(content)
-  } else if (type == 'str') {
+  } else if (type == 'string') {
     as.character(content)
-  } else if (type == 'obj') {
+  } else if (type == 'object') {
     fromJSON(content)
-  } else if (type == 'arr') {
+  } else if (type == 'array') {
     obj <- fromJSON(content)
     if (is.list(obj) && length(obj)==0) obj <- vector()
     obj
-  } else if (type == 'tab') {
-    if (format == 'csv') {
+  } else if (type == 'table') {
+    if (format == 'json') {
+      table <- fromJSON(content)
+      values <- lapply(table$data, function(x) x[['values']])
+      do.call(data.frame, c(values, stringsAsFactors = FALSE))
+    } else if (format == 'csv') {
       read.csv(text=content, as.is=T)
-    } else if (format == 'tsv') {
-      read.csv(text=content, sep='\t', as.is=T)
     } else {
       stop(paste0('Unable to unpack\n  type: ', type, '\n  format: ', format))
     }
