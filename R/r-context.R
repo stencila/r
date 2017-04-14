@@ -58,7 +58,7 @@ RContext <- R6::R6Class('RContext',
     #' }
     runCode = function(code, options = list()) {
         # Do eval and process into a result
-        evaluation <- evaluate(code, envir=private$.global_env, output_handler=evaluate_output_handler)
+        evaluation <- evaluate::evaluate(code, envir=private$.global_env, output_handler=evaluate_output_handler)
         private$.result(evaluation)
     },
 
@@ -86,7 +86,7 @@ RContext <- R6::R6Class('RContext',
       }
 
       # Do eval and process into a result
-      evaluation <- evaluate(code, envir=local, stop_on_error=1L, output_handler=evaluate_output_handler)
+      evaluation <- evaluate::evaluate(code, envir=local, stop_on_error=1L, output_handler=evaluate_output_handler)
       result <- private$.result(evaluation)
 
       # If returned a value, use that as output

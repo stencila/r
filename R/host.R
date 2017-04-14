@@ -14,26 +14,25 @@ TYPES <- list(
 #' the sematics sometimes differ (e.g. a host's `put()` method is used to call an
 #' instance method)
 #'
-#' A `Host` is not limited to beng served by HTTP and it's methods are exposed by both `HostHttpServer`
-#' and `HostWebsocketServer`. Those other classes are responsible for tasks associated with
-#' their communication protocol (e.g. serialising and deserialising objects).
+#' A host's methods are exposed by `HostHttpServer` and `HostWebsocketServer`. 
+#' Those other classes are responsible for tasks associated with their communication 
+#' protocol (e.g. serialising and deserialising objects).
+#'
+#' This is a singleton class. There should only ever be one `Host` in memory in each process 
+#' (although, for purposes of testing, this is not enforced)
 #'
 #' @format \code{R6Class}.
 #' @examples
-#' my_host <- Host$new()
-#' my_host$servers
-#' my_host$start()
-#' my_host$servers
-#' my_host$stop()
+#' host$servers
+#' host$start()
+#' host$servers
+#' host$stop()
 Host <- R6::R6Class("Host",
   public = list(
 
     #' @section new():
     #'
     #' Create a new \code{Host}
-    #'
-    #' This is a singleton class. There should only ever be one `Host` in memory in each process 
-    #' (although, for purposes of testing, this is not enforced)
     initialize = function () {
       private$.servers <- list()
       private$.instances <- list()
@@ -203,6 +202,7 @@ Host <- R6::R6Class("Host",
   )
 )
 
-# The host singleton instance
+#' The singleton instance of the \code{Host} class
+#' @rdname host-instance.Rd
 #' @export
 host <- NULL

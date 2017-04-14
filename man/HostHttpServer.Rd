@@ -50,8 +50,7 @@ Route a HTTP request
 \section{options()}{
 
 
-Handle OPTIONS request
-Necessary for preflighted CORS requests (https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS#Preflighted_requests)
+Handle OPTIONS request. Necessary for pre-flighted CORS requests.
 }
 
 \section{home()}{
@@ -80,6 +79,18 @@ Handle a GET request
 
 
 Handle a PUT request
+}
+
+\section{delete()}{
+
+
+Handle a DELETE request
+}
+
+\section{url}{
+
+
+The URL of the server, or \code{NULL} if not yet started
 }
 
 \keyword{datasets}

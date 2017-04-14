@@ -41,29 +41,29 @@ type <- function(value) {
 #' @return A package as an R \code{list}
 #' @export
 pack <- function(value) {
-  type <- stencila:::type(value)
+  type_ <- type(value)
   format <- 'text'
 
   # Of couse, the order of these if statements is important. Rearrange with caution (and testing!)
-  if (type == 'null') {
+  if (type_ == 'null') {
     content <- 'null'
-  } else if (type == 'bool') {
+  } else if (type_ == 'bool') {
     content <- ifelse(value, 'true', 'false')
-  } else if (type %in% c('int', 'flt', 'str')) {
+  } else if (type_ %in% c('int', 'flt', 'str')) {
     content <- toString(value)
-  } else if (type == 'tab') {
+  } else if (type_ == 'tab') {
     format <- 'csv'
     content <- capture.output(write.csv(value, file=stdout(), row.names=FALSE, quote=FALSE))
     content <- paste(content, collapse='\n')
-  } else if (type == 'plot') {
+  } else if (type_ == 'plot') {
     format <- 'png'
     path <- tempfile(fileext=paste0('.',format))
     png(path)
     if (inherits(value, 'recordedplot')) replayPlot(value)
     else print(value)
     dev.off()
-    content <- dataURI(file=path, mime="image/png")
-  } else if (type == 'unk') {
+    content <- base64enc::dataURI(file=path, mime="image/png")
+  } else if (type_ == 'unk') {
     # Unknown types serialised using `print` which may be customised
     # e.g. `print.table` is used for the results of `summary`
     content <- paste(capture.output(print(value)), collapse = '\n')
@@ -71,10 +71,10 @@ pack <- function(value) {
     # Catches 'obj', 'arr' and custom types
     format <- 'json'
     content <- toString(toJSON(value, auto_unbox = TRUE, force = TRUE))
-    if (type == 'obj' && content == '[]') content <- '{}'
+    if (type_ == 'obj' && content == '[]') content <- '{}'
   }
 
-  list(type=type, format=format, content=content)
+  list(type=type_, format=format, content=content)
 }
 
 #' Unpack a package into a R value

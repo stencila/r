@@ -10,20 +10,15 @@ Version: 0.1.0
 LazyData: TRUE
 Imports:
     base64enc,
-    DBI,
     evaluate,
     httpuv,
-    httr,
     jsonlite,
     mime,
     methods,
     R6,
     readr,
-    RSQLite,
     stringr,
-    tibble,
-    tools,
-    xtable
+    tools
 Suggests:
     testthat,
     covr,

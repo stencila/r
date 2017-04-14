@@ -96,16 +96,16 @@ The types can be thought of a "services" provided by the host e.g. `RContext`, `
 (e.g. `post`, `get`) are similar to HTTP methods (e.g. `POST`, `GET`) but
 the sematics sometimes differ (e.g. a host's `put()` method is used to call an
 instance method)</p>
-<p>A `Host` is not limited to beng served by HTTP and it's methods are exposed by both `HostHttpServer`
-and `HostWebsocketServer`. Those other classes are responsible for tasks associated with
-their communication protocol (e.g. serialising and deserialising objects).</p>
+<p>A host's methods are exposed by `HostHttpServer` and `HostWebsocketServer`. 
+Those other classes are responsible for tasks associated with their communication 
+protocol (e.g. serialising and deserialising objects).</p>
+<p>This is a singleton class. There should only ever be one `Host` in memory in each process 
+(although, for purposes of testing, this is not enforced)</p>
     
     <h2 class="hasAnchor" id="new-"><a class="anchor" href="#new-"></a>new()</h2>
 
     
     <p>Create a new <code>Host</code></p>
-<p>This is a singleton class. There should only ever be one `Host` in memory in each process 
-(although, for purposes of testing, this is not enforced)</p>
     
     <h2 class="hasAnchor" id="options-"><a class="anchor" href="#options-"></a>options()</h2>
 
@@ -174,9 +174,8 @@ e.g. `http` for `HostHttpServer`</p>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='no'>my_host</span> <span class='kw'>&lt;-</span> <span class='no'>Host</span>$<span class='fu'>new</span>()
-<span class='no'>my_host</span>$<span class='no'>servers</span></div><div class='output co'>#&gt; NULL</div><div class='input'><span class='no'>my_host</span>$<span class='fu'>start</span>()
-<span class='no'>my_host</span>$<span class='no'>servers</span></div><div class='output co'>#&gt; [1] "http"</div><div class='input'><span class='no'>my_host</span>$<span class='fu'>stop</span>()</div></pre>
+    <pre class="examples"><div class='input'><span class='no'>host</span>$<span class='no'>servers</span></div><div class='output co'>#&gt; NULL</div><div class='input'><span class='no'>host</span>$<span class='fu'>start</span>()
+<span class='no'>host</span>$<span class='no'>servers</span></div><div class='output co'>#&gt; [1] "http"</div><div class='input'><span class='no'>host</span>$<span class='fu'>stop</span>()</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>

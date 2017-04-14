@@ -18,17 +18,17 @@ The API of a host is similar to that of a HTTP server. It's methods names
 the sematics sometimes differ (e.g. a host's `put()` method is used to call an
 instance method)
 
-A `Host` is not limited to beng served by HTTP and it's methods are exposed by both `HostHttpServer`
-and `HostWebsocketServer`. Those other classes are responsible for tasks associated with
-their communication protocol (e.g. serialising and deserialising objects).
+A host's methods are exposed by `HostHttpServer` and `HostWebsocketServer`. 
+Those other classes are responsible for tasks associated with their communication 
+protocol (e.g. serialising and deserialising objects).
+
+This is a singleton class. There should only ever be one `Host` in memory in each process 
+(although, for purposes of testing, this is not enforced)
 }
 \section{new()}{
 
 
 Create a new \code{Host}
-
-This is a singleton class. There should only ever be one `Host` in memory in each process 
-(although, for purposes of testing, this is not enforced)
 }
 
 \section{options()}{
@@ -116,10 +116,9 @@ e.g. `http` for `HostHttpServer`
 }
 
 \examples{
-my_host <- Host$new()
-my_host$servers
-my_host$start()
-my_host$servers
-my_host$stop()
+host$servers
+host$start()
+host$servers
+host$stop()
 }
 \keyword{datasets}

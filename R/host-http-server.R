@@ -4,7 +4,7 @@
 #' use the \code{start} method of the \code{host} instance.
 #'
 #' @format \code{R6Class}.
-HostHttpServer <- R6Class("HostHttpServer",
+HostHttpServer <- R6::R6Class("HostHttpServer",
   public = list(
 
     #' @section new():
@@ -29,7 +29,7 @@ HostHttpServer <- R6Class("HostHttpServer",
       if (is.null(private$.server)) {
         while (private$.port < 65535) {
           result <- tryCatch(
-            startDaemonizedServer(private$.address, private$.port, list(call=self$handle)),
+            httpuv::startDaemonizedServer(private$.address, private$.port, list(call=self$handle)),
             error = identity
           )
           if (inherits(result, 'error')) {
@@ -51,7 +51,7 @@ HostHttpServer <- R6Class("HostHttpServer",
     #' Stop the server
     stop = function() {
       if (!is.null(private$.server)) {
-        stopDaemonizedServer(private$.server)
+        httpuv::stopDaemonizedServer(private$.server)
         private$.server <- NULL
       }
     },
@@ -71,7 +71,7 @@ HostHttpServer <- R6Class("HostHttpServer",
       #
       # See https://github.com/jeffreyhorner/Rook/blob/a5e45f751/README.md#the-environment for
       request <- list(
-        path = decodeURIComponent(env$PATH_INFO),
+        path = httpuv::decodeURIComponent(env$PATH_INFO),
         method = env$REQUEST_METHOD,
         body = paste(env$rook.input$read_lines(), collapse=''),
         accept = env$HTTP_ACCEPT
@@ -125,8 +125,7 @@ HostHttpServer <- R6Class("HostHttpServer",
 
     #' @section options():
     #'
-    #' Handle OPTIONS request
-    #' Necessary for preflighted CORS requests (https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS#Preflighted_requests)
+    #' Handle OPTIONS request. Necessary for pre-flighted CORS requests.
     options = function(request) {
       list(body = '', status = 200, headers = list())
     },
@@ -211,7 +210,7 @@ HostHttpServer <- R6Class("HostHttpServer",
         )
     },
 
-    #' @section delete()
+    #' @section delete():
     #'
     #' Handle a DELETE request
     delete = function(){
@@ -234,7 +233,7 @@ HostHttpServer <- R6Class("HostHttpServer",
 
   active = list(
 
-    #' @section url
+    #' @section url:
     #'
     #' The URL of the server, or \code{NULL} if not yet started
     url = function() {
