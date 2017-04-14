@@ -3,25 +3,18 @@
 # for example, Python's module local import staements), for purposes of DRY they may as well be
 # all together here in none file.
 
-# TODO : Follow Hadley Wickham's advice:
-# "If you are using just a few functions from another package, the recommended option is to note the
-# package name in the Imports: field of the DESCRIPTION file and call the function(s) explicitly using ::, e.g., pkg::fun().
-#' @importFrom base64enc dataURI
-#' @import DBI
-#' @importFrom evaluate evaluate
+# We're following Hadley Wickham's advice:
+#   If you are using just a few functions from another package, the recommended option is to note the
+#   package name in the Imports: field of the DESCRIPTION file and call the function(s) explicitly
+#   using ::, e.g., pkg::fun().
+# But these are imports for some commonly used functions:
+#
 #' @importFrom grDevices dev.off png replayPlot
-#' @import httr
-#' @import httpuv
-#' @import jsonlite
+#' @importFrom jsonlite fromJSON toJSON
 #' @import methods
-#' @importFrom R6 R6Class
-#' @importFrom readr read_csv read_tsv
-#' @import RSQLite
 #' @import stringr
-#' @importFrom tibble data_frame
 #' @import tools
-#' @importFrom utils capture.output write.csv
-#' @importFrom xtable xtable
+#' @importFrom utils capture.output read.csv write.csv
 NULL
 
 # Get the version

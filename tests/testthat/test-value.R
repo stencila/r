@@ -135,7 +135,10 @@ describe('unpack()', {
   })
 
   it("works for tabular data", {
-    expect_equal(unpack(list(type='tab',format='csv',content='a,b\n1,x\n2,y\n3,z')), data_frame(a=1:3, b=c('x','y','z')))
+    expect_equal(
+      unpack(list(type='tab',format='csv',content='a,b\n1,x\n2,y\n3,z')),
+      data.frame(a=1:3, b=c('x','y','z'), stringsAsFactors=FALSE)
+    )
   })
 })
 

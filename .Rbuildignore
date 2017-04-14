@@ -6,5 +6,8 @@
 ^\.sandbox$
 ^Makefile$
 ^LICENSE$
+^index.md$
+^CONDUCT.md$
+^_pkgdown\.yml$
 ^stencila_.+\.tar\.gz$
-^_gh-pages$
+^docs$

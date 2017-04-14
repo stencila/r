@@ -1,40 +1,44 @@
-#' The host singleton instance
-#'
-#' @rdname Host
-#' @export
-host <- NULL
-
 # List of types that hosts supports
 #' @include r-context.R
 TYPES <- list(
   RContext = RContext
 )
 
-#' A `Host` allows you to create, get, run methods of, and delete instances of various types.
-#' The types can be thought of a "services" provided by the host e.g. `NoteContext`, `FileSystemStorer`
+#' A Host
+#'
+#' Hosts allows you to remotely create, get, run methods of, and delete instances of various types.
+#' The types can be thought of a "services" provided by the host e.g. `RContext`, `FileSystemStorer`
 #'
 #' The API of a host is similar to that of a HTTP server. It's methods names
 #' (e.g. `post`, `get`) are similar to HTTP methods (e.g. `POST`, `GET`) but
 #' the sematics sometimes differ (e.g. a host's `put()` method is used to call an
 #' instance method)
 #'
-#' A `Host` is not limited to beng served by HTTP and it's methods are exposed by both `HostHttpServer`
-#' and `HostWebsocketServer`. Those other classes are responsible for tasks associated with
-#' their communication protocol (e.g. serialising and deserialising objects).
+#' A host's methods are exposed by `HostHttpServer` and `HostWebsocketServer`. 
+#' Those other classes are responsible for tasks associated with their communication 
+#' protocol (e.g. serialising and deserialising objects).
 #'
-#' This is a singleton class. There should only ever be one `Host`
-#' in memory in each process (although, for purposes of testing, this is not enforced)
+#' This is a singleton class. There should only ever be one `Host` in memory in each process 
+#' (although, for purposes of testing, this is not enforced)
 #'
-#' @rdname Host
-Host <- R6Class("Host",
+#' @format \code{R6Class}.
+#' @examples
+#' host$servers
+#' host$start()
+#' host$servers
+#' host$stop()
+Host <- R6::R6Class("Host",
   public = list(
 
+    #' @section new():
+    #'
+    #' Create a new \code{Host}
     initialize = function () {
       private$.servers <- list()
       private$.instances <- list()
     },
 
-    #' @section \code{options} method:
+    #' @section options():
     #'
     #' Get a manifest for this host
     #'
@@ -53,16 +57,15 @@ Host <- R6Class("Host",
       )
     },
 
-    #' @section \code{post} method:
+    #' @section post():
     #'
     #' Create a new instance of a type
     #'
     #' \describe{
     #'   \item{type}{Type of instance}
     #'   \item{options}{Options to be passed to type constructor}
+    #'   \item{return}{The ID string of the newly created instance}
     #' }
-    #'
-    #' Returns the ID string of the newly created instance
     post = function (type, options = list()) {
       Class <- TYPES[[type]]
       if (!is.null(Class)) {
@@ -75,15 +78,14 @@ Host <- R6Class("Host",
       }
     },
 
-    #' @section \code{get} method:
+    #' @section get():
     #'
     #' Get an instance
     #'
     #' \describe{
     #'   \item{id}{ID of instance}
+    #'   \item{return}{The instance}
     #' }
-    #'
-    #' Returns the instance
     get  = function (id) {
       instance <- private$.instances[[id]]
       if (!is.null(instance)) {
@@ -93,7 +95,7 @@ Host <- R6Class("Host",
       }
     },
 
-    #' @section \code{put} method:
+    #' @section put():
     #'
     #' Call a method of an instance
     #'
@@ -101,9 +103,8 @@ Host <- R6Class("Host",
     #'   \item{id}{ID of instance}
     #'   \item{method}{Name of instance method}
     #'   \item{args}{A list of of method arguments}
+    #'   \item{return}{The result of the method call}
     #' }
-    #'
-    #' Returns the result of the method call
     put  = function (id, method, args = NULL) {
       instance <- private$.instances[[id]]
       if (!is.null(instance)) {
@@ -118,7 +119,7 @@ Host <- R6Class("Host",
       }
     },
 
-    #' @section \code{delete} method:
+    #' @section delete():
     #'
     #' Delete an instance
     #'
@@ -134,7 +135,7 @@ Host <- R6Class("Host",
       }
     },
 
-    #' @section \code{start} method:
+    #' @section start():
     #'
     #' Start serving this host
     #'
@@ -149,7 +150,7 @@ Host <- R6Class("Host",
       invisible(self)
     },
 
-    #' @section \code{stop} method:
+    #' @section stop():
     #'
     #' Stop serving this host. Stops all servers that are currently serving this host
     stop  = function () {
@@ -161,7 +162,7 @@ Host <- R6Class("Host",
       invisible(self)
     },
 
-    #' @section \code{view} method:
+    #' @section view():
     #'
     #' View this host in the browser. Opens the default browser at the URL of this host
     view  = function (external=FALSE) {
@@ -186,7 +187,7 @@ Host <- R6Class("Host",
   ),
 
   active = list(
-    #' @section \code{servers} method:
+    #' @section servers:
     #'
     #' Get a list of server names for this host. Servers are identified by the protocol shorthand
     #' e.g. `http` for `HostHttpServer`
@@ -200,3 +201,8 @@ Host <- R6Class("Host",
     .instances = NULL
   )
 )
+
+#' The singleton instance of the \code{Host} class
+#' @rdname host-instance.Rd
+#' @export
+host <- NULL

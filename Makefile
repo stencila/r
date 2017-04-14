@@ -2,6 +2,7 @@ all: setup build
 
 setup:
 	Rscript -e 'install.packages(c("devtools","roxygen2","testthat","covr"),repo="http://cloud.r-project.org/")'
+	Rscript -e 'devtools::install_github("hadley/pkgdown")'
 
 build:
 	Rscript -e 'devtools::document()'
@@ -11,7 +12,8 @@ install:
 	Rscript -e 'devtools::install()'
 
 docs:
-	Rscript -e 'packagedocs::build_vignettes()'
+	Rscript -e 'devtools::document(); pkgdown::build_site()'
+.PHONY: docs
 
 # The tryCatch here is simply to catch teh `ignoring SIGPIPE signal` that occurs (on Ubuntu Linux at least)
 run:
