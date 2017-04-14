@@ -4,14 +4,20 @@
 \name{RContext}
 \alias{RContext}
 \title{A R context}
-\format{An object of class \code{R6ClassGenerator} of length 24.}
+\format{\code{R6Class}.}
 \usage{
 RContext
 }
 \description{
-Implements the Stencila `Context` API.
+An execution context for R code
 }
-\section{\code{new} method}{
+\details{
+In Stencila, a "context" is the thing that executes code for a particular programming language.
+This is the context for R.
+It implements the \code{Context} API so that it can talk to other parts of the platform,
+including contexts for other languages, Documents, and Sheets.
+}
+\section{new()}{
 
 
 Create a new \code{RContext}
@@ -22,10 +28,10 @@ Create a new \code{RContext}
 }
 }
 
-\section{\code{runCode} method}{
+\section{runCode()}{
 
 
-Run R code within the context's scope (i.e. execute a code "chunk")
+Run R code within the context's scope
 
 \describe{
   \item{code}{R code to be executed}
@@ -33,10 +39,10 @@ Run R code within the context's scope (i.e. execute a code "chunk")
 }
 }
 
-\section{\code{callCode} method}{
+\section{callCode()}{
 
 
-Run R code within the context's global scope (i.e. execute a code "chunk")
+Run R code within a local function scope
 
 \describe{
   \item{code}{R code to be executed}
@@ -44,7 +50,7 @@ Run R code within the context's global scope (i.e. execute a code "chunk")
 }
 }
 
-\section{\code{codeDependencies} method}{
+\section{codeDependencies()}{
 
 
 Returns an array of all variable names not declared within
@@ -56,4 +62,12 @@ within the piece of code.
 }
 }
 
+\examples{
+context <- RContext$new()
+context$runCode('my_var <- 42')
+context$runCode('my_var')
+context$callCode('my_var / 7')
+context$callCode('x * 2', list(x=pack(2)))
+context$callCode('plot(1,1)')
+}
 \keyword{datasets}

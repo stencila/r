@@ -6,5 +6,6 @@
 ^\.sandbox$
 ^Makefile$
 ^LICENSE$
+^CONDUCT.md$
 ^stencila_.+\.tar\.gz$
-^_gh-pages$
+^docs$

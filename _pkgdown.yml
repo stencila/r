@@ -12,3 +12,13 @@ navbar:
   right:
     - icon: fa-github
       href: https://github.com/stencila/r
+
+reference:
+  - title: Classes
+    contents:
+      - RContext
+      - Host
+      - HostHttpServer
+  - title: Functions
+    contents:
+      - type

@@ -1,14 +1,25 @@
 #' A R context
 #'
-#' Implements the Stencila `Context` API.
+#' An execution context for R code
 #'
-#' @importFrom R6 R6Class
-#' @name RContext
+#' In Stencila, a "context" is the thing that executes code for a particular programming language.
+#' This is the context for R.
+#' It implements the \code{Context} API so that it can talk to other parts of the platform,
+#' including contexts for other languages, Documents, and Sheets.
+#'
+#' @format \code{R6Class}.
+#' @examples
+#' context <- RContext$new()
+#' context$runCode('my_var <- 42')
+#' context$runCode('my_var')
+#' context$callCode('my_var / 7')
+#' context$callCode('x * 2', list(x=pack(2)))
+#' context$callCode('plot(1,1)')
 #' @export
-RContext <- R6Class('RContext',
+RContext <- R6::R6Class('RContext',
   public = list(
 
-    #' @section \code{new} method:
+    #' @section new():
     #'
     #' Create a new \code{RContext}
     #'
@@ -17,18 +28,29 @@ RContext <- R6Class('RContext',
     #'   \item{closed}{Context is not nested within the global environment. Default \code{FALSE}}
     #' }
     initialize = function (global=FALSE, closed=FALSE) {
+      # Create a global environment for the context (utilised by `runCode()`)
       if (global) env <- globalenv() # Can pollute global env
       else {
         # Can't pollute global env...
         if (closed) env <- new.env(parent=baseenv()) # and can't access it
         else env <- new.env(parent=globalenv()) # but can access it
       }
-      private$scope <- env
+      private$.global_env <- env
+      # Create a function environment for the context (utilised by `callCode()`)
+      # Note that this intentionally does not have access to context's global namespace
+      # Ensures no leakage between runCode and callCode (either way)
+      env <- new.env(parent=baseenv())
+      # Create nested environments to make necessary namespaces accesible
+      for (package in c('utils', 'grDevices', 'graphics', 'stats')) {
+        namespace <- getNamespace(package)
+        for(name in ls(namespace)) assign(name, namespace[[name]], envir=env)
+      }
+      private$.func_env <- env
     },
 
-    #' @section \code{runCode} method:
+    #' @section runCode():
     #'
-    #' Run R code within the context's scope (i.e. execute a code "chunk")
+    #' Run R code within the context's scope
     #'
     #' \describe{
     #'   \item{code}{R code to be executed}
@@ -36,13 +58,13 @@ RContext <- R6Class('RContext',
     #' }
     runCode = function(code, options = list()) {
         # Do eval and process into a result
-        evaluation <- evaluate(code, envir=private$scope, output_handler=evaluate_output_handler)
-        private$result(evaluation)
+        evaluation <- evaluate(code, envir=private$.global_env, output_handler=evaluate_output_handler)
+        private$.result(evaluation)
     },
 
-    #' @section \code{callCode} method:
+    #' @section callCode():
     #'
-    #' Run R code within the context's global scope (i.e. execute a code "chunk")
+    #' Run R code within a local function scope
     #'
     #' \describe{
     #'   \item{code}{R code to be executed}
@@ -50,30 +72,30 @@ RContext <- R6Class('RContext',
     #' }
     callCode = function(code, args = NULL) {
       # Create a local enviroment for execution
-      local <- new.env(parent=baseenv())
+      local <- new.env(parent=private$.func_env)
       for (arg in names(args)) local[[arg]] <- unpack(args[[arg]])
 
       # Overide the return function so that we capture the first returned
-      # value and stop exeution (the `stop_on_error` below)
-      returned <- NULL
+      # value and stop execution (the `stop_on_error` below)
+      value_returned <- NULL
       has_returned <- FALSE
       local[['return']] <- function (value) {
-        returned <<- value
+        value_returned <<- value
         has_returned <<- TRUE
         stop('Returned')
       }
 
       # Do eval and process into a result
       evaluation <- evaluate(code, envir=local, stop_on_error=1L, output_handler=evaluate_output_handler)
-      result <- private$result(evaluation)
+      result <- private$.result(evaluation)
 
       # If returned a value, use that as output
-      if (has_returned) result$output <- pack(returned)
+      if (has_returned) result$output <- pack(value_returned)
 
       result
     },
 
-    #' @section \code{codeDependencies} method:
+    #' @section codeDependencies():
     #'
     #' Returns an array of all variable names not declared within
     #' the piece of code. This might include global functions and variables used
@@ -97,13 +119,16 @@ RContext <- R6Class('RContext',
   ),
 
   private = list(
-    # Context's scope
-    scope = NULL,
+    # Context's global scope
+    .global_env = NULL,
+
+    # Context's function scope
+    .func_env = NULL,
 
     # Extract errors and the last value from an `evaluate` result
     # Note that not all source items will have a value (e.g. an emptyline)
     # Also, sometimes lines are sometimes groupd together so we need to count lines
-    result = function (evaluation) {
+    .result = function (evaluation) {
       line <- 0
       errors <- list()
       last_value <- NULL

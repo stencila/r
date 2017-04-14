@@ -1,13 +1,14 @@
-#' A HTTP server for a `Host`
+#' A HTTP server for a Host
 #'
 #' Normally there is no need to create a new \code{HostHttpServer}, instead
-#' use the \code{start} method of the \code{host} nstance.
+#' use the \code{start} method of the \code{host} instance.
 #'
-#' @name HttpServer
-HostHttpServer <- R6Class("HttpServer",
+#' @format \code{R6Class}.
+HostHttpServer <- R6Class("HostHttpServer",
   public = list(
 
-    #' @section \code{initialize} method:
+    #' @section new():
+    #'
     #' \describe{
     #'   \item{host}{The host to be served}
     #'   \item{port}{The port to listen on}
@@ -19,7 +20,9 @@ HostHttpServer <- R6Class("HttpServer",
       private$.server <- NULL
     },
 
-    #' @section \code{start} method:
+    #' @section start():
+    #'
+    #' Create a new \code{HostHttpServer}
     #'
     #' Start the server
     start = function() {
@@ -43,7 +46,7 @@ HostHttpServer <- R6Class("HttpServer",
       }
     },
 
-    #' @section \code{stop} method:
+    #' @section stop():
     #'
     #' Stop the server
     stop = function() {
@@ -53,7 +56,7 @@ HostHttpServer <- R6Class("HttpServer",
       }
     },
 
-    #' @section \code{handle} method:
+    #' @section handle():
     #'
     #' Handle a HTTP request
     handle = function(env) {
@@ -97,7 +100,7 @@ HostHttpServer <- R6Class("HttpServer",
       }
     },
 
-    #' @section \code{route} method:
+    #' @section route():
     #'
     #' Route a HTTP request
     route = function(verb, path) {
@@ -120,7 +123,7 @@ HostHttpServer <- R6Class("HttpServer",
       return(NULL)
     },
 
-    #' @section \code{options} method:
+    #' @section options():
     #'
     #' Handle OPTIONS request
     #' Necessary for preflighted CORS requests (https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS#Preflighted_requests)
@@ -128,7 +131,7 @@ HostHttpServer <- R6Class("HttpServer",
       list(body = '', status = 200, headers = list())
     },
 
-    #' @section \code{home} method:
+    #' @section home():
     #'
     #' Handle a request to `home`
     home = function(request) {
@@ -143,7 +146,7 @@ HostHttpServer <- R6Class("HttpServer",
       }
     },
 
-    #' @section \code{home} method:
+    #' @section static():
     #'
     #' Handle a request for a static file
     static = function(request, path) {
@@ -168,6 +171,9 @@ HostHttpServer <- R6Class("HttpServer",
       }
     },
 
+    #' @section post():
+    #'
+    #' Handle a POST request
     post = function(request, type) {
       list(
         body = to_json(private$.host$post(type)),
@@ -176,6 +182,9 @@ HostHttpServer <- R6Class("HttpServer",
       )
     },
 
+    #' @section post():
+    #'
+    #' Handle a GET request
     get = function(request, id) {
       list(
         body = to_json(private$.host$get(id)),
@@ -184,6 +193,9 @@ HostHttpServer <- R6Class("HttpServer",
       )
     },
 
+    #' @section put():
+    #'
+    #' Handle a PUT request
     put = function(request, id, method) {
         if (!is.null(request$body) && nchar(request$body) > 0) {
           args <- fromJSON(request$body, simplifyDataFrame=FALSE)
@@ -199,7 +211,12 @@ HostHttpServer <- R6Class("HttpServer",
         )
     },
 
-    delete = function(){},
+    #' @section delete()
+    #'
+    #' Handle a DELETE request
+    delete = function(){
+      stop('Not yet implemeted')
+    },
 
     error403 = function(request, what='') {
       list(body = paste0('Unauthorized ', what), status = 403, headers = list('Content-Type' = 'text/html'))
@@ -217,6 +234,9 @@ HostHttpServer <- R6Class("HttpServer",
 
   active = list(
 
+    #' @section url
+    #'
+    #' The URL of the server, or \code{NULL} if not yet started
     url = function() {
       if (is.null(private$.server)) NULL
       else paste0('http://', private$.address, ':', private$.port)
