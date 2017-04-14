@@ -261,7 +261,7 @@ accepts_json <- function(request) {
 to_json <- function(value) {
   # jsonlite converts empty R lists to empty JSON arrays, override that
   if (is.list(value) & length(value)==0) '{}'
-  else toString(jsonlite::toJSON(value, auto_unbox=TRUE, null='null'))
+  else toString(toJSON(value, auto_unbox=TRUE, null='null'))
 }
 # Create a hook for conversion of R6 instances to JSON
 methods::setClass('R6')

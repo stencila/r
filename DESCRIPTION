@@ -16,7 +16,6 @@ Imports:
     mime,
     methods,
     R6,
-    readr,
     stringr,
     tools
 Suggests:

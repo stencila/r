@@ -117,9 +117,9 @@ unpack <- function(package) {
     obj
   } else if (type == 'tab') {
     if (format == 'csv') {
-      read_csv(content)
+      read.csv(text=content, as.is=T)
     } else if (format == 'tsv') {
-      read_tsv(content)
+      read.csv(text=content, sep='\t', as.is=T)
     } else {
       stop(paste0('Unable to unpack\n  type: ', type, '\n  format: ', format))
     }
