@@ -64,10 +64,20 @@ within the piece of code.
 
 \examples{
 context <- RContext$new()
+
+# Assign a variable within the context
 context$runCode('my_var <- 42')
+
+# Get the variable as an output value
 context$runCode('my_var')
-context$callCode('my_var / 7')
-context$callCode('x * 2', list(x=pack(2)))
-context$callCode('plot(1,1)')
+
+# The variable is NOT available in `callCode`
+context$callCode('my_var')$errors[[1]]$message
+
+# Intead, you can pass input values
+context$callCode('x * y', list(x=pack(6), y=pack(7)))
+
+# Returned output value can include plots
+context$callCode('plot(1,1)')$output
 }
 \keyword{datasets}
