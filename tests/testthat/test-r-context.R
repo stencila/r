@@ -13,10 +13,18 @@ describe('RContext', {
 
     expect_equal(s$runCode('y <- 3.14\ny')$output, pack(3.14))
 
-    expect_equal(s$runCode('foo')$errors, list("1"="object 'foo' not found"))
+    expect_equal(s$runCode('foo')$errors, list(list(
+      line = 1,
+      column = 0,
+      message = "object 'foo' not found"
+    )))
 
     r <- s$runCode('x*2\nfoo\nx')
-    expect_equal(r$errors, list("2"="object 'foo' not found"))
+    expect_equal(r$errors, list(list(
+      line = 2,
+      column = 0,
+      message = "object 'foo' not found"
+    )))
     expect_equal(r$output, pack(42))
 
     r <- s$runCode('plot(1,1)')
@@ -40,7 +48,7 @@ describe('RContext', {
 
     # Scope is local...
     expect_equal(s$callCode('x <- 42')$output, NULL)
-    expect_equal(s$callCode('x')$errors$`1`, "object 'x' not found")
+    expect_equal(s$callCode('x')$errors[[1]]$message, "object 'x' not found")
 
     # Last value is returned as per usual
     expect_equal(s$callCode('foo <- "bar"\nfoo'), list(errors=NULL, output=pack('bar')))
@@ -61,10 +69,10 @@ describe('RContext', {
     expect_equal(unpack(s$callCode(func,list(x=pack(3)))$output), "x is ?")
 
     # Reports errors as expected
-    expect_equal(s$callCode('x')$errors$`1`, "object 'x' not found")
-    expect_equal(s$callCode('\nx\n')$errors$`2`, "object 'x' not found")
-    expect_equal(s$callCode('1\nx')$errors$`2`, "object 'x' not found")
-    expect_equal(s$callCode('\n\nx')$errors$`3`, "object 'x' not found")
+    expect_equal(s$callCode('x')$errors[[1]]$line, 1)
+    expect_equal(s$callCode('\nx\n')$errors[[1]]$line, 2)
+    expect_equal(s$callCode('1\nx')$errors[[1]]$line, 2)
+    expect_equal(s$callCode('\n\nx')$errors[[1]]$line, 3)
   })
 
   it("has an a codeDependencies method", {
