@@ -78,12 +78,12 @@ RContext <- R6::R6Class('RContext',
     #'
     #' \describe{
     #'   \item{code}{R code to be executed}
-    #'   \item{args}{A list with a data pack for each argument}
+    #'   \item{inputs}{A list with a data pack for each input}
     #' }
-    callCode = function(code, args = NULL) {
+    callCode = function(code, inputs = NULL) {
       # Create a local enviroment for execution
       local <- new.env(parent=private$.func_env)
-      for (arg in names(args)) local[[arg]] <- unpack(args[[arg]])
+      for (input in names(inputs)) local[[input]] <- unpack(inputs[[input]])
 
       # Overide the return function so that we capture the first returned
       # value and stop execution (the `stop_on_error` below)
@@ -164,6 +164,12 @@ RContext <- R6::R6Class('RContext',
       list(errors=errors, output=output)
     }
   )
+)
+
+RContext$spec = list(
+  name = 'RContext',
+  base = 'Context',
+  aliases = c('r', 'R')
 )
 
 # Custom output handler for the `run` and `call` methods

@@ -16,6 +16,8 @@ test_that("HostHttpServer$stop+start", {
 test_that("HostHttpServer.route", {
   s = HostHttpServer$new(NULL)
 
+  expect_equal(s$route('OPTIONS', NULL), list(s$options))
+
   expect_equal(s$route('GET', '/'), list(s$home))
 
   expect_equal(s$route('GET', '/static/some/file.js'), list(s$static, 'some/file.js'))

@@ -46,7 +46,7 @@ Run R code within a local function scope
 
 \describe{
   \item{code}{R code to be executed}
-  \item{args}{A list with a data pack for each argument}
+  \item{inputs}{A list with a data pack for each input}
 }
 }
 

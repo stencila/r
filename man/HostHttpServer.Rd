@@ -24,8 +24,6 @@ use the \code{start} method of the \code{host} instance.
 \section{start()}{
 
 
-Create a new \code{HostHttpServer}
-
 Start the server
 }
 
