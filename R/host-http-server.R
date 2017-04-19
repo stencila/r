@@ -22,8 +22,6 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
 
     #' @section start():
     #'
-    #' Create a new \code{HostHttpServer}
-    #'
     #' Start the server
     start = function() {
       if (is.null(private$.server)) {
@@ -89,13 +87,10 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
       if (inherits(response, 'error')) {
         self$error500(request, response)
       } else {
-        # CORS headers added to all requests to allow direct access by browsers
+        # CORS access header added to all requests
         # See https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS
         response$headers <- c(response$headers, list(
-          'Access-Control-Allow-Origin' = '*',
-          'Access-Control-Allow-Methods' = 'GET,POST,PUT,DELETE,OPTIONS',
-          'Access-Control-Allow-Headers' = 'Content-Type',
-          'Access-Control-Max-Age' = '1728000'
+          'Access-Control-Allow-Origin' = '*'
         ))
         response
       }
@@ -128,7 +123,11 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
     #'
     #' Handle OPTIONS request. Necessary for pre-flighted CORS requests.
     options = function(request) {
-      list(body = '', status = 200, headers = list())
+      list(body = '', status = 200, headers = list(
+        'Access-Control-Allow-Methods' = 'GET, POST, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers' = 'Content-Type',
+        'Access-Control-Max-Age' = '1728000'
+      ))
     },
 
     #' @section home():
@@ -176,7 +175,7 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
     #' Handle a POST request
     post = function(request, type) {
       list(
-        body = to_json(private$.host$post(type)),
+        body = to_json(private$.host$post(type, self$args(request)[['name']])),
         status = 200,
         headers = list('Content-Type'='application/json')
       )
@@ -197,15 +196,8 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
     #'
     #' Handle a PUT request
     put = function(request, id, method) {
-        if (!is.null(request$body) && nchar(request$body) > 0) {
-          args <- fromJSON(request$body, simplifyDataFrame=FALSE)
-          # Vectors need to converted into a list for `do.call` below
-          args <- as.list(args)
-        } else {
-          args <- list()
-        }
         list(
-          body = to_json(private$.host$put(id, method, args)),
+          body = to_json(private$.host$put(id, method, self$args(request))),
           status = 200,
           headers = list('Content-Type'='application/json')
         )
@@ -216,6 +208,15 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
     #' Handle a DELETE request
     delete = function(request, id) {
       stop('Not yet implemeted')
+    },
+
+    args = function(request) {
+      if (!is.null(request$body) && nchar(request$body) > 0) {
+        # Vectors need to converted into a list for `do.call` below
+        as.list(fromJSON(request$body, simplifyDataFrame=FALSE))
+      } else {
+        list()
+      }
     },
 
     error403 = function(request, what='') {
@@ -251,7 +252,8 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
     .server = NULL
   )
 )
-# Does request accept JSON
+
+# Does request accept JSON?
 accepts_json <- function(request) {
   accept <- request$headers[['Accept']]
   if (is.null(accept)) FALSE
@@ -274,4 +276,3 @@ methods::setMethod('asJSON', 'R6', function(x, ...) {
   }
   to_json(members)
 })
-

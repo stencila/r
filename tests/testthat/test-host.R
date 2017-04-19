@@ -11,7 +11,7 @@ describe("Host", {
     expect_equal(manifest$stencila$version, version)
     expect_equal(length(manifest$urls), 0)
     expect_equal(length(manifest$instances), 0)
-    expect_true(length(manifest$types) > 0)
+    expect_true(length(manifest$schemes) > 0)
   })
 
   it('has a post() method', {
@@ -25,7 +25,7 @@ describe("Host", {
   it('has a get() method', {
     id <- h$post('RContext')
     expect_true(inherits(h$get(id), 'RContext'))
-    
+
     expect_error(h$get('foo'), 'Unknown instance')
   })
 

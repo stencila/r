@@ -14,11 +14,11 @@ TYPES <- list(
 #' the sematics sometimes differ (e.g. a host's `put()` method is used to call an
 #' instance method)
 #'
-#' A host's methods are exposed by `HostHttpServer` and `HostWebsocketServer`. 
-#' Those other classes are responsible for tasks associated with their communication 
+#' A host's methods are exposed by `HostHttpServer` and `HostWebsocketServer`.
+#' Those other classes are responsible for tasks associated with their communication
 #' protocol (e.g. serialising and deserialising objects).
 #'
-#' This is a singleton class. There should only ever be one `Host` in memory in each process 
+#' This is a singleton class. There should only ever be one `Host` in memory in each process
 #' (although, for purposes of testing, this is not enforced)
 #'
 #' @format \code{R6Class}.
@@ -52,7 +52,11 @@ Host <- R6::R6Class("Host",
           version = version
         ),
         urls = sapply(private$.servers, function (server) server$url),
-        types = names(TYPES),
+        schemes = list(
+          new = list(
+            RContext = RContext$spec
+          )
+        ),
         instances = names(private$.instances)
       )
     },
@@ -62,17 +66,21 @@ Host <- R6::R6Class("Host",
     #' Create a new instance of a type
     #'
     #' \describe{
-    #'   \item{type}{Type of instance}
+    #'   \item{type}{Type of new instance}
+    #'   \item{name}{Name of new instance}
     #'   \item{options}{Options to be passed to type constructor}
-    #'   \item{return}{The ID string of the newly created instance}
+    #'   \item{return}{Address of the newly created instance}
     #' }
-    post = function (type, options = list()) {
+    post = function (type, name = NULL, options = list()) {
       Class <- TYPES[[type]]
       if (!is.null(Class)) {
         instance <- Class$new()
-        id <- paste(sample(c(letters,0:9), 10),collapse='')
-        private$.instances[[id]] <- instance
-        id
+        if (is.null(name)) {
+          name <- paste(sample(c(letters, 0:9), 10), collapse='')
+        }
+        address <- paste0('name://', name)
+        private$.instances[[address]] <- instance
+        address
       } else {
         stop(paste('Unknown type:', type))
       }
