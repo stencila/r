@@ -85,15 +85,14 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
         error = identity
       )
       if (inherits(response, 'error')) {
-        self$error500(request, response)
-      } else {
-        # CORS access header added to all requests
-        # See https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS
-        response$headers <- c(response$headers, list(
-          'Access-Control-Allow-Origin' = '*'
-        ))
-        response
+        response <- self$error500(request, response)
       }
+      # CORS access header added to all requests
+      # See https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS
+      response$headers <- c(response$headers, list(
+        'Access-Control-Allow-Origin' = '*'
+      ))
+      response
     },
 
     #' @section route():
