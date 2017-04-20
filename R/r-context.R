@@ -139,6 +139,7 @@ RContext <- R6::R6Class('RContext',
     # Note that not all source items will have a value (e.g. an emptyline)
     # Also, sometimes lines are sometimes groupd together so we need to count lines
     .result = function (evaluation) {
+
       line <- 0
       errors <- list()
       has_value <- FALSE
@@ -158,8 +159,23 @@ RContext <- R6::R6Class('RContext',
         }
       }
 
+      if (has_value) {
+        # Errors can occur in conversion of values e.g. ggplots
+        # so they must be caught here
+        output <- tryCatch(pack(last_value), error=identity)
+        if (inherits(output, 'error')) {
+          errors[[length(errors)+1]] <- list(
+            line = 0,
+            column = 0,
+            message = output$message
+          )
+          output <- NULL
+        }
+      } else {
+        output <- NULL
+      }
+
       if (length(errors) == 0) errors <- NULL
-      output <- if (has_value) pack(last_value) else NULL
 
       list(errors=errors, output=output)
     }

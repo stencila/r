@@ -37,6 +37,16 @@ describe('RContext', {
       expect_equal(r$output$type, 'plot')
       expect_equal(r$output$format, 'png')
       expect_equal(str_sub(r$output$content, 1, 10), 'iVBORw0KGg')
+
+      # An error in the rendering of the ggplot (in this case missing aesthtics)
+      # which wil thow in the packing of the ggplot value
+      r <- s$runCode('library(ggplot2); ggplot(diamonds) + geom_point()')
+      expect_equal(r$errors, list(list(
+        line = 0,
+        column = 0,
+        message = 'geom_point requires the following missing aesthetics: x, y'
+      )))
+      expect_equal(r$output, NULL)
     }
   })
 
