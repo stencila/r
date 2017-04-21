@@ -1,11 +1,14 @@
 describe('RContext', {
-  s <- RContext$new()
 
   it("can be constructed", {
+    s <- RContext$new()
+
     expect_equal(class(s)[1], "RContext")
   })
 
   it("has an runCode method", {
+    s <- RContext$new()
+
     expect_equal(s$runCode(''), list(errors=NULL, output=NULL))
 
     expect_equal(s$runCode('x <- 42')$output, NULL)
@@ -51,6 +54,8 @@ describe('RContext', {
   })
 
   it("has an a callCode method", {
+    s <- RContext$new()
+
     expect_equal(s$callCode(''), list(errors=NULL, output=NULL))
 
     # Takes arguments
@@ -86,6 +91,8 @@ describe('RContext', {
   })
 
   it("has an a codeDependencies method", {
+    s <- RContext$new()
+
     expect_equal(s$codeDependencies('x'), 'x')
     expect_equal(s$codeDependencies('x+y/z+foo()'), c('x','y','z','foo'))
     expect_equal(s$codeDependencies('x<-1\nx+y/z+foo()'), c('x','y','z','foo'))
