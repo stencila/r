@@ -88,6 +88,13 @@ describe('RContext', {
     expect_equal(s$callCode('\nx\n')$errors[[1]]$line, 2)
     expect_equal(s$callCode('1\nx')$errors[[1]]$line, 2)
     expect_equal(s$callCode('\n\nx')$errors[[1]]$line, 3)
+
+    # Can call code isolated from context's gloal env, or not
+    s$runCode('var1 <- 123')
+    expect_equal(unpack(s$callCode('var1')$output), 123)
+    result <- s$callCode('var1', isolated=TRUE)
+    expect_equal(result$output, NULL)
+    expect_equal(result$errors[[1]]$message, "object 'var1' not found")
   })
 
   it("has an a codeDependencies method", {

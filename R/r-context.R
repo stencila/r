@@ -79,10 +79,12 @@ RContext <- R6::R6Class('RContext',
     #' \describe{
     #'   \item{code}{R code to be executed}
     #'   \item{inputs}{A list with a data pack for each input}
+    #'   \item{isolated}{Is the call isolated from the context's global environment}
     #' }
-    callCode = function(code, inputs = NULL) {
+    callCode = function(code, inputs = NULL, isolated = FALSE) {
       # Create a local enviroment for execution
-      local <- new.env(parent=private$.func_env)
+      parent <- if (isolated) private$.func_env  else private$.global_env
+      local <- new.env(parent=parent)
       for (input in names(inputs)) local[[input]] <- unpack(inputs[[input]])
 
       # Overide the return function so that we capture the first returned
