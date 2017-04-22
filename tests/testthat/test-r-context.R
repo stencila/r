@@ -69,7 +69,9 @@ describe('RContext', {
     expect_equal(s$callCode('foo <- "bar"\nfoo'), list(errors=NULL, output=pack('bar')))
 
     # return() function can also be used - outputs the first returned value
-    expect_equal(s$callCode('return(2)\nreturn("not this")')$output$content, '2')
+    result <- s$callCode('return(2)\nreturn("not this")')
+    expect_equal(result$errors, NULL)
+    expect_equal(result$output$content, '2')
 
     # Works multiline
     func <- 'if(x==1){

@@ -94,7 +94,7 @@ RContext <- R6::R6Class('RContext',
       local[['return']] <- function (value) {
         value_returned <<- value
         has_returned <<- TRUE
-        stop('Returned')
+        stop('~return~')
       }
 
       # Do eval and process into a result
@@ -150,11 +150,13 @@ RContext <- R6::R6Class('RContext',
         if (inherits(item, 'source')) {
           line <- line + max(1, str_count(item, '\n'))
         } else if (inherits(item, 'error')) {
-          errors[[length(errors)+1]] <- list(
-            line = line,
-            column = 0,
-            message = item$message
-          )
+          if(item$message != '~return~') {
+            errors[[length(errors)+1]] <- list(
+              line = line,
+              column = 0,
+              message = item$message
+            )
+          }
         } else {
           last_value <- item
           has_value <- TRUE
