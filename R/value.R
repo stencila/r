@@ -23,6 +23,8 @@ type <- function(value) {
   } else if (inherits(value, 'data.frame') || inherits(value, 'matrix')) {
     'table'
   } else if (inherits(value, 'recordedplot') || inherits(value, 'ggplot')) {
+    # Use the special 'plot' type to identify plot values that need
+    # to be converted to the standard 'image' type during `pack()`
     'plot'
   } else if (is.list(value)) {
     type <- value$type
@@ -66,6 +68,7 @@ pack <- function(value) {
       })
     ), auto_unbox = TRUE))
   } else if (type_ == 'plot') {
+    type_ <- 'image'
     format <- 'png'
     path <- tempfile(fileext=paste0('.', format))
     png(path)
