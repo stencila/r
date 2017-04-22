@@ -31,13 +31,13 @@ describe('RContext', {
     expect_equal(r$output, pack(42))
 
     r <- s$runCode('plot(1,1)')
-    expect_equal(r$output$type, 'plot')
+    expect_equal(r$output$type, 'image')
     expect_equal(r$output$format, 'png')
     expect_equal(str_sub(r$output$content, 1, 10), 'iVBORw0KGg')
 
     if (require('ggplot2', quietly=T)) {
       r <- s$runCode('library(ggplot2); ggplot(diamonds) + geom_point(aes(x=carat, y=price))')
-      expect_equal(r$output$type, 'plot')
+      expect_equal(r$output$type, 'image')
       expect_equal(r$output$format, 'png')
       expect_equal(str_sub(r$output$content, 1, 10), 'iVBORw0KGg')
 
