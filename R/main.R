@@ -17,8 +17,9 @@
 #' @importFrom utils capture.output read.csv write.csv
 NULL
 
-# Get the version
+# Set the package version string
 version <- tryCatch(toString(packageVersion("stencila")), error = '0.0.0')
+
 
 # Hooks for namespace events
 # See https://stat.ethz.ch/R-manual/R-devel/library/base/html/ns-hooks.html
@@ -28,4 +29,14 @@ version <- tryCatch(toString(packageVersion("stencila")), error = '0.0.0')
   # This appears to be better than instantiating 'globally'
   # which causes issues with bindings
   host <<- Host$new()
+}
+
+
+#' Start serving the Stencila host and wait for connections
+#'
+#' @seealso \code{Host}
+#' @export
+run <- function () {
+  host$start()
+  Sys.sleep(1e6)
 }
