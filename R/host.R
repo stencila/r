@@ -51,7 +51,7 @@ Host <- R6::R6Class("Host",
           package = 'r',
           version = version
         ),
-        urls = sapply(private$.servers, function (server) server$url),
+        urls = self$urls,
         schemes = list(
           new = list(
             RContext = RContext$spec
@@ -154,6 +154,7 @@ Host <- R6::R6Class("Host",
         server <- HostHttpServer$new(self)
         private$.servers[['http']] <- server
         server$start()
+        cat('Host is served at:', paste(self$urls, collapse=', '), '\n')
       }
       invisible(self)
     },
@@ -201,6 +202,13 @@ Host <- R6::R6Class("Host",
     #' e.g. `http` for `HostHttpServer`
     servers = function () {
       names(private$.servers)
+    },
+
+    #' @section urls:
+    #'
+    #' Get a list of URLs for this host
+    urls = function () {
+      sapply(private$.servers, function (server) server$url)
     }
   ),
 

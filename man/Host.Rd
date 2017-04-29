@@ -116,6 +116,12 @@ Get a list of server names for this host. Servers are identified by the protocol
 e.g. `http` for `HostHttpServer`
 }
 
+\section{urls}{
+
+
+Get a list of URLs for this host
+}
+
 \examples{
 host$servers
 host$start()
