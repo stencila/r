@@ -4,7 +4,7 @@
 \name{host}
 \alias{host}
 \title{The singleton instance of the \code{Host} class}
-\format{An object of class \code{Host} (inherits from \code{R6}) of length 12.}
+\format{An object of class \code{Host} (inherits from \code{R6}) of length 13.}
 \usage{
 host
 }

@@ -219,6 +219,6 @@ Host <- R6::R6Class("Host",
 )
 
 #' The singleton instance of the \code{Host} class
-#' @rdname host-instance.Rd
+#' @rdname host-instance
 #' @export
 host <- NULL
