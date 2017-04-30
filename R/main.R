@@ -31,12 +31,20 @@ version <- tryCatch(toString(packageVersion("stencila")), error = '0.0.0')
   host <<- Host$new()
 }
 
+#' Start serving the Stencila host
+#'
+#' Not exported because masks `stats::start`
+#' @seealso \code{Host}
+start <- function () {
+  host$start()
+}
 
-#' Start serving the Stencila host and wait for connections
+#' Start serving the Stencila host and wait for connections indefinitely
 #'
 #' @seealso \code{Host}
 #' @export
 run <- function () {
-  host$start()
+  start()
+  cat('Use Ctl+C to stop\n')
   Sys.sleep(1e6)
 }
