@@ -41,9 +41,11 @@ start <- function () {
 
 #' Stop serving the Stencila host
 #'
-#' Not exported to be consistent with \code{start()}
+#' Not called stop_ because confusingly masks `stats::stop`,
+#' including withing this package. Not exported to be consistent
+#' with `start()`
 #' @seealso \code{Host}
-stop <- function () {
+stop_ <- function () {
   host$start()
 }
 
