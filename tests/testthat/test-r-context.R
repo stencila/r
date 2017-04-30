@@ -35,22 +35,24 @@ describe('RContext', {
     expect_equal(r$output$format, 'png')
     expect_equal(str_sub(r$output$content, 1, 10), 'iVBORw0KGg')
 
-    if (require('ggplot2', quietly=T)) {
-      r <- s$runCode('library(ggplot2); ggplot(diamonds) + geom_point(aes(x=carat, y=price))')
-      expect_equal(r$output$type, 'image')
-      expect_equal(r$output$format, 'png')
-      expect_equal(str_sub(r$output$content, 1, 10), 'iVBORw0KGg')
+    # Load ggplot2 so that diamonds is available
+    s$runCode('library(ggplot2)')
 
-      # An error in the rendering of the ggplot (in this case missing aesthtics)
-      # which wil thow in the packing of the ggplot value
-      r <- s$runCode('library(ggplot2); ggplot(diamonds) + geom_point()')
-      expect_equal(r$errors, list(list(
-        line = 0,
-        column = 0,
-        message = 'geom_point requires the following missing aesthetics: x, y'
-      )))
-      expect_equal(r$output, NULL)
-    }
+    r <- s$runCode('ggplot(diamonds) + geom_point(aes(x=carat, y=price))')
+    expect_equal(r$output$type, 'image')
+    expect_equal(r$output$format, 'png')
+    expect_equal(str_sub(r$output$content, 1, 10), 'iVBORw0KGg')
+
+    # An error in the rendering of the ggplot (in this case missing aesthtics)
+    # which wil thow in the packing of the ggplot value
+    r <- s$runCode('ggplot(diamonds) + geom_point()')
+    expect_equal(r$errors, list(list(
+      line = 0,
+      column = 0,
+      message = 'geom_point requires the following missing aesthetics: x, y'
+    )))
+    expect_equal(r$output, NULL)
+
   })
 
   it("has an a callCode method", {
@@ -91,7 +93,7 @@ describe('RContext', {
     expect_equal(s$callCode('1\nx')$errors[[1]]$line, 2)
     expect_equal(s$callCode('\n\nx')$errors[[1]]$line, 3)
 
-    # Can call code isolated from context's gloal env, or not
+    # Can call code isolated from context's global env, or not
     s$runCode('var1 <- 123')
     expect_equal(unpack(s$callCode('var1')$output), 123)
     result <- s$callCode('var1', isolated=TRUE)

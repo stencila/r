@@ -33,28 +33,35 @@ RContext <- R6::R6Class('RContext',
     #'
     #' Create a new \code{RContext}
     #'
+    #' Currently the parameter \code{closed} defaults to \code{FALSE} so that you can use
+    #' \code{library(somepackage)} to make a package available in subsequent calls to
+    #' \code{runCode} or \code{callCode}. In the future, it would be good to have a better machanism for that.
+    #'
     #' \describe{
-    #'   \item{global}{Scope of context is the global environment. Default \code{FALSE}}
-    #'   \item{closed}{Context is not nested within the global environment. Default \code{FALSE}}
+    #'   \item{local}{Context can not assign to the global environment. Default \code{TRUE}}
+    #'   \item{closed}{Context can not read from the global environment. Default \code{FALSE}}
     #' }
-    initialize = function (global=FALSE, closed=FALSE) {
-      # Create a global environment for the context (utilised by `runCode()`)
-      if (global) env <- globalenv() # Can pollute global env
-      else {
-        # Can't pollute global env...
-        if (closed) env <- new.env(parent=baseenv()) # and can't access it
-        else env <- new.env(parent=globalenv()) # but can access it
+    initialize = function (local=TRUE, closed=FALSE) {
+      # Create a 'packages' environment that contains all the functions available to the context
+      if (closed) packages_env <- new.env(parent=baseenv())
+      else packages_env <- new.env(parent=globalenv())
+      # Assign names in package namespaces to the package environment
+      for (package in RContext$packages) {
+        namespace <- getNamespace(package)
+        for(name in ls(namespace)) {
+          assign(name, get(name, envir=namespace), envir=packages_env)
+        }
       }
+
+      # Create a global environment for the context (utilised by `runCode()`)
+      if (local) env <- new.env(parent=packages_env) # Can't pollute global env
+      else env <- globalenv() # Can pollute global env
       private$.global_env <- env
+
       # Create a function environment for the context (utilised by `callCode()`)
       # Note that this intentionally does not have access to context's global namespace
       # Ensures no leakage between runCode and callCode (either way)
-      env <- new.env(parent=baseenv())
-      # Create nested environments to make necessary namespaces accesible
-      for (package in c('utils', 'grDevices', 'graphics', 'stats')) {
-        namespace <- getNamespace(package)
-        for(name in ls(namespace)) assign(name, namespace[[name]], envir=env)
-      }
+      env <- new.env(parent=packages_env)
       private$.func_env <- env
     },
 
@@ -186,10 +193,21 @@ RContext <- R6::R6Class('RContext',
   )
 )
 
-RContext$spec = list(
+# Specification of an RContext (used in host manifest)
+RContext$spec <- list(
   name = 'RContext',
   base = 'Context',
   aliases = c('r', 'R')
+)
+
+# List of packages made available within a RContext
+RContext$packages <-  c(
+  # Usual base packages (type `search()` in a naked R session)
+  'methods', 'datasets', 'utils', 'grDevices', 'graphics', 'stats',
+  # Core tidyverse packages http://tidyverse.org/
+  'ggplot2', 'tibble', 'tidyr', 'readr', 'purrr', 'dplyr',
+  # Other useful tidyverse packages
+  'stringr'
 )
 
 # Custom output handler for the `run` and `call` methods

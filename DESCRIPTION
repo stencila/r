@@ -17,6 +17,7 @@ Imports:
     methods,
     R6,
     stringr,
+    tidyverse,
     tools
 Suggests:
     testthat,
