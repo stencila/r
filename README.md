@@ -5,11 +5,11 @@
 [![CRAN](http://www.r-pkg.org/badges/version/stencila)](https://cran.r-project.org/package=stencila)
 [![Chat](https://badges.gitter.im/stencila/stencila.svg)](https://gitter.im/stencila/stencila)
 
-This package let's you launch an execution context for R so you can run R code from within your Stencila Document or Sheet.
+> Run R code from within Stencila
 
 ### Install
 
-Right now this package isn't on CRAN, but you can install it from this repo using the [`devtools`](https://github.com/hadley/devtools) package,
+This package isn't on CRAN yet, but you can install it from this repository using the [`devtools`](https://github.com/hadley/devtools) package,
 
 ```r
 devtools::install_github("stencila/r")
@@ -17,14 +17,19 @@ devtools::install_github("stencila/r")
 
 ### Use
 
-```r
-# Load the library
-library(stencila)
+This package lets you run R code from inside Stencila Documents. First, you need to start serving the Stencila Host within this package. You can do that in your favourite R console (e.g. RStudio):
 
-# Start the Stencila R host so that it can respond to 
-# external requests to create and call execution contexts
-host$start()
+```r
+stencila:::start()
 ```
+
+Or at the system shell:
+
+```sh
+RScript -e 'stencila::run()'
+```
+
+Then, open your Stencila Document from within the [Stencila Desktop](https://github.com/stencila/desktop). The host will be automatically detected by the dektop app and you'll be able to execute R code cells from within your documents.
 
 More documentation is available at https://stencila.github.io/r
 
@@ -34,7 +39,7 @@ We love feedback. Create a [new issue](https://github.com/stencila/r/issues/new)
 
 ### Develop
 
-Want to help out with development? Great, there's a lot to do! To get started, read our contributor [code of conduct](CONDUCT.md), then [get in touch](https://gitter.im/stencila/stencila) or checkout the [platform-wide, cross-repository kanban board](https://github.com/orgs/stencila/projects/1).
+Want to help out with development? To get started, please read our contributor [code of conduct](CONDUCT.md), then [get in touch](https://gitter.im/stencila/stencila) or checkout the [platform-wide, cross-repository kanban board](https://github.com/orgs/stencila/projects/1).
 
 Most development tasks can be run using `make` or RStudio keyboard shortcuts.
 

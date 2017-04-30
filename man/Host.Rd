@@ -93,6 +93,11 @@ Delete an instance
 
 Start serving this host
 
+
+\describe{
+  \item{quiet}{Don't print out message. Default FALSE}
+}
+
 Currently, HTTP is the only server available
 for hosts. We plan to implement a `HostWebsocketServer` soon.
 }

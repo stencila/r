@@ -1,12 +1,12 @@
 Package: stencila
 Type: Package
 Title: Stencila for R
-Description: The office suite for reproducible research.
+Description: Create R execution contexts to use in Stencila, the office suite for reproducible research.
 Authors@R: c(person("Nokome", "Bentley", email = "nokome@stenci.la", role = c("aut", "cre")))
 URL: https://github.com/stencila/r#readme
 BugReports: https://github.com/stencila/r/issues
 License: Apache-2.0
-Version: 0.1.0
+Version: 0.26.0
 LazyData: TRUE
 Imports:
     base64enc,

@@ -22,9 +22,13 @@ including contexts for other languages, Documents, and Sheets.
 
 Create a new \code{RContext}
 
+Currently the parameter \code{closed} defaults to \code{FALSE} so that you can use
+\code{library(somepackage)} to make a package available in subsequent calls to
+\code{runCode} or \code{callCode}. In the future, it would be good to have a better machanism for that.
+
 \describe{
-  \item{global}{Scope of context is the global environment. Default \code{FALSE}}
-  \item{closed}{Context is not nested within the global environment. Default \code{FALSE}}
+  \item{local}{Context can not assign to the global environment. Default \code{TRUE}}
+  \item{closed}{Context can not read from the global environment. Default \code{FALSE}}
 }
 }
 
