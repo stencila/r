@@ -1,16 +1,24 @@
 test_that("HostHttpServer$stop+start", {
-  s = HostHttpServer$new(NULL)
+  s1 = HostHttpServer$new(NULL)
+  s2 = HostHttpServer$new(NULL)
 
-  expect_equal(s$url, NULL)
+  expect_equal(s1$url, NULL)
 
-  s$start()
-  expect_true(str_detect(s$url,'^http://127.0.0.1'))
+  s1$start()
+  expect_true(str_detect(s1$url, '^http://127.0.0.1'))
+
+  s2$start()
+  p1 <- as.integer(str_match(s1$url, '^http://127.0.0.1:(\\d+)')[1, 2])
+  p2 <- as.integer(str_match(s2$url, '^http://127.0.0.1:(\\d+)')[1, 2])
+  expect_equal(p2, p1+10)
+  s2$stop()
 
   # Unfortunately this timesout here. But will work from a separate R process.
   #r = GET(s$origin, timeout(10))
 
-  s$stop()
-  expect_equal(s$url, NULL)
+  s1$stop()
+  expect_equal(s1$url, NULL)
+
 })
 
 test_that("HostHttpServer.route", {
@@ -52,6 +60,17 @@ test_that("HostHttpServer.handle", {
   ))
   expect_equal(r$status, 200)
   expect_equal(str_sub(r$body, 1, 22), '{"stencila":{"package"')
+})
+
+test_that("HostHttpServer.options", {
+  s = HostHttpServer$new(host)
+
+  r = s$options(list(headers=list('Accept'='application/json')))
+  expect_equal(r$status, 200)
+  expect_equal(r$headers[['Access-Control-Allow-Methods']], 'GET, POST, PUT, DELETE, OPTIONS')
+  expect_equal(r$headers[['Access-Control-Allow-Headers']], 'Content-Type')
+  expect_equal(r$headers[['Access-Control-Max-Age']], '1728000')
+
 })
 
 test_that("HostHttpServer.home", {

@@ -34,7 +34,7 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
             if (result$message == 'Failed to create server') {
               private$.port <- private$.port + 10
             } else {
-              stop(result$message)
+              stop(result$message) # nocov
             }
           } else {
             private$.server <- result
