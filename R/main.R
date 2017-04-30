@@ -39,6 +39,14 @@ start <- function () {
   host$start()
 }
 
+#' Stop serving the Stencila host
+#'
+#' Not exported to be consistent with \code{start()}
+#' @seealso \code{Host}
+stop <- function () {
+  host$start()
+}
+
 #' Start serving the Stencila host and wait for connections indefinitely
 #'
 #' @seealso \code{Host}
