@@ -147,14 +147,19 @@ Host <- R6::R6Class("Host",
     #'
     #' Start serving this host
     #'
+    #'
+    #' \describe{
+    #'   \item{quiet}{Don't print out message. Default FALSE}
+    #' }
+    #'
     #' Currently, HTTP is the only server available
     #' for hosts. We plan to implement a `HostWebsocketServer` soon.
-    start  = function () {
+    start  = function (quiet=FALSE) {
       if (is.null(private$.servers[['http']])) {
         server <- HostHttpServer$new(self)
         private$.servers[['http']] <- server
         server$start()
-        cat('Host is served at:', paste(self$urls, collapse=', '), '\n')
+        if (!quiet) cat('Host is served at:', paste(self$urls, collapse=', '), '\n')
       }
       invisible(self)
     },

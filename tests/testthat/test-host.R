@@ -44,7 +44,7 @@ describe("Host", {
   })
 
   it('has a start() and stop() methods', {
-    h$start()
+    h$start(quiet=TRUE)
     expect_equal(h$servers, 'http')
     expect_equal(length(h$servers), 1)
     expect_equal(length(h$options()$urls), 1)
