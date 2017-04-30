@@ -27,7 +27,7 @@ Or at the system shell:
 RScript -e 'stencila::run()'
 ```
 
-Then, open your Stencila Document from within the [Stencila Desktop](https://github.com/stencila/desktop). The host will be automatically detected by the dektop app and you'll be able to execute R code cells from within your documents.
+Then, open your Stencila Document from within the [Stencila Desktop](https://github.com/stencila/desktop). The host will be automatically detected by the desktop app and you'll be able to execute R code cells from within your documents.
 
 More documentation is available at https://stencila.github.io/r
 
