@@ -29,9 +29,13 @@ This is a singleton class. There should only ever be one `Host` in memory in eac
 
 
 Create a new \code{Host}
+
+
+
+Get the environment of this \code{Host}
 }
 
-\section{options()}{
+\section{manifest()}{
 
 
 Get a manifest for this host

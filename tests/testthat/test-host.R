@@ -5,8 +5,8 @@ describe("Host", {
     expect_equal(class(h)[1], "Host")
   })
 
-  it('has an options method', {
-    manifest <- h$options()
+  it('has an manifest() method', {
+    manifest <- h$manifest()
     expect_equal(manifest$stencila$package, 'r')
     expect_equal(manifest$stencila$version, version)
     expect_equal(length(manifest$urls), 0)
@@ -47,9 +47,9 @@ describe("Host", {
     h$start(quiet=TRUE)
     expect_equal(h$servers, 'http')
     expect_equal(length(h$servers), 1)
-    expect_equal(length(h$options()$urls), 1)
+    expect_equal(length(h$manifest()$urls), 1)
     h$stop()
     expect_equal(length(h$servers), 0)
-    expect_equal(length(h$options()$urls), 0)
+    expect_equal(length(h$manifest()$urls), 0)
   })
 })

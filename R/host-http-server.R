@@ -137,7 +137,7 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
         self$static(request, 'index.html')
       } else {
         list(
-          body = to_json(private$.host$options()),
+          body = to_json(private$.host$manifest()),
           status = 200,
           headers = list('Content-Type'='application/json')
         )

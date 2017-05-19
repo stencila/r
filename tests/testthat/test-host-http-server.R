@@ -78,7 +78,7 @@ test_that("HostHttpServer.home", {
 
   r = s$home(list(headers=list('Accept'='application/json')))
   expect_equal(r$status, 200)
-  expect_equal(fromJSON(r$body), host$options())
+  expect_equal(fromJSON(r$body)$stencila, host$manifest()$stencila)
 
   r = s$home(list())
   expect_equal(r$status, 200)

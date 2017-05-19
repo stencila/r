@@ -38,27 +38,64 @@ Host <- R6::R6Class("Host",
       private$.instances <- list()
     },
 
-    #' @section options():
+    #' @section new():
+    #'
+    #' Get the environment of this \code{Host}
+    environment = function () {
+      # R
+      env <- with(R.version, list(
+        version = paste(major, minor, sep='.'),
+        codename = nickname,
+        date = paste(year, month, day, sep='-'),
+        platform = platform
+      ))
+      # Installed packages and their versions in order of library paths
+      # to prevent duplicates caused by the same package being in multiple libraries
+      packages <- list()
+      for(library in .libPaths()) {
+        library_packages <- installed.packages(library)[, c(1, 3)]
+        if (nrow(library_packages)) {
+          for (row in 1:nrow(library_packages)) {
+            name <- library_packages[row, 1]
+            if (!(name %in% names(packages))) {
+              version <- library_packages[row, 2]
+              packages[[name]] <- version
+            }
+          }
+        }
+      }
+      env[['packages']] <- packages[sort(names(packages))]
+      env
+    },
+
+    #' @section manifest():
     #'
     #' Get a manifest for this host
     #'
     #' The manifest describes the host and it's capabilities. It is used
     #' by peer hosts to determine which "types" this host provides and
     #' which "instances" have already been instantiated.
-    options = function () {
-      list(
+    manifest = function (complete=TRUE) {
+      manifest <- list(
         stencila = list(
           package = 'r',
           version = version
         ),
-        urls = self$urls,
+        run = c(unname(Sys.which('R')), '--slave', '-e', 'stencila:::run()'),
         schemes = list(
           new = list(
             RContext = RContext$spec
           )
-        ),
-        instances = names(private$.instances)
+        )
       )
+      if (complete) {
+        manifest <- c(manifest, list(
+          urls = self$urls,
+          instances = names(private$.instances),
+          environment = self$environment()
+        ))
+      }
+      manifest
     },
 
     #' @section post():

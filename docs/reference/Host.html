@@ -106,8 +106,9 @@ protocol (e.g. serialising and deserialising objects).</p>
 
     
     <p>Create a new <code>Host</code></p>
+    <p>Get the environment of this <code>Host</code></p>
     
-    <h2 class="hasAnchor" id="options-"><a class="anchor" href="#options-"></a>options()</h2>
+    <h2 class="hasAnchor" id="manifest-"><a class="anchor" href="#manifest-"></a>manifest()</h2>
 
     
     <p>Get a manifest for this host</p>
@@ -183,7 +184,7 @@ e.g. `http` for `HostHttpServer`</p>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='no'>host</span>$<span class='no'>servers</span></div><div class='output co'>#&gt; NULL</div><div class='input'><span class='no'>host</span>$<span class='fu'><a href='start.html'>start</a></span>()</div><div class='output co'>#&gt; Host is served at: http://127.0.0.1:2000 </div><div class='input'><span class='no'>host</span>$<span class='no'>servers</span></div><div class='output co'>#&gt; [1] "http"</div><div class='input'><span class='no'>host</span>$<span class='fu'>stop</span>()</div></pre>
+    <pre class="examples"><div class='input'><span class='no'>host</span>$<span class='no'>servers</span></div><div class='output co'>#&gt; NULL</div><div class='input'><span class='no'>host</span>$<span class='fu'><a href='start.html'>start</a></span>()</div><div class='output co'>#&gt; Host is served at: http://127.0.0.1:2010 </div><div class='input'><span class='no'>host</span>$<span class='no'>servers</span></div><div class='output co'>#&gt; [1] "http"</div><div class='input'><span class='no'>host</span>$<span class='fu'>stop</span>()</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
@@ -195,7 +196,7 @@ e.g. `http` for `HostHttpServer`</p>
 
       <li><a href="#new-">new()</a></li>
 
-      <li><a href="#options-">options()</a></li>
+      <li><a href="#manifest-">manifest()</a></li>
 
       <li><a href="#post-">post()</a></li>
 
