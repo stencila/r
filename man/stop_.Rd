@@ -7,9 +7,7 @@
 stop_()
 }
 \description{
-Not called stop_ because confusingly masks `stats::stop`,
-including withing this package. Not exported to be consistent
-with `start()`
+Stop serving the Stencila host
 }
 \seealso{
 \code{Host}

@@ -3,7 +3,6 @@
 export(RContext)
 export(host)
 export(pack)
-export(run)
 export(type)
 export(unpack)
 import(methods)

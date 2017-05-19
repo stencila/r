@@ -17,8 +17,57 @@
 #' @importFrom utils capture.output read.csv write.csv
 NULL
 
+# The following free functions have generic names which may clash with
+# names in other packages (e.g. `start` masks `stats::start`). For this
+# reason the are not exported
+
 # Set the package version string
 version <- tryCatch(toString(packageVersion("stencila")), error = '0.0.0')
+
+# Get the path to a file in Stencila's user data
+user_data_file_path <- function(...) {
+  home <- Sys.getenv("HOME")
+  file <- file.path(home, '.local', 'share', 'stencila', ...)
+  dir <- dirname(file)
+  if (!dir.exists(dir)) dir.create(dir, recursive = T)
+  file
+}
+
+#' Install the Stencila host
+#'
+#' @seealso \code{Host}
+install <- function () {
+  cat(
+    toJSON(host$options(complete=FALSE), pretty=TRUE, auto_unbox=TRUE),
+    file=user_data_file_path('hosts', 'r.json')
+  )
+}
+
+#' Start serving the Stencila host
+#'
+#' @seealso \code{Host}
+start <- function () {
+  host$start()
+}
+
+#' Stop serving the Stencila host
+#'
+#' @seealso \code{Host}
+#
+# Called 'stop_' because 'stop' masks `stats::stop`,
+# even within this package.
+stop_ <- function () {
+  host$start()
+}
+
+#' Start serving the Stencila host and wait for connections indefinitely
+#'
+#' @seealso \code{Host}
+run <- function () {
+  start()
+  cat('Use Ctl+C to stop\n')
+  Sys.sleep(1e6)
+}
 
 
 # Hooks for namespace events
@@ -31,30 +80,4 @@ version <- tryCatch(toString(packageVersion("stencila")), error = '0.0.0')
   host <<- Host$new()
 }
 
-#' Start serving the Stencila host
-#'
-#' Not exported because masks `stats::start`
-#' @seealso \code{Host}
-start <- function () {
-  host$start()
-}
 
-#' Stop serving the Stencila host
-#'
-#' Not called stop_ because confusingly masks `stats::stop`,
-#' including withing this package. Not exported to be consistent
-#' with `start()`
-#' @seealso \code{Host}
-stop_ <- function () {
-  host$start()
-}
-
-#' Start serving the Stencila host and wait for connections indefinitely
-#'
-#' @seealso \code{Host}
-#' @export
-run <- function () {
-  start()
-  cat('Use Ctl+C to stop\n')
-  Sys.sleep(1e6)
-}
