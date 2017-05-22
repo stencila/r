@@ -43,6 +43,13 @@ install <- function () {
   )
 }
 
+#' Reflect the Stencila host's environment
+#'
+#' @seealso \code{Host}
+reflect <- function () {
+  cat(toJSON(host$environment(), pretty=TRUE, auto_unbox=TRUE))
+}
+
 #' Start serving the Stencila host
 #'
 #' @seealso \code{Host}
