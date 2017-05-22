@@ -55,13 +55,11 @@ stop_ <- function () {
   host$stop()
 }
 
-#' Start serving the Stencila host and wait for connections indefinitely
+#' Run the Stencila host
 #'
 #' @seealso \code{Host}
 run <- function () {
-  start()
-  cat('Use Ctl+C to stop\n')
-  Sys.sleep(1e6)
+  host$run()
 }
 
 

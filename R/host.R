@@ -287,6 +287,21 @@ Host <- R6::R6Class("Host",
       invisible(self)
     },
 
+    #' @section run():
+    #'
+    #' Start serving the Stencila host and wait for connections indefinitely
+    run  = function () {
+      self$start()
+      cat('Use Ctl+C (terminal) or Esc (RStudio) to stop\n')
+      tryCatch(
+        Sys.sleep(1e6),
+        interrupt = function (condition) {
+          cat('Stopping host\n')
+          self$stop()
+        }
+      )
+    },
+
     #' @section view():
     #'
     #' View this host in the browser. Opens the default browser at the URL of this host
