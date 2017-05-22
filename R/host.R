@@ -34,8 +34,55 @@ Host <- R6::R6Class("Host",
     #'
     #' Create a new \code{Host}
     initialize = function () {
+      private$.id <- paste(c('r-', sample(c(letters, 0:9), 64, replace=TRUE)), collapse="")
       private$.servers <- list()
       private$.instances <- list()
+    },
+
+    #' @section user_dir():
+    #'
+    #' Get the current user's Stencila data directory
+    user_dir = function(...) {
+      os <- tolower(Sys.info()["sysname"])
+      dir <- switch(os,
+        darwin = file.path(Sys.getenv("HOME"), 'Library', 'Preferences', 'Stencila'),
+        linux = file.path(Sys.getenv("HOME"), '.local', 'share', 'stencila'),
+        windows = file.path(Sys.getenv("APPDATA"), 'Stencila')
+      )
+      if (!dir.exists(dir)) dir.create(dir, recursive = T)
+      dir
+    },
+
+    #' @section temp_dir():
+    #'
+    #' Get the current user's Stencila temporary directory
+    temp_dir = function(...) {
+      # Get system's temporary directory
+      # Thanks to Steve Weston at https://stackoverflow.com/a/16492084/4625911
+      os <- tolower(Sys.info()["sysname"])
+      envs <- Sys.getenv(c('TMPDIR', 'TMP', 'TEMP'))
+      useable <- which(file.info(envs)$isdir & file.access(envs, 2) == 0)
+      if (length(useable) > 0)
+        temp <- envs[[useable[1]]]
+      else if (os == 'windows')
+        temp <- Sys.getenv('R_USER')
+      else
+        temp <- '/tmp'
+      dir <- switch(os,
+        linux = file.path(temp, 'stencila'),
+        file.path(temp, 'Stencila')
+      )
+      if (!dir.exists(dir)) dir.create(dir, recursive = T)
+      dir
+    },
+
+    #' @section temp_dir():
+    #'
+    #' Get the path of the "run" file for this host.
+    run_file = function(...) {
+      dir <- file.path(self$temp_dir(), 'hosts')
+      if (!file.exists(dir)) dir.create(dir, recursive=TRUE)
+      file.path(dir, paste0(self$id, '.json'))
     },
 
     #' @section new():
@@ -90,12 +137,25 @@ Host <- R6::R6Class("Host",
       )
       if (complete) {
         manifest <- c(manifest, list(
+          id = private$.id,
           urls = self$urls,
           instances = names(private$.instances),
           environment = self$environment()
         ))
       }
       manifest
+    },
+
+    #' @section install():
+    #'
+    #' Get the Stencila user data directory of this \code{Host}
+    install = function(...) {
+      dir <- file.path(self$user_dir(), 'hosts', 'installed')
+      if (!file.exists(dir)) dir.create(dir, recursive=TRUE)
+      cat(
+        toJSON(host$manifest(complete=FALSE), pretty=TRUE, auto_unbox=TRUE),
+        file=file.path(dir, 'r.json')
+      )
     },
 
     #' @section post():
@@ -193,9 +253,17 @@ Host <- R6::R6Class("Host",
     #' for hosts. We plan to implement a `HostWebsocketServer` soon.
     start  = function (quiet=FALSE) {
       if (is.null(private$.servers[['http']])) {
+        # Start HTTP server
         server <- HostHttpServer$new(self)
         private$.servers[['http']] <- server
         server$start()
+
+        # Register as a running host
+        file <- self$run_file()
+        file.create(file)
+        Sys.chmod(file, "0600")
+        cat(toJSON(host$manifest(), pretty=TRUE, auto_unbox=TRUE), file=file)
+
         if (!quiet) cat('Host is served at:', paste(self$urls, collapse=', '), '\n')
       }
       invisible(self)
@@ -205,11 +273,17 @@ Host <- R6::R6Class("Host",
     #'
     #' Stop serving this host. Stops all servers that are currently serving this host
     stop  = function () {
+      # Stop each server
       for (name in names(private$.servers)) {
         server <- private$.servers[[name]]
         server$stop()
         private$.servers[[name]] <- NULL
       }
+
+      # Deregister as a running host
+      file <- self$run_file()
+      if (file.exists(file)) file.remove(file)
+
       invisible(self)
     },
 
@@ -238,6 +312,13 @@ Host <- R6::R6Class("Host",
   ),
 
   active = list(
+    #' @section id:
+    #'
+    #' Get unique ID of this host
+    id = function () {
+      private$.id
+    },
+
     #' @section servers:
     #'
     #' Get a list of server names for this host. Servers are identified by the protocol shorthand
@@ -255,6 +336,7 @@ Host <- R6::R6Class("Host",
   ),
 
   private = list(
+    .id = NULL,
     .servers = NULL,
     .instances = NULL
   )

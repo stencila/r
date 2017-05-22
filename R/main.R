@@ -24,23 +24,11 @@ NULL
 # Set the package version string
 version <- tryCatch(toString(packageVersion("stencila")), error = '0.0.0')
 
-# Get the path to a file in Stencila's user data
-user_data_file_path <- function(...) {
-  home <- Sys.getenv("HOME")
-  file <- file.path(home, '.local', 'share', 'stencila', ...)
-  dir <- dirname(file)
-  if (!dir.exists(dir)) dir.create(dir, recursive = T)
-  file
-}
-
 #' Install the Stencila host
 #'
 #' @seealso \code{Host}
 install <- function () {
-  cat(
-    toJSON(host$options(complete=FALSE), pretty=TRUE, auto_unbox=TRUE),
-    file=user_data_file_path('hosts', 'r.json')
-  )
+  host$install()
 }
 
 #' Reflect the Stencila host's environment
