@@ -34,7 +34,16 @@ Host <- R6::R6Class("Host",
     #'
     #' Create a new \code{Host}
     initialize = function () {
-      private$.id <- paste(c('r-', sample(c(letters, 0:9), 64, replace=TRUE)), collapse="")
+      # Generate unique id. Note this currently only needs to be unique on the current machine
+      private$.id <- paste(
+        c('r-', sample(c(letters, 0:9), 64, replace=TRUE)),
+        collapse=''
+      )
+      # Generate secret to be used for authenticating requests
+      private$.secret <- paste(
+        sample(c(LETTERS, letters, 0:9, strsplit('~ ! @ # $ % ^ & * _ + - |', ' ')[[1]]), 256, replace=TRUE),
+        collapse=''
+      )
       private$.servers <- list()
       private$.instances <- list()
     },
@@ -138,6 +147,7 @@ Host <- R6::R6Class("Host",
       if (complete) {
         manifest <- c(manifest, list(
           id = private$.id,
+          secret = private$.secret,
           urls = self$urls,
           instances = names(private$.instances),
           environment = self$environment()
@@ -352,6 +362,7 @@ Host <- R6::R6Class("Host",
 
   private = list(
     .id = NULL,
+    .secret = NULL,
     .servers = NULL,
     .instances = NULL
   )
