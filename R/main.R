@@ -57,7 +57,7 @@ start <- function () {
 # Called 'stop_' because 'stop' masks `stats::stop`,
 # even within this package.
 stop_ <- function () {
-  host$start()
+  host$stop()
 }
 
 #' Start serving the Stencila host and wait for connections indefinitely
