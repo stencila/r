@@ -150,7 +150,7 @@ Host <- R6::R6Class("Host",
     #'
     #' Get the Stencila user data directory of this \code{Host}
     install = function(...) {
-      dir <- file.path(self$user_dir(), 'hosts', 'installed')
+      dir <- file.path(self$user_dir(), 'hosts')
       if (!file.exists(dir)) dir.create(dir, recursive=TRUE)
       cat(
         toJSON(host$manifest(complete=FALSE), pretty=TRUE, auto_unbox=TRUE),
