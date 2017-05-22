@@ -13,6 +13,12 @@ This package isn't on CRAN yet, but you can install it from this repository usin
 devtools::install_github("stencila/r")
 ```
 
+Then install the package so that other Stencila packages and applications can detect it:
+
+```r
+stencila:::install()
+```
+
 ### Use
 
 This package lets you run R code from inside Stencila Documents. First, you need to start serving the Stencila Host within this package. You can do that in your favourite R console (e.g. RStudio):
@@ -24,7 +30,7 @@ stencila:::start()
 Or at the system shell:
 
 ```sh
-RScript -e 'stencila::run()'
+RScript -e 'stencila:::run()'
 ```
 
 Then, open your Stencila Document from within the [Stencila Desktop](https://github.com/stencila/desktop). The host will be automatically detected by the desktop app and you'll be able to execute R code cells from within your documents.
