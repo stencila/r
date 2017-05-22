@@ -344,6 +344,13 @@ Host <- R6::R6Class("Host",
       private$.id
     },
 
+    #' @section .secret:
+    #'
+    #' Get this host secret key
+    secret = function () {
+      private$.secret
+    },
+
     #' @section servers:
     #'
     #' Get a list of server names for this host. Servers are identified by the protocol shorthand
