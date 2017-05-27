@@ -31,10 +31,10 @@ install <- function () {
   host$install()
 }
 
-#' Reflect the Stencila host's environment
+#' Display the Stencila host's environment
 #'
 #' @seealso \code{Host}
-reflect <- function () {
+environ <- function () {
   cat(toJSON(host$environment(), pretty=TRUE, auto_unbox=TRUE))
 }
 
