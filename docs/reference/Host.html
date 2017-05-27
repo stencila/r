@@ -108,6 +108,17 @@ protocol (e.g. serialising and deserialising objects).</p>
     <p>Create a new <code>Host</code></p>
     <p>Get the environment of this <code>Host</code></p>
     
+    <h2 class="hasAnchor" id="user-dir-"><a class="anchor" href="#user-dir-"></a>user_dir()</h2>
+
+    
+    <p>Get the current user's Stencila data directory</p>
+    
+    <h2 class="hasAnchor" id="temp-dir-"><a class="anchor" href="#temp-dir-"></a>temp_dir()</h2>
+
+    
+    <p>Get the current user's Stencila temporary directory</p>
+    <p>Get the path of the "run" file for this host.</p>
+    
     <h2 class="hasAnchor" id="manifest-"><a class="anchor" href="#manifest-"></a>manifest()</h2>
 
     
@@ -115,6 +126,11 @@ protocol (e.g. serialising and deserialising objects).</p>
 <p>The manifest describes the host and it's capabilities. It is used
 by peer hosts to determine which "types" this host provides and
 which "instances" have already been instantiated.</p>
+    
+    <h2 class="hasAnchor" id="install-"><a class="anchor" href="#install-"></a>install()</h2>
+
+    
+    <p>Get the Stencila user data directory of this <code>Host</code></p>
     
     <h2 class="hasAnchor" id="post-"><a class="anchor" href="#post-"></a>post()</h2>
 
@@ -166,10 +182,20 @@ for hosts. We plan to implement a `HostWebsocketServer` soon.</p>
     
     <p>Stop serving this host. Stops all servers that are currently serving this host</p>
     
+    <h2 class="hasAnchor" id="run-"><a class="anchor" href="#run-"></a>run()</h2>
+
+    
+    <p>Start serving the Stencila host and wait for connections indefinitely</p>
+    
     <h2 class="hasAnchor" id="view-"><a class="anchor" href="#view-"></a>view()</h2>
 
     
     <p>View this host in the browser. Opens the default browser at the URL of this host</p>
+    
+    <h2 class="hasAnchor" id="id"><a class="anchor" href="#id"></a>id</h2>
+
+    
+    <p>Get unique ID of this host</p>
     
     <h2 class="hasAnchor" id="servers"><a class="anchor" href="#servers"></a>servers</h2>
 
@@ -184,7 +210,7 @@ e.g. `http` for `HostHttpServer`</p>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='no'>host</span>$<span class='no'>servers</span></div><div class='output co'>#&gt; NULL</div><div class='input'><span class='no'>host</span>$<span class='fu'><a href='start.html'>start</a></span>()</div><div class='output co'>#&gt; Host is served at: http://127.0.0.1:2010 </div><div class='input'><span class='no'>host</span>$<span class='no'>servers</span></div><div class='output co'>#&gt; [1] "http"</div><div class='input'><span class='no'>host</span>$<span class='fu'>stop</span>()</div></pre>
+    <pre class="examples"><div class='input'><span class='no'>host</span>$<span class='no'>servers</span></div><div class='output co'>#&gt; NULL</div><div class='input'><span class='no'>host</span>$<span class='fu'><a href='start.html'>start</a></span>()</div><div class='output co'>#&gt; Host is served at: http://127.0.0.1:2000 </div><div class='input'><span class='no'>host</span>$<span class='no'>servers</span></div><div class='output co'>#&gt; [1] "http"</div><div class='input'><span class='no'>host</span>$<span class='fu'>stop</span>()</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
@@ -196,7 +222,13 @@ e.g. `http` for `HostHttpServer`</p>
 
       <li><a href="#new-">new()</a></li>
 
+      <li><a href="#user-dir-">user_dir()</a></li>
+
+      <li><a href="#temp-dir-">temp_dir()</a></li>
+
       <li><a href="#manifest-">manifest()</a></li>
+
+      <li><a href="#install-">install()</a></li>
 
       <li><a href="#post-">post()</a></li>
 
@@ -210,7 +242,11 @@ e.g. `http` for `HostHttpServer`</p>
 
       <li><a href="#stop-">stop()</a></li>
 
+      <li><a href="#run-">run()</a></li>
+
       <li><a href="#view-">view()</a></li>
+
+      <li><a href="#id">id</a></li>
 
       <li><a href="#servers">servers</a></li>
 

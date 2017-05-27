@@ -35,6 +35,22 @@ Create a new \code{Host}
 Get the environment of this \code{Host}
 }
 
+\section{user_dir()}{
+
+
+Get the current user's Stencila data directory
+}
+
+\section{temp_dir()}{
+
+
+Get the current user's Stencila temporary directory
+
+
+
+Get the path of the "run" file for this host.
+}
+
 \section{manifest()}{
 
 
@@ -43,6 +59,12 @@ Get a manifest for this host
 The manifest describes the host and it's capabilities. It is used
 by peer hosts to determine which "types" this host provides and
 which "instances" have already been instantiated.
+}
+
+\section{install()}{
+
+
+Get the Stencila user data directory of this \code{Host}
 }
 
 \section{post()}{
@@ -112,10 +134,22 @@ for hosts. We plan to implement a `HostWebsocketServer` soon.
 Stop serving this host. Stops all servers that are currently serving this host
 }
 
+\section{run()}{
+
+
+Start serving the Stencila host and wait for connections indefinitely
+}
+
 \section{view()}{
 
 
 View this host in the browser. Opens the default browser at the URL of this host
+}
+
+\section{id}{
+
+
+Get unique ID of this host
 }
 
 \section{servers}{

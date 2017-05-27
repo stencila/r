@@ -2,12 +2,12 @@
 % Please edit documentation in R/main.R
 \name{run}
 \alias{run}
-\title{Start serving the Stencila host and wait for connections indefinitely}
+\title{Run the Stencila host}
 \usage{
 run()
 }
 \description{
-Start serving the Stencila host and wait for connections indefinitely
+Run the Stencila host
 }
 \seealso{
 \code{Host}
