@@ -6,7 +6,7 @@ Authors@R: c(person("Nokome", "Bentley", email = "nokome@stenci.la", role = c("a
 URL: https://github.com/stencila/r#readme
 BugReports: https://github.com/stencila/r/issues
 License: Apache-2.0
-Version: 0.27.0-preview
+Version: 0.27.0
 LazyData: TRUE
 Imports:
     base64enc,
