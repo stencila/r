@@ -43,7 +43,7 @@ describe("Host", {
     expect_error(h$delete(id), 'Unknown instance')
   })
 
-  it('has a start() and stop() methods', {
+  it('has start() and stop() methods', {
     h$start(quiet=TRUE)
     expect_equal(h$servers, 'http')
     expect_equal(length(h$servers), 1)

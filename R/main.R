@@ -35,14 +35,19 @@ install <- function () {
 #'
 #' @seealso \code{Host}
 environ <- function () {
-  cat(toJSON(host$environment(), pretty=TRUE, auto_unbox=TRUE))
+  cat(toJSON(host$environ(), pretty=TRUE, auto_unbox=TRUE))
 }
 
 #' Start serving the Stencila host
 #'
+#' \describe{
+#'   \item{address}{The address to listen. Default '127.0.0.1'}
+#'   \item{port}{The port to listen on. Default 2000}
+#' }
+#'
 #' @seealso \code{Host}
-start <- function () {
-  host$start()
+start <- function (address='127.0.0.1', port=2000) {
+  host$start(address, port)
 }
 
 #' Stop serving the Stencila host

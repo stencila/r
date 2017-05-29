@@ -11,11 +11,12 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
     #'
     #' \describe{
     #'   \item{host}{The host to be served}
-    #'   \item{port}{The port to listen on}
+    #'   \item{address}{The port to listen on. Default '127.0.0.1'}
+    #'   \item{port}{The port to listen on. Default 2000}
     #' }
-    initialize = function(host, port=2000) {
+    initialize = function(host, address='127.0.0.1', port=2000) {
       private$.host <- host
-      private$.address <- '127.0.0.1'
+      private$.address <- address
       private$.port <- port
       private$.server <- NULL
     },
