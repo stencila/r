@@ -67,15 +67,19 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
       #  [17] "rook.input"                     "rook.url_scheme"                "rook.version"                   "SCRIPT_NAME"
       #  [21] "SERVER_NAME"                    "SERVER_PORT"
       #
-      # See https://github.com/jeffreyhorner/Rook/blob/a5e45f751/README.md#the-environment for
+      # See https://github.com/jeffreyhorner/Rook#the-environment for
       request <- list(
         path = httpuv::decodeURIComponent(env$PATH_INFO),
         method = env$REQUEST_METHOD,
         headers = list(
-          Accept = env$HTTP_ACCEPT
+          Accept = env$HTTP_ACCEPT,
+          Authorization = env$HTTP_AUTHORIZATION
         ),
         body = paste(env$rook.input$read_lines(), collapse='')
       )
+      if (!self$authorize(request)) {
+        return(self$error403())
+      }
       response <- tryCatch({
           endpoint <- self$route(request$method, request$path)
           method <- endpoint[[1]]
@@ -93,6 +97,29 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
         'Access-Control-Allow-Origin' = '*'
       ))
       response
+    },
+
+    #' @section authorize():
+    #'
+    #' Authorize a HTTP request
+    authorize = function(request) {
+      # Get the Authorization header
+      auth <- request$headers$Authorization
+      if (is.null(auth)) return(FALSE)
+
+      # Get the HMAC provided in the Authorization header
+      # e.g. 'StencilaHMAC <the-hmac>'
+      hmac_provided <- str_sub(auth, 14)
+      if (!nchar(hmac_provided)) return(FALSE)
+
+      hmac_expected <- digest::hmac(
+        key=private$.host$secret,
+        object=paste(request$method, request$path, request$body, sep='\n'),
+        algo='sha1'
+      )
+      if (hmac_provided != hmac_expected) return(FALSE)
+
+      return(TRUE)
     },
 
     #' @section route():

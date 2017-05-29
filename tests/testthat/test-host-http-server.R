@@ -43,23 +43,55 @@ test_that("HostHttpServer.route", {
 test_that("HostHttpServer.handle", {
   s = HostHttpServer$new(host)
 
-  r <- s$handle(list(
-    PATH_INFO = '/',
-    REQUEST_METHOD = 'GET',
-    HTTP_ACCEPT = '',
-    rook.input = list(read_lines = function() NULL)
-  ))
+  create_env <- function(method, path, body="", accept='') {
+    list(
+      REQUEST_METHOD = method,
+      PATH_INFO = path,
+      HTTP_ACCEPT = accept,
+      HTTP_AUTHORIZATION = paste0('StencilaHMAC ', digest::hmac(
+        key=host$secret,
+        object=paste(method, path, body, sep='\n'),
+        algo='sha1'
+      )),
+      rook.input = list(read_lines = function() body)
+    )
+  }
+
+  r <- s$handle(create_env('GET', '/'))
   expect_equal(r$status, 200)
   expect_equal(str_sub(r$body, 1, 23), '<!doctype html>\n<html>\n')
 
-  r <- s$handle(list(
-    PATH_INFO = '/',
-    REQUEST_METHOD = 'GET',
-    HTTP_ACCEPT = 'application/json',
-    rook.input = list(read_lines = function() NULL)
-  ))
+  r <- s$handle(create_env('GET', '/', accept='application/json'))
   expect_equal(r$status, 200)
   expect_equal(str_sub(r$body, 1, 22), '{"stencila":{"package"')
+})
+
+test_that("HostHttpServer.authorize", {
+  s = HostHttpServer$new(host)
+
+  create_request <- function(method, path, body="", accept='') {
+    list(
+      method = method,
+      path = path,
+      headers = list(
+        Accept = accept,
+        Authorization = paste0('StencilaHMAC ', digest::hmac(
+          key=host$secret,
+          object=paste(method, path, body, sep='\n'),
+          algo='sha1'
+        ))
+      ),
+      body = body
+    )
+  }
+
+  expect_true(s$authorize(create_request('GET', '/')))
+  expect_true(s$authorize(create_request('PUT', '/instance!method', '{"arg1": "foo", "arg2": 42}')))
+
+  expect_false(s$authorize(list()))
+  expect_false(s$authorize(list(method='GET', path='/')))
+  expect_false(s$authorize(list(method='GET', path='/', headers=list(Authorization='Basic foo:bar'))))
+  expect_false(s$authorize(list(method='GET', path='/', headers=list(Authorization='StencilaHMAC incorrect-HMAC'))))
 })
 
 test_that("HostHttpServer.options", {
