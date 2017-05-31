@@ -141,7 +141,7 @@ Host <- R6::R6Class("Host",
           package = 'r',
           version = version
         ),
-        run = c(unname(Sys.which('R')), '--slave', '-e', 'stencila:::run()'),
+        run = c(unname(Sys.which('R')), '--slave', '-e', 'stencila:::run(echo=TRUE)'),
         schemes = list(
           new = list(
             RContext = RContext$spec
@@ -282,7 +282,7 @@ Host <- R6::R6Class("Host",
         Sys.chmod(file, "0600")
         cat(toJSON(self$manifest(), pretty=TRUE, auto_unbox=TRUE), file=file)
 
-        if (!quiet) cat('Host is served at:', paste(self$urls, collapse=', '), '\n')
+        if (!quiet) cat('Host has started at', paste(self$urls, collapse=', '), '\n')
       }
       invisible(self)
     },
@@ -290,7 +290,7 @@ Host <- R6::R6Class("Host",
     #' @section stop():
     #'
     #' Stop serving this host. Stops all servers that are currently serving this host
-    stop  = function () {
+    stop  = function (quiet=FALSE) {
       # Stop each server
       for (name in names(private$.servers)) {
         server <- private$.servers[[name]]
@@ -302,6 +302,8 @@ Host <- R6::R6Class("Host",
       file <- self$run_file()
       if (file.exists(file)) file.remove(file)
 
+      if (!quiet) cat('Host has stopped\n')
+
       invisible(self)
     },
 
@@ -310,17 +312,22 @@ Host <- R6::R6Class("Host",
     #' \describe{
     #'   \item{address}{The address to listen. Default '127.0.0.1'}
     #'   \item{port}{The port to listen on. Default 2000}
+    #'   \item{quiet}{Do not print status messages to the console? Default FALSE}
+    #'   \item{echo}{Print the host's manifest to the console? Default FALSE}
     #' }
     #'
     #' Start serving the Stencila host and wait for connections indefinitely
-    run  = function (address='127.0.0.1', port=2000) {
-      self$start(address, port)
-      cat('Use Ctl+C (terminal) or Esc (RStudio) to stop\n')
+    run  = function (address='127.0.0.1', port=2000, quiet=FALSE, echo=FALSE) {
+      if (echo) quiet = TRUE
+      self$start(address=address, port=port, quiet=quiet)
+      if (echo) {
+        cat(toJSON(self$manifest(), pretty=TRUE, auto_unbox=TRUE))
+      }
+      if (!quiet) cat('Use Ctl+C (terminal) or Esc (RStudio) to stop\n')
       tryCatch(
         Sys.sleep(1e6),
         interrupt = function (condition) {
-          cat('Stopping host\n')
-          self$stop()
+          self$stop(quiet=quiet)
         }
       )
     },
