@@ -45,7 +45,7 @@ Host <- R6::R6Class("Host",
     #'
     #' This is the directory that Stencila configuration settings, such as the
     #' installed Stencila hosts, and document buffers get stored.
-    user_dir = function(...) {
+    user_dir = function() {
       os <- tolower(Sys.info()["sysname"])
       dir <- switch(os,
         darwin = file.path(Sys.getenv("HOME"), 'Library', 'Preferences', 'Stencila'),
@@ -61,7 +61,7 @@ Host <- R6::R6Class("Host",
     #' Get the current user's Stencila temporary directory
     #'
     #' This directory is used by Stencila for files such as "run files" (see below)
-    temp_dir = function(...) {
+    temp_dir = function() {
       # Get system's temporary directory
       # Thanks to Steve Weston at https://stackoverflow.com/a/16492084/4625911
       os <- tolower(Sys.info()["sysname"])
@@ -91,7 +91,7 @@ Host <- R6::R6Class("Host",
     #' destroyed by \code{host$stop()}. It is placed in the machine's temporarily
     #' directory to reduce the chances of a run file being present when a host
     #' has aborted with out by \code{host$stop()} being called.
-    run_file = function(...) {
+    run_file = function() {
       dir <- file.path(self$temp_dir(), 'hosts')
       if (!file.exists(dir)) dir.create(dir, recursive=TRUE)
       file.path(dir, paste0(self$id, '.json'))
@@ -153,7 +153,7 @@ Host <- R6::R6Class("Host",
           id = private$.id,
           urls = self$urls,
           instances = names(private$.instances),
-          environment = self$environ()
+          environ = self$environ()
         ))
       }
       manifest
@@ -166,11 +166,11 @@ Host <- R6::R6Class("Host",
     #' Installation of a host involves creating a file \code{r.json} inside of
     #' the user's Stencila data (see \code{user_dir}) directory which describes
     #' the capabilities of this host.
-    install = function(...) {
+    install = function() {
       dir <- file.path(self$user_dir(), 'hosts')
       if (!file.exists(dir)) dir.create(dir, recursive=TRUE)
       cat(
-        toJSON(host$manifest(complete=FALSE), pretty=TRUE, auto_unbox=TRUE),
+        toJSON(self$manifest(complete=FALSE), pretty=TRUE, auto_unbox=TRUE),
         file=file.path(dir, 'r.json')
       )
     },
@@ -280,7 +280,7 @@ Host <- R6::R6Class("Host",
         file <- self$run_file()
         file.create(file)
         Sys.chmod(file, "0600")
-        cat(toJSON(host$manifest(), pretty=TRUE, auto_unbox=TRUE), file=file)
+        cat(toJSON(self$manifest(), pretty=TRUE, auto_unbox=TRUE), file=file)
 
         if (!quiet) cat('Host is served at:', paste(self$urls, collapse=', '), '\n')
       }
