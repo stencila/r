@@ -27,8 +27,8 @@ version <- tryCatch(toString(packageVersion("stencila")), error = '0.0.0')
 #' Install the Stencila host
 #'
 #' @seealso \code{Host}
-install <- function () {
-  host$install()
+install <- function (...) {
+  host$install(...)
 }
 
 #' Display the Stencila host's environment
@@ -46,8 +46,8 @@ environ <- function () {
 #' }
 #'
 #' @seealso \code{Host}
-start <- function (address='127.0.0.1', port=2000) {
-  host$start(address, port)
+start <- function (...) {
+  host$start(...)
 }
 
 #' Stop serving the Stencila host
@@ -56,15 +56,15 @@ start <- function (address='127.0.0.1', port=2000) {
 #
 # Called 'stop_' because 'stop' masks `stats::stop`,
 # even within this package.
-stop_ <- function () {
-  host$stop()
+stop_ <- function (...) {
+  host$stop(...)
 }
 
 #' Run the Stencila host
 #'
 #' @seealso \code{Host}
-run <- function () {
-  host$run()
+run <- function (...) {
+  host$run(...)
 }
 
 
