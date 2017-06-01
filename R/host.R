@@ -151,9 +151,9 @@ Host <- R6::R6Class("Host",
       if (complete) {
         manifest <- c(manifest, list(
           id = private$.id,
+          process = Sys.getpid(),
           urls = self$urls,
-          instances = names(private$.instances),
-          environ = self$environ()
+          instances = names(private$.instances)
         ))
       }
       manifest
