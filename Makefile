@@ -9,14 +9,14 @@ build:
 	R CMD build .
 
 install:
-	Rscript -e 'devtools::install()'
+	Rscript -e 'devtools:::install()'
 
 docs:
 	Rscript -e 'devtools::document(); pkgdown::build_site()'
 .PHONY: docs
 
 run:
-	Rscript -e 'stencila::run()'
+	Rscript -e 'stencila:::run()'
 
 check:
 	R CMD check $$(ls stencila_*.tar.gz | tail -n 1)
