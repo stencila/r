@@ -317,9 +317,12 @@ Host <- R6::R6Class("Host",
     run  = function (address='127.0.0.1', port=2000, quiet=FALSE, echo=FALSE) {
       if (echo) quiet = TRUE
       self$start(address=address, port=port, quiet=quiet)
+      
       if (echo) {
         cat(toJSON(self$manifest(), pretty=TRUE, auto_unbox=TRUE))
+        flush.console()
       }
+      
       if (!quiet) cat('Use Ctl+C (terminal) or Esc (RStudio) to stop\n')
       tryCatch(
         Sys.sleep(1e6),
