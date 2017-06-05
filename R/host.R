@@ -73,10 +73,7 @@ Host <- R6::R6Class("Host",
         temp <- Sys.getenv('R_USER')
       else
         temp <- '/tmp'
-      dir <- switch(os,
-        linux = file.path(temp, 'stencila'),
-        file.path(temp, 'Stencila')
-      )
+      dir <- file.path(temp, 'stencila')
       if (!dir.exists(dir)) dir.create(dir, recursive = T)
       dir
     },
