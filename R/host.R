@@ -149,7 +149,7 @@ Host <- R6::R6Class("Host",
         manifest <- c(manifest, list(
           id = private$.id,
           process = Sys.getpid(),
-          urls = c(self$urls, ''),
+          urls = I(self$urls),
           instances = names(private$.instances)
         ))
       }
