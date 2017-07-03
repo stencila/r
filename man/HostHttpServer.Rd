@@ -17,7 +17,8 @@ use the \code{start} method of the \code{host} instance.
 
 \describe{
   \item{host}{The host to be served}
-  \item{port}{The port to listen on}
+  \item{address}{The port to listen on. Default '127.0.0.1'}
+  \item{port}{The port to listen on. Default 2000}
 }
 }
 

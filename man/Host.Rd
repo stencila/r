@@ -32,13 +32,17 @@ Create a new \code{Host}
 
 
 
-Get the environment of this \code{Host}
+Get the environment of this \code{Host} including the version of R
+and the version of installed packages.
 }
 
 \section{user_dir()}{
 
 
-Get the current user's Stencila data directory
+Get the current user's Stencila data directory.
+
+This is the directory that Stencila configuration settings, such as the
+installed Stencila hosts, and document buffers get stored.
 }
 
 \section{temp_dir()}{
@@ -46,9 +50,20 @@ Get the current user's Stencila data directory
 
 Get the current user's Stencila temporary directory
 
+This directory is used by Stencila for files such as "run files" (see below)
+}
+
+\section{run_file()}{
 
 
-Get the path of the "run" file for this host.
+Get the path of the "run file" for this host.
+
+A run file is used to indicate that a particular host is running
+and allow other Stencila processes on the same machine
+to communicate with it. It is created by by \code{host$start()} and
+destroyed by \code{host$stop()}. It is placed in the machine's temporarily
+directory to reduce the chances of a run file being present when a host
+has aborted with out by \code{host$stop()} being called.
 }
 
 \section{manifest()}{
@@ -64,7 +79,11 @@ which "instances" have already been instantiated.
 \section{install()}{
 
 
-Get the Stencila user data directory of this \code{Host}
+Install this Stencila \code{Host} on this machine.
+
+Installation of a host involves creating a file \code{r.json} inside of
+the user's Stencila data (see \code{user_dir}) directory which describes
+the capabilities of this host.
 }
 
 \section{post()}{
@@ -119,8 +138,9 @@ Delete an instance
 
 Start serving this host
 
-
 \describe{
+  \item{address}{The address to listen. Default '127.0.0.1'}
+  \item{port}{The port to listen on. Default 2000}
   \item{quiet}{Don't print out message. Default FALSE}
 }
 
@@ -136,6 +156,13 @@ Stop serving this host. Stops all servers that are currently serving this host
 
 \section{run()}{
 
+
+\describe{
+  \item{address}{The address to listen. Default '127.0.0.1'}
+  \item{port}{The port to listen on. Default 2000}
+  \item{quiet}{Do not print status messages to the console? Default FALSE}
+  \item{echo}{Print the host's manifest to the console? Default FALSE}
+}
 
 Start serving the Stencila host and wait for connections indefinitely
 }
