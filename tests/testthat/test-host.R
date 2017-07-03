@@ -14,6 +14,15 @@ describe("Host", {
     expect_true(length(manifest$schemes) > 0)
   })
 
+  it('has an install() method', {
+    h$install()
+    manifest <- h$manifest(complete=FALSE)
+    expect_equal(
+      manifest,
+      fromJSON(file.path(h$user_dir(), 'hosts', 'r.json'))
+    )
+  })
+
   it('has a post() method', {
     id1 <- h$post('RContext')
     id2 <- h$post('RContext')
