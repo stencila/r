@@ -28,6 +28,7 @@ version <- tryCatch(toString(packageVersion("stencila")), error = '0.0.0')
 
 #' Install the Stencila host
 #'
+#' @param \code{...} Arguments to pass to \code{host$install}
 #' @seealso \code{Host}
 install <- function (...) host$install(...)
 
@@ -40,16 +41,13 @@ environ <- function () {
 
 #' Start serving the Stencila host
 #'
-#' \describe{
-#'   \item{address}{The address to listen. Default '127.0.0.1'}
-#'   \item{port}{The port to listen on. Default 2000}
-#' }
-#'
+#' @param \code{...} Arguments to pass to \code{host$start}
 #' @seealso \code{Host}
 start <- function (...) host$start(...)
 
 #' Stop serving the Stencila host
 #'
+#' @param \code{...} Arguments to pass to \code{host$install}
 #' @seealso \code{Host}
 #
 # Called 'stop_' because 'stop' masks `stats::stop`,
@@ -58,6 +56,7 @@ stop_ <- function (...) host$stop(...)
 
 #' Run the Stencila host
 #'
+#' @param \code{...} Arguments to pass to \code{host$install}
 #' @seealso \code{Host}
 run <- function (...) host$run(...)
 
