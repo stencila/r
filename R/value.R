@@ -69,13 +69,13 @@ pack <- function(value) {
     ), auto_unbox = TRUE))
   } else if (type_ == 'plot') {
     type_ <- 'image'
-    format <- 'png'
+    format <- 'src'
     path <- tempfile(fileext=paste0('.', format))
     png(path)
     if (inherits(value, 'recordedplot')) replayPlot(value)
     else print(value)
     dev.off()
-    content <- base64enc::base64encode(path)
+    content <- paste0('data:image/', format, ';base64,', base64enc::base64encode(path))
   } else if (type_ == 'unknown') {
     # Unknown types serialised using `print` which may be customised
     # e.g. `print.table` is used for the results of `summary`
