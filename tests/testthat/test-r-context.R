@@ -32,16 +32,16 @@ describe('RContext', {
 
     r <- s$runCode('plot(1,1)')
     expect_equal(r$output$type, 'image')
-    expect_equal(r$output$format, 'png')
-    expect_equal(str_sub(r$output$content, 1, 10), 'iVBORw0KGg')
+    expect_equal(r$output$format, 'src')
+    expect_equal(str_sub(r$output$content, 1, 10), 'data:image')
 
     # Load ggplot2 so that diamonds is available
     s$runCode('library(ggplot2)')
 
     r <- s$runCode('ggplot(diamonds) + geom_point(aes(x=carat, y=price))')
     expect_equal(r$output$type, 'image')
-    expect_equal(r$output$format, 'png')
-    expect_equal(str_sub(r$output$content, 1, 10), 'iVBORw0KGg')
+    expect_equal(r$output$format, 'src')
+    expect_equal(str_sub(r$output$content, 1, 10), 'data:image')
 
     # An error in the rendering of the ggplot (in this case missing aesthtics)
     # which wil thow in the packing of the ggplot value
