@@ -48,7 +48,7 @@ Host <- R6::R6Class("Host",
     user_dir = function() {
       os <- tolower(Sys.info()["sysname"])
       dir <- switch(os,
-        darwin = file.path(Sys.getenv("HOME"), 'Library', 'Preferences', 'Stencila'),
+        darwin = file.path(Sys.getenv("HOME"), 'Library', 'Application Support', 'Stencila'),
         linux = file.path(Sys.getenv("HOME"), '.local', 'share', 'stencila'),
         windows = file.path(Sys.getenv("APPDATA"), 'Stencila')
       )
