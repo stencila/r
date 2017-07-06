@@ -23,7 +23,7 @@ describe('type()', {
   expect_equal(type(data.frame(a=1:10, b=11:20)), 'table')
 
   expect_equal(type(list(type='html', content='<img>')), 'html')
-  expect_equal(type(list(type='png', content='')), 'png')
+  expect_equal(type(list(type='image', content='')), 'image')
   expect_equal(type(list(type=1)), 'object')
 
   expect_equal(type(function () {}), 'unknown')
@@ -82,16 +82,16 @@ describe('pack()', {
     plot(mpg~disp, mtcars)
     p <- pack(recordPlot())
     expect_equal(p$type, 'image')
-    expect_equal(p$format, 'png')
-    expect_equal(str_sub(p$content, 1, 10), 'iVBORw0KGg')
+    expect_equal(p$format, 'src')
+    expect_equal(str_sub(p$content, 1, 10), 'data:image')
   })
 
   if (require('ggplot2', quietly=T)) {
     it("works for ggplots", {
       p <- pack(ggplot(mtcars) + geom_point(aes(x=disp,y=mpg)))
       expect_equal(p$type, 'image')
-      expect_equal(p$format, 'png')
-      expect_equal(str_sub(p$content, 1, 10), 'iVBORw0KGg')
+      expect_equal(p$format, 'src')
+      expect_equal(str_sub(p$content, 1, 10), 'data:image')
     })
   }
 })

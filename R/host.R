@@ -41,11 +41,14 @@ Host <- R6::R6Class("Host",
 
     #' @section user_dir():
     #'
-    #' Get the current user's Stencila data directory
-    user_dir = function(...) {
+    #' Get the current user's Stencila data directory.
+    #'
+    #' This is the directory that Stencila configuration settings, such as the
+    #' installed Stencila hosts, and document buffers get stored.
+    user_dir = function() {
       os <- tolower(Sys.info()["sysname"])
       dir <- switch(os,
-        darwin = file.path(Sys.getenv("HOME"), 'Library', 'Preferences', 'Stencila'),
+        darwin = file.path(Sys.getenv("HOME"), 'Library', 'Application Support', 'Stencila'),
         linux = file.path(Sys.getenv("HOME"), '.local', 'share', 'stencila'),
         windows = file.path(Sys.getenv("APPDATA"), 'Stencila')
       )
@@ -56,7 +59,9 @@ Host <- R6::R6Class("Host",
     #' @section temp_dir():
     #'
     #' Get the current user's Stencila temporary directory
-    temp_dir = function(...) {
+    #'
+    #' This directory is used by Stencila for files such as "run files" (see below)
+    temp_dir = function() {
       # Get system's temporary directory
       # Thanks to Steve Weston at https://stackoverflow.com/a/16492084/4625911
       os <- tolower(Sys.info()["sysname"])
@@ -68,18 +73,22 @@ Host <- R6::R6Class("Host",
         temp <- Sys.getenv('R_USER')
       else
         temp <- '/tmp'
-      dir <- switch(os,
-        linux = file.path(temp, 'stencila'),
-        file.path(temp, 'Stencila')
-      )
+      dir <- file.path(temp, 'stencila')
       if (!dir.exists(dir)) dir.create(dir, recursive = T)
       dir
     },
 
-    #' @section temp_dir():
+    #' @section run_file():
     #'
-    #' Get the path of the "run" file for this host.
-    run_file = function(...) {
+    #' Get the path of the "run file" for this host.
+    #'
+    #' A run file is used to indicate that a particular host is running
+    #' and allow other Stencila processes on the same machine
+    #' to communicate with it. It is created by by \code{host$start()} and
+    #' destroyed by \code{host$stop()}. It is placed in the machine's temporarily
+    #' directory to reduce the chances of a run file being present when a host
+    #' has aborted with out by \code{host$stop()} being called.
+    run_file = function() {
       dir <- file.path(self$temp_dir(), 'hosts')
       if (!file.exists(dir)) dir.create(dir, recursive=TRUE)
       file.path(dir, paste0(self$id, '.json'))
@@ -87,8 +96,9 @@ Host <- R6::R6Class("Host",
 
     #' @section new():
     #'
-    #' Get the environment of this \code{Host}
-    environment = function () {
+    #' Get the environment of this \code{Host} including the version of R
+    #' and the version of installed packages.
+    environ = function () {
       # R
       env <- with(R.version, list(
         version = paste(major, minor, sep='.'),
@@ -128,7 +138,7 @@ Host <- R6::R6Class("Host",
           package = 'r',
           version = version
         ),
-        run = c(unname(Sys.which('R')), '--slave', '-e', 'stencila:::run()'),
+        run = c(unname(Sys.which('R')), '--slave', '-e', 'stencila:::run(echo=TRUE)'),
         schemes = list(
           new = list(
             RContext = RContext$spec
@@ -138,9 +148,9 @@ Host <- R6::R6Class("Host",
       if (complete) {
         manifest <- c(manifest, list(
           id = private$.id,
-          urls = self$urls,
-          instances = names(private$.instances),
-          environment = self$environment()
+          process = Sys.getpid(),
+          urls = I(self$urls),
+          instances = names(private$.instances)
         ))
       }
       manifest
@@ -148,12 +158,16 @@ Host <- R6::R6Class("Host",
 
     #' @section install():
     #'
-    #' Get the Stencila user data directory of this \code{Host}
-    install = function(...) {
+    #' Install this Stencila \code{Host} on this machine.
+    #'
+    #' Installation of a host involves creating a file \code{r.json} inside of
+    #' the user's Stencila data (see \code{user_dir}) directory which describes
+    #' the capabilities of this host.
+    install = function() {
       dir <- file.path(self$user_dir(), 'hosts')
       if (!file.exists(dir)) dir.create(dir, recursive=TRUE)
       cat(
-        toJSON(host$manifest(complete=FALSE), pretty=TRUE, auto_unbox=TRUE),
+        toJSON(self$manifest(complete=FALSE), pretty=TRUE, auto_unbox=TRUE),
         file=file.path(dir, 'r.json')
       )
     },
@@ -244,27 +258,28 @@ Host <- R6::R6Class("Host",
     #'
     #' Start serving this host
     #'
-    #'
     #' \describe{
+    #'   \item{address}{The address to listen. Default '127.0.0.1'}
+    #'   \item{port}{The port to listen on. Default 2000}
     #'   \item{quiet}{Don't print out message. Default FALSE}
     #' }
     #'
     #' Currently, HTTP is the only server available
     #' for hosts. We plan to implement a `HostWebsocketServer` soon.
-    start  = function (quiet=FALSE) {
+    start  = function (address='127.0.0.1', port=2000, quiet=FALSE) {
       if (is.null(private$.servers[['http']])) {
         # Start HTTP server
-        server <- HostHttpServer$new(self)
+        server <- HostHttpServer$new(self, address, port)
         private$.servers[['http']] <- server
         server$start()
 
-        # Register as a running host
+        # Register as a running host by creating a run file
         file <- self$run_file()
         file.create(file)
         Sys.chmod(file, "0600")
-        cat(toJSON(host$manifest(), pretty=TRUE, auto_unbox=TRUE), file=file)
+        cat(toJSON(self$manifest(), pretty=TRUE, auto_unbox=TRUE), file=file)
 
-        if (!quiet) cat('Host is served at:', paste(self$urls, collapse=', '), '\n')
+        if (!quiet) cat('Host has started at', paste(self$urls, collapse=', '), '\n')
       }
       invisible(self)
     },
@@ -272,7 +287,7 @@ Host <- R6::R6Class("Host",
     #' @section stop():
     #'
     #' Stop serving this host. Stops all servers that are currently serving this host
-    stop  = function () {
+    stop  = function (quiet=FALSE) {
       # Stop each server
       for (name in names(private$.servers)) {
         server <- private$.servers[[name]]
@@ -284,20 +299,35 @@ Host <- R6::R6Class("Host",
       file <- self$run_file()
       if (file.exists(file)) file.remove(file)
 
+      if (!quiet) cat('Host has stopped\n')
+
       invisible(self)
     },
 
     #' @section run():
     #'
+    #' \describe{
+    #'   \item{address}{The address to listen. Default '127.0.0.1'}
+    #'   \item{port}{The port to listen on. Default 2000}
+    #'   \item{quiet}{Do not print status messages to the console? Default FALSE}
+    #'   \item{echo}{Print the host's manifest to the console? Default FALSE}
+    #' }
+    #'
     #' Start serving the Stencila host and wait for connections indefinitely
-    run  = function () {
-      self$start()
-      cat('Use Ctl+C (terminal) or Esc (RStudio) to stop\n')
+    run  = function (address='127.0.0.1', port=2000, quiet=FALSE, echo=FALSE) {
+      if (echo) quiet = TRUE
+      self$start(address=address, port=port, quiet=quiet)
+
+      if (echo) {
+        cat(toJSON(self$manifest(), pretty=TRUE, auto_unbox=TRUE))
+        flush.console()
+      }
+
+      if (!quiet) cat('Use Ctl+C (terminal) or Esc (RStudio) to stop\n')
       tryCatch(
         Sys.sleep(1e6),
         interrupt = function (condition) {
-          cat('Stopping host\n')
-          self$stop()
+          self$stop(quiet=quiet)
         }
       )
     },

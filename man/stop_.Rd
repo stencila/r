@@ -4,7 +4,10 @@
 \alias{stop_}
 \title{Stop serving the Stencila host}
 \usage{
-stop_()
+stop_(...)
+}
+\arguments{
+\item{...}{Arguments to pass to \code{host$install}}
 }
 \description{
 Stop serving the Stencila host

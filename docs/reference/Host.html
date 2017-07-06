@@ -106,18 +106,32 @@ protocol (e.g. serialising and deserialising objects).</p>
 
     
     <p>Create a new <code>Host</code></p>
-    <p>Get the environment of this <code>Host</code></p>
+    <p>Get the environment of this <code>Host</code> including the version of R
+and the version of installed packages.</p>
     
     <h2 class="hasAnchor" id="user-dir-"><a class="anchor" href="#user-dir-"></a>user_dir()</h2>
 
     
-    <p>Get the current user's Stencila data directory</p>
+    <p>Get the current user's Stencila data directory.</p>
+<p>This is the directory that Stencila configuration settings, such as the
+installed Stencila hosts, and document buffers get stored.</p>
     
     <h2 class="hasAnchor" id="temp-dir-"><a class="anchor" href="#temp-dir-"></a>temp_dir()</h2>
 
     
     <p>Get the current user's Stencila temporary directory</p>
-    <p>Get the path of the "run" file for this host.</p>
+<p>This directory is used by Stencila for files such as "run files" (see below)</p>
+    
+    <h2 class="hasAnchor" id="run-file-"><a class="anchor" href="#run-file-"></a>run_file()</h2>
+
+    
+    <p>Get the path of the "run file" for this host.</p>
+<p>A run file is used to indicate that a particular host is running
+and allow other Stencila processes on the same machine
+to communicate with it. It is created by by <code>host$start()</code> and
+destroyed by <code>host$stop()</code>. It is placed in the machine's temporarily
+directory to reduce the chances of a run file being present when a host
+has aborted with out by <code>host$stop()</code> being called.</p>
     
     <h2 class="hasAnchor" id="manifest-"><a class="anchor" href="#manifest-"></a>manifest()</h2>
 
@@ -130,7 +144,10 @@ which "instances" have already been instantiated.</p>
     <h2 class="hasAnchor" id="install-"><a class="anchor" href="#install-"></a>install()</h2>
 
     
-    <p>Get the Stencila user data directory of this <code>Host</code></p>
+    <p>Install this Stencila <code>Host</code> on this machine.</p>
+<p>Installation of a host involves creating a file <code>r.json</code> inside of
+the user's Stencila data (see <code>user_dir</code>) directory which describes
+the capabilities of this host.</p>
     
     <h2 class="hasAnchor" id="post-"><a class="anchor" href="#post-"></a>post()</h2>
 
@@ -170,8 +187,9 @@ which "instances" have already been instantiated.</p>
     <h2 class="hasAnchor" id="start-"><a class="anchor" href="#start-"></a>start()</h2>
 
     
-    <p>Start serving this host</p>
-    <dl class='dl-horizontal'>
+    <p>Start serving this host</p><dl class='dl-horizontal'>
+  <dt>address</dt><dd><p>The address to listen. Default '127.0.0.1'</p></dd>
+  <dt>port</dt><dd><p>The port to listen on. Default 2000</p></dd>
   <dt>quiet</dt><dd><p>Don't print out message. Default FALSE</p></dd>
 </dl>
     <p>Currently, HTTP is the only server available
@@ -185,6 +203,12 @@ for hosts. We plan to implement a `HostWebsocketServer` soon.</p>
     <h2 class="hasAnchor" id="run-"><a class="anchor" href="#run-"></a>run()</h2>
 
     
+    <dl class='dl-horizontal'>
+  <dt>address</dt><dd><p>The address to listen. Default '127.0.0.1'</p></dd>
+  <dt>port</dt><dd><p>The port to listen on. Default 2000</p></dd>
+  <dt>quiet</dt><dd><p>Do not print status messages to the console? Default FALSE</p></dd>
+  <dt>echo</dt><dd><p>Print the host's manifest to the console? Default FALSE</p></dd>
+</dl>
     <p>Start serving the Stencila host and wait for connections indefinitely</p>
     
     <h2 class="hasAnchor" id="view-"><a class="anchor" href="#view-"></a>view()</h2>
@@ -210,7 +234,7 @@ e.g. `http` for `HostHttpServer`</p>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='no'>host</span>$<span class='no'>servers</span></div><div class='output co'>#&gt; NULL</div><div class='input'><span class='no'>host</span>$<span class='fu'><a href='start.html'>start</a></span>()</div><div class='output co'>#&gt; Host is served at: http://127.0.0.1:2000 </div><div class='input'><span class='no'>host</span>$<span class='no'>servers</span></div><div class='output co'>#&gt; [1] "http"</div><div class='input'><span class='no'>host</span>$<span class='fu'>stop</span>()</div></pre>
+    <pre class="examples"><div class='input'><span class='no'>host</span>$<span class='no'>servers</span></div><div class='output co'>#&gt; NULL</div><div class='input'><span class='no'>host</span>$<span class='fu'><a href='start.html'>start</a></span>()</div><div class='output co'>#&gt; Host has started at http://127.0.0.1:2000 </div><div class='input'><span class='no'>host</span>$<span class='no'>servers</span></div><div class='output co'>#&gt; [1] "http"</div><div class='input'><span class='no'>host</span>$<span class='fu'>stop</span>()</div><div class='output co'>#&gt; Host has stopped</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
@@ -225,6 +249,8 @@ e.g. `http` for `HostHttpServer`</p>
       <li><a href="#user-dir-">user_dir()</a></li>
 
       <li><a href="#temp-dir-">temp_dir()</a></li>
+
+      <li><a href="#run-file-">run_file()</a></li>
 
       <li><a href="#manifest-">manifest()</a></li>
 

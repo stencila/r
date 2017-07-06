@@ -4,7 +4,10 @@
 \alias{start}
 \title{Start serving the Stencila host}
 \usage{
-start()
+start(...)
+}
+\arguments{
+\item{...}{Arguments to pass to \code{host$start}}
 }
 \description{
 Start serving the Stencila host

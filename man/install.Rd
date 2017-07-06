@@ -4,7 +4,10 @@
 \alias{install}
 \title{Install the Stencila host}
 \usage{
-install()
+install(...)
+}
+\arguments{
+\item{...}{Arguments to pass to \code{host$install}}
 }
 \description{
 Install the Stencila host

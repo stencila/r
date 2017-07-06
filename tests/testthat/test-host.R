@@ -14,6 +14,15 @@ describe("Host", {
     expect_true(length(manifest$schemes) > 0)
   })
 
+  it('has an install() method', {
+    h$install()
+    manifest <- h$manifest(complete=FALSE)
+    expect_equal(
+      manifest,
+      fromJSON(file.path(h$user_dir(), 'hosts', 'r.json'))
+    )
+  })
+
   it('has a post() method', {
     id1 <- h$post('RContext')
     id2 <- h$post('RContext')
@@ -43,7 +52,7 @@ describe("Host", {
     expect_error(h$delete(id), 'Unknown instance')
   })
 
-  it('has a start() and stop() methods', {
+  it('has start() and stop() methods', {
     h$start(quiet=TRUE)
     expect_equal(h$servers, 'http')
     expect_equal(length(h$servers), 1)

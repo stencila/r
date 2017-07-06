@@ -4,7 +4,10 @@
 \alias{run}
 \title{Run the Stencila host}
 \usage{
-run()
+run(...)
+}
+\arguments{
+\item{...}{Arguments to pass to \code{host$install}}
 }
 \description{
 Run the Stencila host

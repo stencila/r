@@ -3,6 +3,7 @@
 [![Build status](https://travis-ci.org/stencila/r.svg?branch=master)](https://travis-ci.org/stencila/r)
 [![Code coverage](https://codecov.io/gh/stencila/r/branch/master/graph/badge.svg)](https://codecov.io/gh/stencila/r)
 [![CRAN](http://www.r-pkg.org/badges/version/stencila)](https://cran.r-project.org/package=stencila)
+[![Community](https://img.shields.io/badge/join-community-green.svg)](https://community.stenci.la)
 [![Chat](https://badges.gitter.im/stencila/stencila.svg)](https://gitter.im/stencila/stencila)
 
 ### Install
@@ -21,19 +22,7 @@ stencila:::install()
 
 ### Use
 
-This package lets you run R code from inside Stencila Documents. First, you need to start serving the Stencila Host within this package. You can do that in your favourite R console (e.g. RStudio):
-
-```r
-stencila:::start()
-```
-
-Or at the system shell:
-
-```sh
-RScript -e 'stencila:::run()'
-```
-
-Then, open your Stencila Document from within the [Stencila Desktop](https://github.com/stencila/desktop). The host will be automatically detected by the desktop app and you'll be able to execute R code cells from within your documents.
+This package lets you run R code from inside Stencila Documents. When you start the [Stencila Desktop](https://github.com/stencila/desktop) it will be automatically detect the installed R package and you'll be able to execute R code cells from within your documents.
 
 More documentation is available at https://stencila.github.io/r
 

@@ -3,6 +3,8 @@
 # for example, Python's module local import staements), for purposes of DRY they may as well be
 # all together here in none file.
 
+# nocov start
+
 # We're following Hadley Wickham's advice:
 #   If you are using just a few functions from another package, the recommended option is to note the
 #   package name in the Imports: field of the DESCRIPTION file and call the function(s) explicitly
@@ -26,42 +28,37 @@ version <- tryCatch(toString(packageVersion("stencila")), error = '0.0.0')
 
 #' Install the Stencila host
 #'
+#' @param ... Arguments to pass to \code{host$install}
 #' @seealso \code{Host}
-install <- function () {
-  host$install()
-}
+install <- function (...) host$install(...)
 
 #' Display the Stencila host's environment
 #'
 #' @seealso \code{Host}
 environ <- function () {
-  cat(toJSON(host$environment(), pretty=TRUE, auto_unbox=TRUE))
+  cat(toJSON(host$environ(), pretty=TRUE, auto_unbox=TRUE))
 }
 
 #' Start serving the Stencila host
 #'
+#' @param ... Arguments to pass to \code{host$start}
 #' @seealso \code{Host}
-start <- function () {
-  host$start()
-}
+start <- function (...) host$start(...)
 
 #' Stop serving the Stencila host
 #'
+#' @param ... Arguments to pass to \code{host$install}
 #' @seealso \code{Host}
 #
 # Called 'stop_' because 'stop' masks `stats::stop`,
 # even within this package.
-stop_ <- function () {
-  host$stop()
-}
+stop_ <- function (...) host$stop(...)
 
 #' Run the Stencila host
 #'
+#' @param ... Arguments to pass to \code{host$install}
 #' @seealso \code{Host}
-run <- function () {
-  host$run()
-}
-
+run <- function (...) host$run(...)
 
 # Hooks for namespace events
 # See https://stat.ethz.ch/R-manual/R-devel/library/base/html/ns-hooks.html
@@ -73,4 +70,4 @@ run <- function () {
   host <<- Host$new()
 }
 
-
+# nocov end
