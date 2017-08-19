@@ -182,10 +182,11 @@ Host <- R6::R6Class("Host",
     #'   \item{options}{Options to be passed to type constructor}
     #'   \item{return}{Address of the newly created instance}
     #' }
-    post = function (type, name = NULL, options = list()) {
+    post = function (type, args = list()) {
       Class <- TYPES[[type]]
       if (!is.null(Class)) {
-        instance <- Class$new()
+        instance <- do.call(Class$new, args)
+        name <- args[['name']]
         if (is.null(name)) {
           name <- paste(sample(c(letters, 0:9), 10), collapse='')
         }

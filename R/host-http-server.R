@@ -175,7 +175,7 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
     #' Handle a POST request
     post = function(request, type) {
       list(
-        body = to_json(private$.host$post(type, self$args(request)[['name']])),
+        body = to_json(private$.host$post(type, self$args(request))),
         status = 200,
         headers = list('Content-Type'='application/json')
       )
