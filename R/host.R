@@ -1,6 +1,7 @@
 # List of types that hosts supports
 #' @include r-context.R
 TYPES <- list(
+  FileStorer = FileStorer,
   RContext = RContext
 )
 
@@ -141,6 +142,7 @@ Host <- R6::R6Class("Host",
         run = c(unname(Sys.which('R')), '--slave', '-e', 'stencila:::run(echo=TRUE)'),
         schemes = list(
           new = list(
+            FileStorer = FileStorer$spec,
             RContext = RContext$spec
           )
         )

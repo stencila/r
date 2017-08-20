@@ -24,7 +24,8 @@ Suggests:
     covr,
     packagedocs
 RoxygenNote: 6.0.1
-Collate:
+Collate: 
+    'file-storer.R'
     'host-http-server.R'
     'r-context.R'
     'host.R'
