@@ -19,10 +19,10 @@ SqliteContext <- R6::R6Class('SqliteContext',
         files <- list.files(dir)
         matches <- grep('(.sqlite)|(.sqlite3)|(.db)|(.db3)$', files)
         if (length(matches) > 0) {
-          db <- file.path(dir, files[matches[0]])
+          db <- file.path(dir, files[matches[1]])
         }
       }
-      private$.conn <- dbConnect(RSQLite::SQLite(), db)
+      private$.conn <- DBI::dbConnect(RSQLite::SQLite(), db)
     },
 
     #' @section runCode():
@@ -33,7 +33,18 @@ SqliteContext <- R6::R6Class('SqliteContext',
     #'   \item{code}{SQL code to be executed}
     #' }
     runCode = function(code) {
-      dbGetQuery(private$.conn, code)
+      output <- tryCatch(DBI::dbGetQuery(private$.conn, code), error=identity)
+      if (inherits(output, 'error')) {
+        errors <- list(list(
+          line = 0,
+          column = 0,
+          message = output$message
+        ))
+        output <- NULL
+      } else {
+        errors <- NULL
+      }
+      list(errors=errors, output=pack(output))
     },
 
     #' @section callCode():
@@ -45,6 +56,24 @@ SqliteContext <- R6::R6Class('SqliteContext',
     #'   \item{inputs}{A list with a value pack for each input}
     #' }
     callCode = function(code, inputs = NULL) {
+      variables <- list()
+      for (name in names(inputs)) {
+        value <- unpack(inputs[[name]])
+        if (inherits(value, 'data.frame')) {
+          DBI::dbExecute(private$.conn, sprintf('DROP TABLE IF EXISTS %s', name))
+          DBI::dbWriteTable(private$.conn, name, value)
+        } else {
+          variables[[name]] <- value
+        }
+      }
+      matches <- str_match_all(code, '\\$\\{(\\w+)\\}')[[1]]
+      if (nrow(matches) >= 1) {
+        for (match in 1:nrow(matches)) {
+          name <- matches[match,2]
+          value <- variables[[name]]
+          code <- str_replace_all(code, sprintf('\\$\\{%s\\}', name), toString(value))
+        }
+      }
       self$runCode(code)
     }
 
