@@ -185,11 +185,11 @@ Host <- R6::R6Class("Host",
     #'
     #' \describe{
     #'   \item{type}{Type of new instance}
-    #'   \item{name}{Name of new instance}
-    #'   \item{options}{Options to be passed to type constructor}
+    #'   \item{args}{Arguments to be passed to type constructor}
+    #'   \item{name}{Name of new instance. Depreciated by retained for compatability.}
     #'   \item{return}{Address of the newly created instance}
     #' }
-    post = function (type, args = list()) {
+    post = function (type, args = list(), name = NULL) {
       Class <- TYPES[[type]]
       if (!is.null(Class)) {
         instance <- do.call(Class$new, args)
@@ -347,7 +347,11 @@ Host <- R6::R6Class("Host",
       # Difficult to test headlessly, so don't include in coverage
       # nocov start
       self$start()
-      url <- sprintf('%s/?peers=origin&address=%s', private$.servers[['http']]$url, address)
+      # Eventually we plan to serve static HTML, JS and CSS from within the package
+      # but for now use S3 bucket http://open.stenci.la
+      origin <- 'http://open.stenci.la'
+      peer <- private$.servers[['http']]$url
+      url <- sprintf('%s/?peers=%s&address=%s', origin, peer, address)
       # See if there is a `viewer` option (defined by RStudio if we are in RStudio)
       viewer <- getOption('viewer')
       # Currently, force external because Stencila will not run in the older
