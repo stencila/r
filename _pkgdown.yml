@@ -17,7 +17,11 @@ reference:
   - title: Classes
     contents:
       - RContext
+<<<<<<< feature-file-storer
       - FileStorer
+=======
+      - SqliteContext
+>>>>>>> Adds initial version of SqliteContext
       - Host
       - HostHttpServer
   - title: Functions

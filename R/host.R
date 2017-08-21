@@ -1,8 +1,14 @@
 # List of types that hosts supports
 #' @include r-context.R
+#' @include sqlite-context.R
 TYPES <- list(
+<<<<<<< feature-file-storer
   FileStorer = FileStorer,
   RContext = RContext
+=======
+  RContext = RContext,
+  SqliteContext = SqliteContext
+>>>>>>> Adds initial version of SqliteContext
 )
 
 #' A Host
@@ -142,8 +148,13 @@ Host <- R6::R6Class("Host",
         run = c(unname(Sys.which('R')), '--slave', '-e', 'stencila:::run(echo=TRUE)'),
         schemes = list(
           new = list(
+<<<<<<< feature-file-storer
             FileStorer = FileStorer$spec,
             RContext = RContext$spec
+=======
+            RContext = RContext$spec,
+            SqliteContext = SqliteContext$spec
+>>>>>>> Adds initial version of SqliteContext
           )
         )
       )
