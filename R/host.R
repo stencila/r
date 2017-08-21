@@ -340,16 +340,19 @@ Host <- R6::R6Class("Host",
       )
     },
 
-    #' @section view():
+    #' @section open():
     #'
-    #' View this host in the browser. Opens the default browser at the URL of this host
-    view  = function (external=FALSE) {
+    #' Open a file the browser. Opens the default browser at the URL of this host
+    open  = function (address=NULL, external=FALSE) {
       # Difficult to test headlessly, so don't include in coverage
       # nocov start
       self$start()
-      url <- private$.servers[['http']]$url
+      url <- sprintf('%s/?peers=origin&address=%s', private$.servers[['http']]$url, address)
       # See if there is a `viewer` option (defined by RStudio if we are in RStudio)
       viewer <- getOption('viewer')
+      # Currently, force external because Stencila will not run in the older
+      # browser that is embedded in RStdio (as of Stencila 0.27 and RStudio 1.0.153)
+      external <- TRUE
       if (is.null(viewer) || external) {
         # Use builtin function to open the URL in a new browser window/tab
         utils::browseURL(url)
@@ -362,6 +365,7 @@ Host <- R6::R6Class("Host",
       invisible(self)
       # nocov end
     }
+
   ),
 
   active = list(

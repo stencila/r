@@ -1,15 +1,10 @@
-#' Opens the file that the is currently open in the source editor in Stencila
-addin_doc_open <- function() {
+#' Opens the file that is currently open in the source editor in Stencila
+addin_open <- function() {
   # Get the path of the file currently in the source editor
-  editor <- getSourceEditorContext()
-  editor$path
+  editor <- rstudioapi::getSourceEditorContext()
+  path <- editor$path
   # If path is empty (as it is for a new document) we could revert to loading the
-  # editor$contents
-}
-
-#' Inserts the current selection as a `run` cell at the cursor location in the document
-addin_doc_insert <- function() {
-  # Get the selected text from the currently active document (source file or console)
-  active <- getActiveDocumentContext()
-  active$selection[[1]]$text
+  # editor$contents but currently error
+  if (nchar(path)==0) stop('Error when attempting to open in Stencila: no file currently active', call.=FALSE)
+  host$open(paste0('file://', path))
 }
