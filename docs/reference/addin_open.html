@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>A HTTP server for a Host — HostHttpServer • stencila</title>
+<title>Opens the file that is currently open in the source editor in Stencila — addin_open • stencila</title>
 
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script>
@@ -76,117 +76,21 @@
       <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>A HTTP server for a Host</h1>
+    <h1>Opens the file that is currently open in the source editor in Stencila</h1>
     </div>
 
     
-    <p>Normally there is no need to create a new <code>HostHttpServer</code>, instead
-use the <code>start</code> method of the <code>host</code> instance.</p>
+    <p>Opens the file that is currently open in the source editor in Stencila</p>
     
 
-    <pre><span class='no'>HostHttpServer</span></pre>
+    <pre><span class='fu'>addin_open</span>()</pre>
         
-    <h2 class="hasAnchor" id="format"><a class="anchor" href="#format"></a>Format</h2>
-
-    <p><code>R6Class</code>.</p>
-    
-    <h2 class="hasAnchor" id="new-"><a class="anchor" href="#new-"></a>new()</h2>
-
-    
-    <dl class='dl-horizontal'>
-  <dt>host</dt><dd><p>The host to be served</p></dd>
-  <dt>address</dt><dd><p>The port to listen on. Default '127.0.0.1'</p></dd>
-  <dt>port</dt><dd><p>The port to listen on. Default 2000</p></dd>
-</dl>
-    
-    <h2 class="hasAnchor" id="start-"><a class="anchor" href="#start-"></a>start()</h2>
-
-    
-    <p>Start the server</p>
-    
-    <h2 class="hasAnchor" id="stop-"><a class="anchor" href="#stop-"></a>stop()</h2>
-
-    
-    <p>Stop the server</p>
-    
-    <h2 class="hasAnchor" id="handle-"><a class="anchor" href="#handle-"></a>handle()</h2>
-
-    
-    <p>Handle a HTTP request</p>
-    
-    <h2 class="hasAnchor" id="route-"><a class="anchor" href="#route-"></a>route()</h2>
-
-    
-    <p>Route a HTTP request</p>
-    
-    <h2 class="hasAnchor" id="options-"><a class="anchor" href="#options-"></a>options()</h2>
-
-    
-    <p>Handle a OPTIONS request</p>
-    
-    <h2 class="hasAnchor" id="home-"><a class="anchor" href="#home-"></a>home()</h2>
-
-    
-    <p>Handle a request to `home`</p>
-    
-    <h2 class="hasAnchor" id="static-"><a class="anchor" href="#static-"></a>static()</h2>
-
-    
-    <p>Handle a request for a static file</p>
-    
-    <h2 class="hasAnchor" id="post-"><a class="anchor" href="#post-"></a>post()</h2>
-
-    
-    <p>Handle a POST request</p>
-    <p>Handle a GET request</p>
-    
-    <h2 class="hasAnchor" id="put-"><a class="anchor" href="#put-"></a>put()</h2>
-
-    
-    <p>Handle a PUT request</p>
-    
-    <h2 class="hasAnchor" id="delete-"><a class="anchor" href="#delete-"></a>delete()</h2>
-
-    
-    <p>Handle a DELETE request</p>
-    
-    <h2 class="hasAnchor" id="url"><a class="anchor" href="#url"></a>url</h2>
-
-    
-    <p>The URL of the server, or <code>NULL</code> if not yet started</p>
-    
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
-      
-      <li><a href="#format">Format</a></li>
-
-      <li><a href="#new-">new()</a></li>
-
-      <li><a href="#start-">start()</a></li>
-
-      <li><a href="#stop-">stop()</a></li>
-
-      <li><a href="#handle-">handle()</a></li>
-
-      <li><a href="#route-">route()</a></li>
-
-      <li><a href="#options-">options()</a></li>
-
-      <li><a href="#home-">home()</a></li>
-
-      <li><a href="#static-">static()</a></li>
-
-      <li><a href="#post-">post()</a></li>
-
-      <li><a href="#put-">put()</a></li>
-
-      <li><a href="#delete-">delete()</a></li>
-
-      <li><a href="#url">url</a></li>
-          </ul>
+                </ul>
 
   </div>
 </div>
