@@ -60,6 +60,12 @@ stop_ <- function (...) host$stop(...)
 #' @seealso \code{Host}
 run <- function (...) host$run(...)
 
+#' Open an address in Stencila
+#'
+#' @param ... Arguments to pass to \code{host$open}
+#' @seealso \code{Host}
+open <- function (...) host$open(...)
+
 # Hooks for namespace events
 # See https://stat.ethz.ch/R-manual/R-devel/library/base/html/ns-hooks.html
 

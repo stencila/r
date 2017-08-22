@@ -154,8 +154,8 @@ the capabilities of this host.</p>
     
     <p>Create a new instance of a type</p><dl class='dl-horizontal'>
   <dt>type</dt><dd><p>Type of new instance</p></dd>
-  <dt>name</dt><dd><p>Name of new instance</p></dd>
-  <dt>options</dt><dd><p>Options to be passed to type constructor</p></dd>
+  <dt>args</dt><dd><p>Arguments to be passed to type constructor</p></dd>
+  <dt>name</dt><dd><p>Name of new instance. Depreciated by retained for compatability.</p></dd>
   <dt>return</dt><dd><p>Address of the newly created instance</p></dd>
 </dl>
     
@@ -211,10 +211,10 @@ for hosts. We plan to implement a `HostWebsocketServer` soon.</p>
 </dl>
     <p>Start serving the Stencila host and wait for connections indefinitely</p>
     
-    <h2 class="hasAnchor" id="view-"><a class="anchor" href="#view-"></a>view()</h2>
+    <h2 class="hasAnchor" id="open-"><a class="anchor" href="#open-"></a>open()</h2>
 
     
-    <p>View this host in the browser. Opens the default browser at the URL of this host</p>
+    <p>Open a file the browser. Opens the default browser at the URL of this host</p>
     
     <h2 class="hasAnchor" id="id"><a class="anchor" href="#id"></a>id</h2>
 
@@ -270,7 +270,7 @@ e.g. `http` for `HostHttpServer`</p>
 
       <li><a href="#run-">run()</a></li>
 
-      <li><a href="#view-">view()</a></li>
+      <li><a href="#open-">open()</a></li>
 
       <li><a href="#id">id</a></li>
 

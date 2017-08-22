@@ -60,17 +60,49 @@ test_that("HostHttpServer.handle", {
   ))
   expect_equal(r$status, 200)
   expect_equal(str_sub(r$body, 1, 22), '{"stencila":{"package"')
+
+  # Browser-based CORS request
+  for (origin in c('http://127.0.0.1:2000', 'http://localhost:2010', 'https://open.stenci.la')) {
+    r <- s$handle(list(
+      PATH_INFO = '/',
+      REQUEST_METHOD = 'GET',
+      HTTP_REFERER = sprintf('%s/some/file/path', origin),
+      rook.input = list(read_lines = function() NULL)
+    ))
+    expect_equal(r$headers[['Access-Control-Allow-Origin']], origin)
+    expect_equal(r$headers[['Access-Control-Allow-Credentials']], 'true')
+  }
+
+  # Browser-based CORS pre-flight request
+  for (origin in c('http://127.0.0.1:2000', 'http://localhost:2010', 'https://open.stenci.la')) {
+    r <- s$handle(list(
+      PATH_INFO = '/',
+      REQUEST_METHOD = 'OPTIONS',
+      HTTP_ORIGIN = origin,
+      rook.input = list(read_lines = function() NULL)
+    ))
+    expect_equal(r$headers[['Access-Control-Allow-Origin']], origin)
+    expect_equal(r$headers[['Access-Control-Allow-Credentials']], 'true')
+    expect_equal(r$headers[['Access-Control-Allow-Methods']], 'GET, POST, PUT, DELETE, OPTIONS')
+    expect_equal(r$headers[['Access-Control-Max-Age']], '86400')
+  }
+
+  # Browser-based CORS pre-flight request from third party site
+  r <- s$handle(list(
+    PATH_INFO = '/',
+    REQUEST_METHOD = 'OPTIONS',
+    HTTP_ORIGIN = 'http://evil.hackers.com',
+    rook.input = list(read_lines = function() NULL)
+  ))
+  expect_equal(r$headers[['Access-Control-Allow-Origin']], NULL)
 })
 
 test_that("HostHttpServer.options", {
   s = HostHttpServer$new(host)
 
-  r = s$options(list(headers=list('Accept'='application/json')))
+  r = s$options()
   expect_equal(r$status, 200)
-  expect_equal(r$headers[['Access-Control-Allow-Methods']], 'GET, POST, PUT, DELETE, OPTIONS')
-  expect_equal(r$headers[['Access-Control-Allow-Headers']], 'Content-Type')
-  expect_equal(r$headers[['Access-Control-Max-Age']], '1728000')
-
+  expect_equal(r$body, '')
 })
 
 test_that("HostHttpServer.home", {

@@ -68,7 +68,7 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
       #  [17] "rook.input"                     "rook.url_scheme"                "rook.version"                   "SCRIPT_NAME"
       #  [21] "SERVER_NAME"                    "SERVER_PORT"
       #
-      # See https://github.com/jeffreyhorner/Rook/blob/a5e45f751/README.md#the-environment for
+      # See https://github.com/jeffreyhorner/Rook#the-environment for further details.
       request <- list(
         path = httpuv::decodeURIComponent(env$PATH_INFO),
         method = env$REQUEST_METHOD,
@@ -88,11 +88,49 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
       if (inherits(response, 'error')) {
         response <- self$error500(request, response)
       }
-      # CORS access header added to all requests
+
+      # CORS headers are used to control access by browsers. In particular, CORS
+      # can prevent access by XHR requests made by Javascript in third party sites.
       # See https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS
-      response$headers <- c(response$headers, list(
-        'Access-Control-Allow-Origin' = '*'
-      ))
+
+      # Get the Origin header (sent in CORS and POST requests) and fall back to Referer header
+      # if it is not present (either of these should be present in most browser requests)
+      origin <- env$HTTP_ORIGIN
+      if (is.null(origin) & !is.null(env$HTTP_REFERER)) {
+        origin <- str_match(env$HTTP_REFERER, '^https?://([\\w.]+)(:\\d+)?')[1,1]
+      }
+
+      # Check that host is in whitelist
+      if (!is.null(origin)) {
+        host <- str_match(origin, '^https?://([\\w.]+)(:\\d+)?')[1,2]
+        if (!(host %in% c('127.0.0.1', 'localhost', 'open.stenci.la'))) origin <- NULL
+      }
+
+      # If an origin has been found and is authorized set CORS headers
+      # Without these headers browser XHR request get an error like:
+      #     No 'Access-Control-Allow-Origin' header is present on the requested resource.
+      #     Origin 'http://evil.hackers:4000' is therefore not allowed access.
+      if (!is.null(origin)) {
+        # 'Simple' requests (GET and POST XHR requests)
+        cors_headers <- list(
+          'Access-Control-Allow-Origin' = origin,
+          # Allow sending cookies and other credentials
+          'Access-Control-Allow-Credentials' = 'true'
+        )
+        # Pre-flighted requests by OPTIONS method (made before PUT, DELETE etc XHR requests and in other circumstances)
+        # get additional CORS headers
+        if (request$method == 'OPTIONS') {
+          cors_headers <- c(cors_headers, list(
+            # Allowable methods and headers
+            'Access-Control-Allow-Methods' = 'GET, POST, PUT, DELETE, OPTIONS',
+            'Access-Control-Allow-Headers' = 'Content-Type',
+            # "how long the response to the preflight request can be cached for without sending another preflight request"
+            'Access-Control-Max-Age' = '86400' # 24 hours
+          ))
+        }
+        response$headers <- c(response$headers, cors_headers)
+      }
+
       response
     },
 
@@ -121,13 +159,10 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
 
     #' @section options():
     #'
-    #' Handle OPTIONS request. Necessary for pre-flighted CORS requests.
+    #' Handle a OPTIONS request
     options = function(request) {
-      list(body = '', status = 200, headers = list(
-        'Access-Control-Allow-Methods' = 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers' = 'Content-Type',
-        'Access-Control-Max-Age' = '1728000'
-      ))
+      # It seems necessary to have at least one header set
+      list(body = '', status = 200, headers = list('Content-Type'='text/plain'))
     },
 
     #' @section home():

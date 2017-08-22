@@ -49,7 +49,7 @@ Route a HTTP request
 \section{options()}{
 
 
-Handle OPTIONS request. Necessary for pre-flighted CORS requests.
+Handle a OPTIONS request
 }
 
 \section{home()}{

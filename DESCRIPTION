@@ -26,7 +26,8 @@ Suggests:
     covr,
     packagedocs
 RoxygenNote: 6.0.1
-Collate:
+Collate: 
+    'addins.R'
     'file-storer.R'
     'host-http-server.R'
     'sqlite-context.R'

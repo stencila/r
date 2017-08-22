@@ -1,0 +1,4 @@
+Name: Open with Stencila
+Description: Open the file in the source editor using Stencila
+Binding: addin_open
+Interactive: false
