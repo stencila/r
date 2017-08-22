@@ -2,6 +2,7 @@
 
 export(FileStorer)
 export(RContext)
+export(SqliteContext)
 export(host)
 export(pack)
 export(type)
