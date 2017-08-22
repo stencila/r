@@ -97,6 +97,30 @@
   <dt>version</dt><dd><p>Version of storer. Currently ignored but required for compatability. Default <code>NULL</code></p></dd>
 </dl>
     
+    <h2 class="hasAnchor" id="getdirectory-"><a class="anchor" href="#getdirectory-"></a>getDirectory()</h2>
+
+    
+    <p>Get the directory path of this storer</p>
+    
+    <h2 class="hasAnchor" id="getmain-"><a class="anchor" href="#getmain-"></a>getMain()</h2>
+
+    
+    <p>Get the main file, if specified</p>
+    
+    <h2 class="hasAnchor" id="getfiles-"><a class="anchor" href="#getfiles-"></a>getFiles()</h2>
+
+    
+    <p>List files within this storer</p>
+    
+    <h2 class="hasAnchor" id="getinfo-"><a class="anchor" href="#getinfo-"></a>getInfo()</h2>
+
+    
+    <p>Get information about this storer:</p><dl class='dl-horizontal'>
+  <dt>dir</dt><dd><p>The absolute file sytem path of the storer's directory</p></dd>
+  <dt>main</dt><dd><p>The main file, if specified</p></dd>
+  <dt>files</dt><dd><p>A list of file in the storer</p></dd>
+</dl>
+    
     <h2 class="hasAnchor" id="readfile-"><a class="anchor" href="#readfile-"></a>readFile()</h2>
 
     
@@ -112,17 +136,11 @@
   <dt>content</dt><dd><p>Content to write</p></dd>
 </dl>
     
-    <h2 class="hasAnchor" id="listfiles-"><a class="anchor" href="#listfiles-"></a>listFiles()</h2>
+    <h2 class="hasAnchor" id="deletefile-"><a class="anchor" href="#deletefile-"></a>deleteFile()</h2>
 
     
-    <p>List files within this storer</p>
-    
-    <h2 class="hasAnchor" id="getinfo-"><a class="anchor" href="#getinfo-"></a>getInfo()</h2>
-
-    
-    <p>Get information about this storer:</p><dl class='dl-horizontal'>
-  <dt>path</dt><dd><p>The absolute file sytem path of the storer</p></dd>
-  <dt>files</dt><dd><p>A list of file in the storer</p></dd>
+    <p>Delete the file at <code>path</code></p><dl class='dl-horizontal'>
+  <dt>path</dt><dd><p>Path within the storer</p></dd>
 </dl>
     
 
@@ -135,13 +153,19 @@
 
       <li><a href="#new-">new()</a></li>
 
+      <li><a href="#getdirectory-">getDirectory()</a></li>
+
+      <li><a href="#getmain-">getMain()</a></li>
+
+      <li><a href="#getfiles-">getFiles()</a></li>
+
+      <li><a href="#getinfo-">getInfo()</a></li>
+
       <li><a href="#readfile-">readFile()</a></li>
 
       <li><a href="#writefile-">writeFile()</a></li>
 
-      <li><a href="#listfiles-">listFiles()</a></li>
-
-      <li><a href="#getinfo-">getInfo()</a></li>
+      <li><a href="#deletefile-">deleteFile()</a></li>
           </ul>
 
   </div>

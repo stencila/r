@@ -22,6 +22,36 @@ Create a new \code{FileStorer}
 }
 }
 
+\section{getDirectory()}{
+
+
+Get the directory path of this storer
+}
+
+\section{getMain()}{
+
+
+Get the main file, if specified
+}
+
+\section{getFiles()}{
+
+
+List files within this storer
+}
+
+\section{getInfo()}{
+
+
+Get information about this storer:
+
+\describe{
+  \item{dir}{The absolute file sytem path of the storer's directory}
+  \item{main}{The main file, if specified}
+  \item{files}{A list of file in the storer}
+}
+}
+
 \section{readFile()}{
 
 
@@ -43,20 +73,13 @@ Write content to the file at \code{path}
 }
 }
 
-\section{listFiles()}{
+\section{deleteFile()}{
 
 
-List files within this storer
-}
-
-\section{getInfo()}{
-
-
-Get information about this storer:
+Delete the file at \code{path}
 
 \describe{
-  \item{path}{The absolute file sytem path of the storer}
-  \item{files}{A list of file in the storer}
+  \item{path}{Path within the storer}
 }
 }
 

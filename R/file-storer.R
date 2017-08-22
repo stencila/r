@@ -12,8 +12,54 @@ FileStorer <- R6::R6Class('FileStorer',
     #'   \item{path}{Local file system path. Default \code{''}}
     #'   \item{version}{Version of storer. Currently ignored but required for compatability. Default \code{NULL}}
     #' }
-    initialize = function (path = '', version=NULL) {
-      private$.path = path
+    initialize = function (path = '/', version = NULL) {
+      path <- suppressWarnings(normalizePath(path))
+      if (file.exists(path)) {
+        isdir <- file.info(path)[1, 'isdir']
+      } else {
+        isdir <- !str_detect(path, '\\.([[:alnum:]]+)$')
+      }
+      private$.dir <- if (isdir) path else dirname(path)
+      private$.main <- if (isdir) NULL else basename(path)
+    },
+
+
+    #' @section getDirectory():
+    #'
+    #' Get the directory path of this storer
+    getDirectory = function () {
+      private$.dir
+    },
+
+    #' @section getMain():
+    #'
+    #' Get the main file, if specified
+    getMain = function () {
+      private$.main
+    },
+
+    #' @section getFiles():
+    #'
+    #' List files within this storer
+    getFiles = function () {
+      setdiff(list.files(private$.dir), list.dirs(private$.dir, recursive = FALSE, full.names = FALSE))
+    },
+
+    #' @section getInfo():
+    #'
+    #' Get information about this storer:
+    #'
+    #' \describe{
+    #'   \item{dir}{The absolute file sytem path of the storer's directory}
+    #'   \item{main}{The main file, if specified}
+    #'   \item{files}{A list of file in the storer}
+    #' }
+    getInfo = function () {
+      list(
+        dir=self$getDirectory(),
+        main=self$getMain(),
+        files=self$getFiles()
+      )
     },
 
     #' @section readFile():
@@ -24,7 +70,7 @@ FileStorer <- R6::R6Class('FileStorer',
     #'   \item{path}{Path within the storer}
     #' }
     readFile = function (path) {
-      path <- file.path(private$.path, path)
+      path <- file.path(private$.dir, path)
       connection <- file(path, 'rt')
       content <- readChar(connection, file.info(path)$size)
       close(connection)
@@ -40,7 +86,7 @@ FileStorer <- R6::R6Class('FileStorer',
     #'   \item{content}{Content to write}
     #' }
     writeFile = function (path, content) {
-      path <- file.path(private$.path, path)
+      path <- file.path(private$.dir, path)
       connection <- file(path, 'wt')
       # It would seem to make sense to use `writeChar` here but that
       # appears to write a binary encoded file. So using `cat`.
@@ -48,31 +94,23 @@ FileStorer <- R6::R6Class('FileStorer',
       close(connection)
     },
 
-    #' @section listFiles():
+    #' @section deleteFile():
     #'
-    #' List files within this storer
-    listFiles = function () {
-      setdiff(list.files(private$.path), list.dirs(private$.path, recursive = FALSE, full.names = FALSE))
-    },
-
-    #' @section getInfo():
-    #'
-    #' Get information about this storer:
+    #' Delete the file at \code{path}
     #'
     #' \describe{
-    #'   \item{path}{The absolute file sytem path of the storer}
-    #'   \item{files}{A list of file in the storer}
+    #'   \item{path}{Path within the storer}
     #' }
-    getInfo = function () {
-      list(
-        path=private$.path,
-        files=self$listFiles()
-      )
+    deleteFile = function (path) {
+      path <- file.path(private$.dir, path)
+      file.remove(path)
     }
+
   ),
 
   private = list(
-    .path = ''
+    .dir = NULL,
+    .main = NULL
   )
 )
 
