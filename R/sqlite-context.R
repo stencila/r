@@ -25,6 +25,12 @@ SqliteContext <- R6::R6Class('SqliteContext',
       private$.conn <- DBI::dbConnect(RSQLite::SQLite(), db)
     },
 
+    # Destructor called when instance is garbage collected
+    finalize = function() {
+      # Prevent the warning "call dbDisconnect() when finished working with a connection"
+      DBI::dbDisconnect(private$.conn)
+    },
+
     #' @section runCode():
     #'
     #' Run R code within the context's scope
@@ -33,7 +39,8 @@ SqliteContext <- R6::R6Class('SqliteContext',
     #'   \item{code}{SQL code to be executed}
     #' }
     runCode = function(code) {
-      output <- tryCatch(DBI::dbGetQuery(private$.conn, code), error=identity)
+      func <- if(str_detect(code, '^(SELECT|select)\\b')) DBI::dbGetQuery else DBI::dbExecute
+      output <- tryCatch(func(private$.conn, code), error=identity)
       if (inherits(output, 'error')) {
         errors <- list(list(
           line = 0,
@@ -60,8 +67,7 @@ SqliteContext <- R6::R6Class('SqliteContext',
       for (name in names(inputs)) {
         value <- unpack(inputs[[name]])
         if (inherits(value, 'data.frame')) {
-          DBI::dbExecute(private$.conn, sprintf('DROP TABLE IF EXISTS %s', name))
-          DBI::dbWriteTable(private$.conn, name, value)
+          DBI::dbWriteTable(private$.conn, name, value, overwrite=TRUE)
         } else {
           variables[[name]] <- value
         }
