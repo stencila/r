@@ -22,9 +22,9 @@ Imports:
     tidyverse,
     tools
 Suggests:
+    devtools,
     testthat,
-    covr,
-    packagedocs
+    covr
 RoxygenNote: 6.0.1
 Collate: 
     'addins.R'
