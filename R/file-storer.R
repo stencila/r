@@ -42,7 +42,7 @@ FileStorer <- R6::R6Class('FileStorer',
     #'
     #' List files within this storer
     getFiles = function () {
-      setdiff(list.files(private$.dir), list.dirs(private$.dir, recursive = FALSE, full.names = FALSE))
+      I(setdiff(list.files(private$.dir), list.dirs(private$.dir, recursive = FALSE, full.names = FALSE)))
     },
 
     #' @section getInfo():
