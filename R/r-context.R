@@ -43,9 +43,9 @@ RContext <- R6::R6Class('RContext',
     #' }
     initialize = function (dir=NULL, local=TRUE, closed=FALSE) {
       # Set the working directory
+      private$.dir <- dir
       if (!is.null(dir)) {
         setwd(dir)
-        private$.dir <- dir
       }
 
       # Create a 'packages' environment that contains all the functions available to the context
