@@ -23,7 +23,6 @@ FileStorer <- R6::R6Class('FileStorer',
       private$.main <- if (isdir) NULL else basename(path)
     },
 
-
     #' @section getDirectory():
     #'
     #' Get the directory path of this storer

@@ -4,12 +4,12 @@ describe('FileStorer', {
     s <- FileStorer$new('test-dir-1')
     expect_equal(s$getDirectory(), file.path(getwd(), 'test-dir-1'))
     expect_equal(s$getMain(), NULL)
-    expect_equal(s$getFiles(), 'main.md')
+    expect_equal(s$getFiles(), I('main.md'))
 
     s <- FileStorer$new('test-dir-1/main.md')
     expect_equal(s$getDirectory(), file.path(getwd(), 'test-dir-1'))
     expect_equal(s$getMain(), 'main.md')
-    expect_equal(s$getFiles(), 'main.md')
+    expect_equal(s$getFiles(), I('main.md'))
 
     s <- FileStorer$new('~/some/dir')
     expect_equal(s$getDirectory(), path.expand('~/some/dir'))
@@ -31,7 +31,7 @@ describe('FileStorer', {
   it('has a writeFile() method', {
     s <- FileStorer$new('test-dir-1')
     s$writeFile('temp.txt', 'A tempororary file created by a test!\n')
-    expect_equal(s$getFiles(), c('main.md', 'temp.txt'))
+    expect_equal(s$getFiles(), I(c('main.md', 'temp.txt')))
     expect_equal(s$readFile('temp.txt'), 'A tempororary file created by a test!\n')
     s$deleteFile('temp.txt')
   })
