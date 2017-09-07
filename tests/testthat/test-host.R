@@ -54,7 +54,7 @@ describe("Host", {
 
   it('has start() and stop() methods', {
     h$start(quiet=TRUE)
-    expect_equal(h$servers, 'http')
+    expect_equal(names(h$servers), 'http')
     expect_equal(length(h$servers), 1)
     expect_equal(length(h$manifest()$urls), 1)
     expect_true(file.exists(h$run_file()))

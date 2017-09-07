@@ -41,7 +41,13 @@ RContext <- R6::R6Class('RContext',
     #'   \item{local}{Context can not assign to the global environment. Default \code{TRUE}}
     #'   \item{closed}{Context can not read from the global environment. Default \code{FALSE}}
     #' }
-    initialize = function (local=TRUE, closed=FALSE) {
+    initialize = function (dir=NULL, local=TRUE, closed=FALSE) {
+      # Set the working directory
+      private$.dir <- dir
+      if (!is.null(dir)) {
+        setwd(dir)
+      }
+
       # Create a 'packages' environment that contains all the functions available to the context
       if (closed) packages_env <- new.env(parent=baseenv())
       else packages_env <- new.env(parent=globalenv())
@@ -138,6 +144,9 @@ RContext <- R6::R6Class('RContext',
   ),
 
   private = list(
+    # Context's working directory
+    .dir = NULL,
+
     # Context's global scope
     .global_env = NULL,
 

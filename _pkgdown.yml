@@ -17,6 +17,8 @@ reference:
   - title: Classes
     contents:
       - RContext
+      - SqliteContext
+      - FileStorer
       - Host
       - HostHttpServer
   - title: Functions

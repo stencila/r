@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Start serving the Stencila host — start • stencila</title>
+<title>A SQLite context — SqliteContext • stencila</title>
 
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha384-nrOSfDHtoPMzJHjVTdCopGqIqeYETSXhZDFyniQ8ZHcVy08QesyHcnOUpMpqnmWq" crossorigin="anonymous"></script>
@@ -77,36 +77,54 @@
       <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Start serving the Stencila host</h1>
+    <h1>A SQLite context</h1>
     </div>
 
     
-    <p>Start serving the Stencila host</p>
+    <p>A SQLite context</p>
     
 
-    <pre class="usage"><span class='fu'>start</span>(<span class='no'>...</span>)</pre>
-    
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a> Arguments</h2>
-    <table class="ref-arguments">
-    <colgroup><col class="name" /><col class="desc" /></colgroup>
-    <tr>
-      <th>...</th>
-      <td><p>Arguments to pass to <code>host$start</code></p></td>
-    </tr>
-    </table>
-    
-    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
+    <pre class="usage"><span class='no'>SqliteContext</span></pre>
+        
+    <h2 class="hasAnchor" id="format"><a class="anchor" href="#format"></a>Format</h2>
 
-    <p><code>Host</code></p>
+    <p>An object of class <code>R6ClassGenerator</code> of length 25.</p>
+    
+    <h2 class="hasAnchor" id="new-"><a class="anchor" href="#new-"></a>new()</h2>
+
+    
+    <p>Create a new <code>SqliteContext</code></p><dl class='dl-horizontal'>
+  <dt>dir</dt><dd><p>Working directory. Default <code>NULL</code></p></dd>
+</dl>
+    
+    <h2 class="hasAnchor" id="runcode-"><a class="anchor" href="#runcode-"></a>runCode()</h2>
+
+    
+    <p>Run R code within the context's scope</p><dl class='dl-horizontal'>
+  <dt>code</dt><dd><p>SQL code to be executed</p></dd>
+</dl>
+    
+    <h2 class="hasAnchor" id="callcode-"><a class="anchor" href="#callcode-"></a>callCode()</h2>
+
+    
+    <p>Run R code within a local function scope</p><dl class='dl-horizontal'>
+  <dt>code</dt><dd><p>SQL code to be executed</p></dd>
+  <dt>inputs</dt><dd><p>A list with a value pack for each input</p></dd>
+</dl>
     
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
-      <li><a href="#arguments">Arguments</a></li>
       
-      <li><a href="#see-also">See also</a></li>
+      <li><a href="#format">Format</a></li>
+
+      <li><a href="#new-">new()</a></li>
+
+      <li><a href="#runcode-">runCode()</a></li>
+
+      <li><a href="#callcode-">callCode()</a></li>
           </ul>
 
   </div>

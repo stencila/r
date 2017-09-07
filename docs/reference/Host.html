@@ -23,9 +23,10 @@
 <link href="../pkgdown.css" rel="stylesheet">
 <script src="../jquery.sticky-kit.min.js"></script>
 <script src="../pkgdown.js"></script>
-
+  
+  
 <!-- mathjax -->
-<script src='https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
+<script src='https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
 
 <!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
@@ -84,7 +85,7 @@
 The types can be thought of a "services" provided by the host e.g. `RContext`, `FileSystemStorer`</p>
     
 
-    <pre><span class='no'>Host</span></pre>
+    <pre class="usage"><span class='no'>Host</span></pre>
         
     <h2 class="hasAnchor" id="format"><a class="anchor" href="#format"></a>Format</h2>
 
@@ -154,8 +155,8 @@ the capabilities of this host.</p>
     
     <p>Create a new instance of a type</p><dl class='dl-horizontal'>
   <dt>type</dt><dd><p>Type of new instance</p></dd>
-  <dt>name</dt><dd><p>Name of new instance</p></dd>
-  <dt>options</dt><dd><p>Options to be passed to type constructor</p></dd>
+  <dt>args</dt><dd><p>Arguments to be passed to type constructor</p></dd>
+  <dt>name</dt><dd><p>Name of new instance. Depreciated but retained for compatability.</p></dd>
   <dt>return</dt><dd><p>Address of the newly created instance</p></dd>
 </dl>
     
@@ -211,10 +212,10 @@ for hosts. We plan to implement a `HostWebsocketServer` soon.</p>
 </dl>
     <p>Start serving the Stencila host and wait for connections indefinitely</p>
     
-    <h2 class="hasAnchor" id="view-"><a class="anchor" href="#view-"></a>view()</h2>
+    <h2 class="hasAnchor" id="open-"><a class="anchor" href="#open-"></a>open()</h2>
 
     
-    <p>View this host in the browser. Opens the default browser at the URL of this host</p>
+    <p>Open a file in the browser.</p>
     
     <h2 class="hasAnchor" id="id"><a class="anchor" href="#id"></a>id</h2>
 
@@ -224,7 +225,7 @@ for hosts. We plan to implement a `HostWebsocketServer` soon.</p>
     <h2 class="hasAnchor" id="servers"><a class="anchor" href="#servers"></a>servers</h2>
 
     
-    <p>Get a list of server names for this host. Servers are identified by the protocol shorthand
+    <p>Get a list of servers for this host. Servers are identified by the protocol shorthand
 e.g. `http` for `HostHttpServer`</p>
     
     <h2 class="hasAnchor" id="urls"><a class="anchor" href="#urls"></a>urls</h2>
@@ -234,7 +235,14 @@ e.g. `http` for `HostHttpServer`</p>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='no'>host</span>$<span class='no'>servers</span></div><div class='output co'>#&gt; NULL</div><div class='input'><span class='no'>host</span>$<span class='fu'><a href='start.html'>start</a></span>()</div><div class='output co'>#&gt; Host has started at http://127.0.0.1:2000 </div><div class='input'><span class='no'>host</span>$<span class='no'>servers</span></div><div class='output co'>#&gt; [1] "http"</div><div class='input'><span class='no'>host</span>$<span class='fu'>stop</span>()</div><div class='output co'>#&gt; Host has stopped</div></pre>
+    <pre class="examples"><div class='input'><span class='no'>host</span>$<span class='no'>servers</span></div><div class='output co'>#&gt; list()</div><div class='input'><span class='no'>host</span>$<span class='fu'><a href='start.html'>start</a></span>()</div><div class='output co'>#&gt; Host has started at: http://127.0.0.1:2000/?ticket=CTYMZDY8RqtM </div><div class='input'><span class='no'>host</span>$<span class='no'>servers</span></div><div class='output co'>#&gt; $http
+#&gt; $http$url
+#&gt; [1] "http://127.0.0.1:2000"
+#&gt; 
+#&gt; $http$ticket
+#&gt; [1] "8tDgrqBNSnda"
+#&gt; 
+#&gt; </div><div class='input'><span class='no'>host</span>$<span class='fu'>stop</span>()</div><div class='output co'>#&gt; Host has stopped</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
@@ -270,7 +278,7 @@ e.g. `http` for `HostHttpServer`</p>
 
       <li><a href="#run-">run()</a></li>
 
-      <li><a href="#view-">view()</a></li>
+      <li><a href="#open-">open()</a></li>
 
       <li><a href="#id">id</a></li>
 
