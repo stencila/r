@@ -156,7 +156,7 @@ the capabilities of this host.</p>
     <p>Create a new instance of a type</p><dl class='dl-horizontal'>
   <dt>type</dt><dd><p>Type of new instance</p></dd>
   <dt>args</dt><dd><p>Arguments to be passed to type constructor</p></dd>
-  <dt>name</dt><dd><p>Name of new instance. Depreciated by retained for compatability.</p></dd>
+  <dt>name</dt><dd><p>Name of new instance. Depreciated but retained for compatability.</p></dd>
   <dt>return</dt><dd><p>Address of the newly created instance</p></dd>
 </dl>
     
@@ -215,7 +215,7 @@ for hosts. We plan to implement a `HostWebsocketServer` soon.</p>
     <h2 class="hasAnchor" id="open-"><a class="anchor" href="#open-"></a>open()</h2>
 
     
-    <p>Open a file the browser. Opens the default browser at the URL of this host</p>
+    <p>Open a file in the browser.</p>
     
     <h2 class="hasAnchor" id="id"><a class="anchor" href="#id"></a>id</h2>
 
@@ -225,7 +225,7 @@ for hosts. We plan to implement a `HostWebsocketServer` soon.</p>
     <h2 class="hasAnchor" id="servers"><a class="anchor" href="#servers"></a>servers</h2>
 
     
-    <p>Get a list of server names for this host. Servers are identified by the protocol shorthand
+    <p>Get a list of servers for this host. Servers are identified by the protocol shorthand
 e.g. `http` for `HostHttpServer`</p>
     
     <h2 class="hasAnchor" id="urls"><a class="anchor" href="#urls"></a>urls</h2>
@@ -235,7 +235,14 @@ e.g. `http` for `HostHttpServer`</p>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='no'>host</span>$<span class='no'>servers</span></div><div class='output co'>#&gt; NULL</div><div class='input'><span class='no'>host</span>$<span class='fu'><a href='start.html'>start</a></span>()</div><div class='output co'>#&gt; Host has started at http://127.0.0.1:2000 </div><div class='input'><span class='no'>host</span>$<span class='no'>servers</span></div><div class='output co'>#&gt; [1] "http"</div><div class='input'><span class='no'>host</span>$<span class='fu'>stop</span>()</div><div class='output co'>#&gt; Host has stopped</div></pre>
+    <pre class="examples"><div class='input'><span class='no'>host</span>$<span class='no'>servers</span></div><div class='output co'>#&gt; list()</div><div class='input'><span class='no'>host</span>$<span class='fu'><a href='start.html'>start</a></span>()</div><div class='output co'>#&gt; Host has started at: http://127.0.0.1:2000/?ticket=CTYMZDY8RqtM </div><div class='input'><span class='no'>host</span>$<span class='no'>servers</span></div><div class='output co'>#&gt; $http
+#&gt; $http$url
+#&gt; [1] "http://127.0.0.1:2000"
+#&gt; 
+#&gt; $http$ticket
+#&gt; [1] "8tDgrqBNSnda"
+#&gt; 
+#&gt; </div><div class='input'><span class='no'>host</span>$<span class='fu'>stop</span>()</div><div class='output co'>#&gt; Host has stopped</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>

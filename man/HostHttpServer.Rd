@@ -8,6 +8,9 @@
 \usage{
 HostHttpServer
 }
+\value{
+{string} A ticket
+}
 \description{
 Normally there is no need to create a new \code{HostHttpServer}, instead
 use the \code{start} method of the \code{host} instance.
@@ -17,8 +20,9 @@ use the \code{start} method of the \code{host} instance.
 
 \describe{
   \item{host}{The host to be served}
-  \item{address}{The port to listen on. Default '127.0.0.1'}
-  \item{port}{The port to listen on. Default 2000}
+  \item{address}{The port to listen on. Default \code{'127.0.0.1'}}
+  \item{port}{The port to listen on. Default \code{2000}}
+  \item{authorization}{Authorization for all requests. Default \code{TRUE}}
 }
 }
 
@@ -84,6 +88,62 @@ Handle a PUT request
 
 
 Handle a DELETE request
+}
+
+\section{args()}{
+
+
+Convert the body into a named list of arguments
+}
+
+\section{ticket_create()}{
+
+
+Create a ticket (a single-use access token)
+}
+
+\section{ticket_check()}{
+
+
+Check that a ticket is valid. If it is, then it is removed
+from the list of tickets and \code{TRUE} is returned. Otherwise,
+returns \code{FALSE}
+}
+
+\section{ticketed_url()}{
+
+Create a URL with a ticket query parameter so users
+can connect to this server
+}
+
+\section{token_create()}{
+
+
+Create a token (a multiple-use access token)
+}
+
+\section{token_check()}{
+
+
+Check that a token is valid.
+}
+
+\section{error_403()}{
+
+
+Generate a 403 error
+}
+
+\section{error_404()}{
+
+
+Generate a 404 error
+}
+
+\section{error_500()}{
+
+
+Generate a 500 error
 }
 
 \section{url}{

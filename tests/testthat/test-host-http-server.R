@@ -49,13 +49,27 @@ test_that("HostHttpServer.handle", {
     HTTP_ACCEPT = '',
     rook.input = list(read_lines = function() NULL)
   ))
+  expect_equal(r$status, 403)
+
+  # Authorization using a ticket
+  r <- s$handle(list(
+    PATH_INFO = '/',
+    QUERY_STRING = paste0('?ticket=', s$ticket_create()),
+    REQUEST_METHOD = 'GET',
+    HTTP_ACCEPT = '',
+    rook.input = list(read_lines = function() NULL)
+  ))
   expect_equal(r$status, 200)
+  expect_equal(str_sub(r$headers['Set-Cookie'], 1, 6), 'token=')
+  token <- str_match(r$headers['Set-Cookie'], 'token=([a-zA-Z0-9]+);')[1,2]
   expect_equal(str_sub(r$body, 1, 23), '<!doctype html>\n<html>\n')
 
+  # Authorization using a token
   r <- s$handle(list(
     PATH_INFO = '/',
     REQUEST_METHOD = 'GET',
     HTTP_ACCEPT = 'application/json',
+    HTTP_COOKIE = paste0('token=', token),
     rook.input = list(read_lines = function() NULL)
   ))
   expect_equal(r$status, 200)
@@ -66,6 +80,7 @@ test_that("HostHttpServer.handle", {
     r <- s$handle(list(
       PATH_INFO = '/',
       REQUEST_METHOD = 'GET',
+      HTTP_COOKIE = paste0('token=', token),
       HTTP_REFERER = sprintf('%s/some/file/path', origin),
       rook.input = list(read_lines = function() NULL)
     ))

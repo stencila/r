@@ -94,7 +94,7 @@ Create a new instance of a type
 \describe{
   \item{type}{Type of new instance}
   \item{args}{Arguments to be passed to type constructor}
-  \item{name}{Name of new instance. Depreciated by retained for compatability.}
+  \item{name}{Name of new instance. Depreciated but retained for compatability.}
   \item{return}{Address of the newly created instance}
 }
 }
@@ -170,7 +170,7 @@ Start serving the Stencila host and wait for connections indefinitely
 \section{open()}{
 
 
-Open a file the browser. Opens the default browser at the URL of this host
+Open a file in the browser.
 }
 
 \section{id}{
@@ -182,7 +182,7 @@ Get unique ID of this host
 \section{servers}{
 
 
-Get a list of server names for this host. Servers are identified by the protocol shorthand
+Get a list of servers for this host. Servers are identified by the protocol shorthand
 e.g. `http` for `HostHttpServer`
 }
 

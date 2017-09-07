@@ -91,13 +91,18 @@ use the <code>start</code> method of the <code>host</code> instance.</p>
 
     <p><code>R6Class</code>.</p>
     
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p>string A ticket</p>
+    
     <h2 class="hasAnchor" id="new-"><a class="anchor" href="#new-"></a>new()</h2>
 
     
     <dl class='dl-horizontal'>
   <dt>host</dt><dd><p>The host to be served</p></dd>
-  <dt>address</dt><dd><p>The port to listen on. Default '127.0.0.1'</p></dd>
-  <dt>port</dt><dd><p>The port to listen on. Default 2000</p></dd>
+  <dt>address</dt><dd><p>The port to listen on. Default <code>'127.0.0.1'</code></p></dd>
+  <dt>port</dt><dd><p>The port to listen on. Default <code>2000</code></p></dd>
+  <dt>authorization</dt><dd><p>Authorization for all requests. Default <code>TRUE</code></p></dd>
 </dl>
     
     <h2 class="hasAnchor" id="start-"><a class="anchor" href="#start-"></a>start()</h2>
@@ -151,6 +156,54 @@ use the <code>start</code> method of the <code>host</code> instance.</p>
     
     <p>Handle a DELETE request</p>
     
+    <h2 class="hasAnchor" id="args-"><a class="anchor" href="#args-"></a>args()</h2>
+
+    
+    <p>Convert the body into a named list of arguments</p>
+    
+    <h2 class="hasAnchor" id="ticket-create-"><a class="anchor" href="#ticket-create-"></a>ticket_create()</h2>
+
+    
+    <p>Create a ticket (a single-use access token)</p>
+    
+    <h2 class="hasAnchor" id="ticket-check-"><a class="anchor" href="#ticket-check-"></a>ticket_check()</h2>
+
+    
+    <p>Check that a ticket is valid. If it is, then it is removed
+from the list of tickets and <code>TRUE</code> is returned. Otherwise,
+returns <code>FALSE</code></p>
+    
+    <h2 class="hasAnchor" id="ticketed-url-"><a class="anchor" href="#ticketed-url-"></a>ticketed_url()</h2>
+
+    
+    <p>Create a URL with a ticket query parameter so users
+can connect to this server</p>
+    
+    <h2 class="hasAnchor" id="token-create-"><a class="anchor" href="#token-create-"></a>token_create()</h2>
+
+    
+    <p>Create a token (a multiple-use access token)</p>
+    
+    <h2 class="hasAnchor" id="token-check-"><a class="anchor" href="#token-check-"></a>token_check()</h2>
+
+    
+    <p>Check that a token is valid.</p>
+    
+    <h2 class="hasAnchor" id="error-"><a class="anchor" href="#error-"></a>error_403()</h2>
+
+    
+    <p>Generate a 403 error</p>
+    
+    <h2 class="hasAnchor" id="error-"><a class="anchor" href="#error-"></a>error_404()</h2>
+
+    
+    <p>Generate a 404 error</p>
+    
+    <h2 class="hasAnchor" id="error-"><a class="anchor" href="#error-"></a>error_500()</h2>
+
+    
+    <p>Generate a 500 error</p>
+    
     <h2 class="hasAnchor" id="url"><a class="anchor" href="#url"></a>url</h2>
 
     
@@ -163,6 +216,8 @@ use the <code>start</code> method of the <code>host</code> instance.</p>
     <ul class="nav nav-pills nav-stacked">
       
       <li><a href="#format">Format</a></li>
+
+      <li><a href="#value">Value</a></li>
 
       <li><a href="#new-">new()</a></li>
 
@@ -185,6 +240,24 @@ use the <code>start</code> method of the <code>host</code> instance.</p>
       <li><a href="#put-">put()</a></li>
 
       <li><a href="#delete-">delete()</a></li>
+
+      <li><a href="#args-">args()</a></li>
+
+      <li><a href="#ticket-create-">ticket_create()</a></li>
+
+      <li><a href="#ticket-check-">ticket_check()</a></li>
+
+      <li><a href="#ticketed-url-">ticketed_url()</a></li>
+
+      <li><a href="#token-create-">token_create()</a></li>
+
+      <li><a href="#token-check-">token_check()</a></li>
+
+      <li><a href="#error-">error_403()</a></li>
+
+      <li><a href="#error-">error_404()</a></li>
+
+      <li><a href="#error-">error_500()</a></li>
 
       <li><a href="#url">url</a></li>
           </ul>

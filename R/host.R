@@ -9,6 +9,12 @@ TYPES <- list(
   SqliteContext = SqliteContext
 )
 
+# List of specifications for resource types
+TYPES_SPECS <- list()
+for (name in names(TYPES)) {
+  TYPES_SPECS[[name]] = TYPES[[name]]$spec
+}
+
 #' A Host
 #'
 #' Hosts allows you to remotely create, get, run methods of, and delete instances of various types.
@@ -144,20 +150,20 @@ Host <- R6::R6Class("Host",
           version = version
         ),
         run = c(unname(Sys.which('R')), '--slave', '-e', 'stencila:::run(echo=TRUE)'),
+        types = TYPES_SPECS,
+        # For compatability with 0.27 API
         schemes = list(
-          new = list(
-            FileStorer = FileStorer$spec,
-            RContext = RContext$spec,
-            SqliteContext = SqliteContext$spec
-          )
+          new = TYPES_SPECS
         )
       )
       if (complete) {
         manifest <- c(manifest, list(
           id = private$.id,
           process = Sys.getpid(),
-          urls = I(self$urls),
-          instances = names(private$.instances)
+          servers = self$servers,
+          instances = names(private$.instances),
+          # For compatability with 0.27 API
+          urls = self$urls
         ))
       }
       manifest
@@ -186,20 +192,19 @@ Host <- R6::R6Class("Host",
     #' \describe{
     #'   \item{type}{Type of new instance}
     #'   \item{args}{Arguments to be passed to type constructor}
-    #'   \item{name}{Name of new instance. Depreciated by retained for compatability.}
+    #'   \item{name}{Name of new instance. Depreciated but retained for compatability.}
     #'   \item{return}{Address of the newly created instance}
     #' }
     post = function (type, args = list(), name = NULL) {
       Class <- TYPES[[type]]
       if (!is.null(Class)) {
+        # Remove depreciated `name` arg from arguments
+        args[['name']] <- NULL
         instance <- do.call(Class$new, args)
-        name <- args[['name']]
-        if (is.null(name)) {
-          name <- paste(sample(c(letters, 0:9), 10), collapse='')
-        }
-        address <- paste0('name://', name)
-        private$.instances[[address]] <- instance
-        address
+        # Generate and ID
+        id <- paste0(type, paste(sample(c(letters, 0:9), 10), collapse=''))
+        private$.instances[[id]] <- instance
+        id
       } else {
         stop(paste('Unknown type:', type))
       }
@@ -274,10 +279,10 @@ Host <- R6::R6Class("Host",
     #'
     #' Currently, HTTP is the only server available
     #' for hosts. We plan to implement a `HostWebsocketServer` soon.
-    start  = function (address='127.0.0.1', port=2000, quiet=FALSE) {
+    start  = function (address='127.0.0.1', port=2000, authorization=TRUE, quiet=FALSE) {
       if (is.null(private$.servers[['http']])) {
         # Start HTTP server
-        server <- HostHttpServer$new(self, address, port)
+        server <- HostHttpServer$new(self, address, port, authorization)
         private$.servers[['http']] <- server
         server$start()
 
@@ -287,7 +292,9 @@ Host <- R6::R6Class("Host",
         Sys.chmod(file, "0600")
         cat(toJSON(self$manifest(), pretty=TRUE, auto_unbox=TRUE), file=file)
 
-        if (!quiet) cat('Host has started at', paste(self$urls, collapse=', '), '\n')
+        if (!quiet) {
+          cat('Host has started at:', server$ticketed_url(), '\n')
+        }
       }
       invisible(self)
     },
@@ -322,9 +329,9 @@ Host <- R6::R6Class("Host",
     #' }
     #'
     #' Start serving the Stencila host and wait for connections indefinitely
-    run  = function (address='127.0.0.1', port=2000, quiet=FALSE, echo=FALSE) {
+    run  = function (address='127.0.0.1', port=2000, authorization=TRUE, quiet=FALSE, echo=FALSE) {
       if (echo) quiet = TRUE
-      self$start(address=address, port=port, quiet=quiet)
+      self$start(address=address, port=port, authorization=authorization, quiet=quiet)
 
       if (echo) {
         cat(toJSON(self$manifest(), pretty=TRUE, auto_unbox=TRUE))
@@ -342,16 +349,18 @@ Host <- R6::R6Class("Host",
 
     #' @section open():
     #'
-    #' Open a file the browser. Opens the default browser at the URL of this host
-    open  = function (address=NULL, external=FALSE) {
+    #' Open a file in the browser.
+    open  = function (address='', external=FALSE) {
       # Difficult to test headlessly, so don't include in coverage
       # nocov start
       self$start()
       # Eventually we plan to serve static HTML, JS and CSS from within the package
       # but for now use S3 bucket http://open.stenci.la
       origin <- 'http://open.stenci.la'
-      peer <- private$.servers[['http']]$url
-      url <- sprintf('%s/?peers=%s&address=%s', origin, peer, address)
+      server <- private$.servers[['http']]
+      peer <- server$url
+      ticket <- server$ticket_create()
+      url <- sprintf('%s/?address=%s&peers=%s/?ticket=%s', origin, address, peer, ticket)
       # See if there is a `viewer` option (defined by RStudio if we are in RStudio)
       viewer <- getOption('viewer')
       # Currently, force external because Stencila will not run in the older
@@ -382,10 +391,18 @@ Host <- R6::R6Class("Host",
 
     #' @section servers:
     #'
-    #' Get a list of server names for this host. Servers are identified by the protocol shorthand
+    #' Get a list of servers for this host. Servers are identified by the protocol shorthand
     #' e.g. `http` for `HostHttpServer`
     servers = function () {
-      names(private$.servers)
+      servers <- list()
+      for (name in names(private$.servers)) {
+        server <- private$.servers[[name]]
+        servers[[name]] <- list(
+          url = server$url,
+          ticket = server$ticket_create()
+        )
+      }
+      servers
     },
 
     #' @section urls:

@@ -11,14 +11,19 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
     #'
     #' \describe{
     #'   \item{host}{The host to be served}
-    #'   \item{address}{The port to listen on. Default '127.0.0.1'}
-    #'   \item{port}{The port to listen on. Default 2000}
+    #'   \item{address}{The port to listen on. Default \code{'127.0.0.1'}}
+    #'   \item{port}{The port to listen on. Default \code{2000}}
+    #'   \item{authorization}{Authorization for all requests. Default \code{TRUE}}
     #' }
-    initialize = function(host, address='127.0.0.1', port=2000) {
+    initialize = function(host, address='127.0.0.1', port=2000, authorization=TRUE) {
       private$.host <- host
       private$.address <- address
       private$.port <- port
+      private$.authorization <- authorization
+
       private$.server <- NULL
+      private$.tickets <- NULL
+      private$.tokens <- NULL
     },
 
     #' @section start():
@@ -59,79 +64,105 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
     #'
     #' Handle a HTTP request
     handle = function(env) {
-      # Get variables from request environment, possibilities include
-      #
-      #  [1] "HTTP_ACCEPT"                    "HTTP_ACCEPT_ENCODING"           "HTTP_ACCEPT_LANGUAGE"           "HTTP_CACHE_CONTROL"
-      #  [5] "HTTP_CONNECTION"                "HTTP_COOKIE"                    "HTTP_HOST"                      "HTTP_UPGRADE_INSECURE_REQUESTS"
-      #  [9] "HTTP_USER_AGENT"                "httpuv.version"                 "PATH_INFO"                      "QUERY_STRING"
-      #  [13] "REMOTE_ADDR"                    "REMOTE_PORT"                    "REQUEST_METHOD"                 "rook.errors"
-      #  [17] "rook.input"                     "rook.url_scheme"                "rook.version"                   "SCRIPT_NAME"
-      #  [21] "SERVER_NAME"                    "SERVER_PORT"
-      #
-      # See https://github.com/jeffreyhorner/Rook#the-environment for further details.
-      request <- list(
-        path = httpuv::decodeURIComponent(env$PATH_INFO),
-        method = env$REQUEST_METHOD,
-        headers = list(
-          Accept = env$HTTP_ACCEPT
-        ),
-        body = paste(env$rook.input$read_lines(), collapse='')
-      )
       response <- tryCatch({
-          endpoint <- self$route(request$method, request$path)
-          method <- endpoint[[1]]
-          if (length(endpoint) == 1) method(request)
-          else do.call(method, c(list(request=request), endpoint[2:length(endpoint)]))
-        },
-        error = identity
-      )
-      if (inherits(response, 'error')) {
-        response <- self$error500(request, response)
-      }
-
-      # CORS headers are used to control access by browsers. In particular, CORS
-      # can prevent access by XHR requests made by Javascript in third party sites.
-      # See https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS
-
-      # Get the Origin header (sent in CORS and POST requests) and fall back to Referer header
-      # if it is not present (either of these should be present in most browser requests)
-      origin <- env$HTTP_ORIGIN
-      if (is.null(origin) & !is.null(env$HTTP_REFERER)) {
-        origin <- str_match(env$HTTP_REFERER, '^https?://([\\w.]+)(:\\d+)?')[1,1]
-      }
-
-      # Check that host is in whitelist
-      if (!is.null(origin)) {
-        host <- str_match(origin, '^https?://([\\w.]+)(:\\d+)?')[1,2]
-        if (!(host %in% c('127.0.0.1', 'localhost', 'open.stenci.la'))) origin <- NULL
-      }
-
-      # If an origin has been found and is authorized set CORS headers
-      # Without these headers browser XHR request get an error like:
-      #     No 'Access-Control-Allow-Origin' header is present on the requested resource.
-      #     Origin 'http://evil.hackers:4000' is therefore not allowed access.
-      if (!is.null(origin)) {
-        # 'Simple' requests (GET and POST XHR requests)
-        cors_headers <- list(
-          'Access-Control-Allow-Origin' = origin,
-          # Allow sending cookies and other credentials
-          'Access-Control-Allow-Credentials' = 'true'
+        # Create request, getthing variables from request environment, possibilities include
+        #
+        #  [1] "HTTP_ACCEPT"                    "HTTP_ACCEPT_ENCODING"           "HTTP_ACCEPT_LANGUAGE"           "HTTP_CACHE_CONTROL"
+        #  [5] "HTTP_CONNECTION"                "HTTP_COOKIE"                    "HTTP_HOST"                      "HTTP_UPGRADE_INSECURE_REQUESTS"
+        #  [9] "HTTP_USER_AGENT"                "httpuv.version"                 "PATH_INFO"                      "QUERY_STRING"
+        #  [13] "REMOTE_ADDR"                    "REMOTE_PORT"                    "REQUEST_METHOD"                 "rook.errors"
+        #  [17] "rook.input"                     "rook.url_scheme"                "rook.version"                   "SCRIPT_NAME"
+        #  [21] "SERVER_NAME"                    "SERVER_PORT"
+        #
+        # See https://github.com/jeffreyhorner/Rook#the-environment for further details.
+        request <- list(
+          path = httpuv::decodeURIComponent(env$PATH_INFO),
+          query = if (!is.null(env$QUERY_STRING)) httpuv::decodeURIComponent(env$QUERY_STRING) else '',
+          method = env$REQUEST_METHOD,
+          headers = list(
+            Accept = env$HTTP_ACCEPT,
+            Cookie = env$HTTP_COOKIE
+          ),
+          body = paste(env$rook.input$read_lines(), collapse='')
         )
-        # Pre-flighted requests by OPTIONS method (made before PUT, DELETE etc XHR requests and in other circumstances)
-        # get additional CORS headers
-        if (request$method == 'OPTIONS') {
-          cors_headers <- c(cors_headers, list(
-            # Allowable methods and headers
-            'Access-Control-Allow-Methods' = 'GET, POST, PUT, DELETE, OPTIONS',
-            'Access-Control-Allow-Headers' = 'Content-Type',
-            # "how long the response to the preflight request can be cached for without sending another preflight request"
-            'Access-Control-Max-Age' = '86400' # 24 hours
-          ))
-        }
-        response$headers <- c(response$headers, cors_headers)
-      }
 
-      response
+        # Check authorization. Note that browsers do not send credentials (e.g. cookies)
+        # in OPTIONS requests
+        cookie_header <- NULL
+        if (private$.authorization & request$method != 'OPTIONS') {
+          # Check for ticket
+          ticket <- urltools::param_get(paste0(request$path, request$query), 'ticket')$ticket
+          if(!is.na(ticket)) {
+            # Check ticket is valid
+            if (!self$ticket_check(ticket)) return(self$error_403(request, paste0(': invalid ticket : ', ticket)))
+            else {
+              # Set token cookie
+              cookie_header <- list('Set-Cookie' = paste0('token=', self$token_create(), '; Path=/'))
+            }
+          } else {
+            # Check for token
+            cookie <- request$headers$Cookie
+            token <- if (is.null(cookie)) NA else str_match(cookie, 'token=([a-zA-Z0-9]+)')[1,2]
+            if (is.na(token) | !self$token_check(token)) return(self$error_403(request, paste0(': invalid token : ', token)))
+          }
+        }
+
+        # Create response
+        endpoint <- self$route(request$method, request$path)
+        method <- endpoint[[1]]
+        if (length(endpoint) == 1) response <- method(request)
+        else response <- do.call(method, c(list(request=request), endpoint[2:length(endpoint)]))
+
+        # Add CORS headers used to control access by browsers. In particular, CORS
+        # can prevent access by XHR requests made by Javascript in third party sites.
+        # See https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS
+
+        # Get the Origin header (sent in CORS and POST requests) and fall back to Referer header
+        # if it is not present (either of these should be present in most browser requests)
+        origin <- env$HTTP_ORIGIN
+        if (is.null(origin) & !is.null(env$HTTP_REFERER)) {
+          origin <- str_match(env$HTTP_REFERER, '^https?://([\\w.]+)(:\\d+)?')[1,1]
+        }
+
+        # Check that host is in whitelist
+        if (!is.null(origin)) {
+          host <- str_match(origin, '^https?://([\\w.]+)(:\\d+)?')[1,2]
+          if (!(host %in% c('127.0.0.1', 'localhost', 'open.stenci.la'))) origin <- NULL
+        }
+
+        # If an origin has been found and is authorized set CORS headers
+        # Without these headers browser XHR request get an error like:
+        #     No 'Access-Control-Allow-Origin' header is present on the requested resource.
+        #     Origin 'http://evil.hackers:4000' is therefore not allowed access.
+        if (!is.null(origin)) {
+          # 'Simple' requests (GET and POST XHR requests)
+          cors_headers <- list(
+            'Access-Control-Allow-Origin' = origin,
+            # Allow sending cookies and other credentials
+            'Access-Control-Allow-Credentials' = 'true'
+          )
+          # Pre-flighted requests by OPTIONS method (made before PUT, DELETE etc XHR requests and in other circumstances)
+          # get additional CORS headers
+          if (request$method == 'OPTIONS') {
+            cors_headers <- c(cors_headers, list(
+              # Allowable methods and headers
+              'Access-Control-Allow-Methods' = 'GET, POST, PUT, DELETE, OPTIONS',
+              'Access-Control-Allow-Headers' = 'Content-Type',
+              # "how long the response to the preflight request can be cached for without sending another preflight request"
+              'Access-Control-Max-Age' = '86400' # 24 hours
+            ))
+          }
+          response$headers <- c(response$headers, cors_headers)
+        }
+
+        # Set token cookie if necessary
+        if (!is.null(cookie_header)) response$headers <- c(response$headers, cookie_header)
+
+        response
+
+      }, error=identity)
+      if (inherits(response, 'error')) self$error_500(request, response)
+      else response
     },
 
     #' @section route():
@@ -188,9 +219,9 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
       requested_path <- suppressWarnings(normalizePath(file.path(static_path, path)))
       if (!str_detect(requested_path, paste0('^', static_path)) | str_detect(requested_path, '\\.\\./')) {
         # Don't allow any request outside of static folder
-        self$error403()
+        self$error_403()
       } else if (!file.exists(requested_path)) {
-        self$error404()
+        self$error_404()
       } else {
         file_connection <- file(requested_path, 'r')
         lines <- suppressWarnings(readLines(file_connection))
@@ -245,6 +276,9 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
       stop('Not yet implemeted')
     },
 
+    #' @section args():
+    #'
+    #' Convert the body into a named list of arguments
     args = function(request) {
       if (!is.null(request$body) && nchar(request$body) > 0) {
         # Vectors need to converted into a list for `do.call` below
@@ -254,16 +288,74 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
       }
     },
 
-    error403 = function(request, what='') {
+    #' @section ticket_create():
+    #'
+    #' Create a ticket (a single-use access token)
+    ticket_create = function () {
+      ticket <- paste(sample(c(LETTERS, letters, 0:9), 12, replace=TRUE), collapse='')
+      private$.tickets <- c(private$.tickets, ticket)
+      ticket
+    },
+
+    #' @section ticket_check():
+    #'
+    #' Check that a ticket is valid. If it is, then it is removed
+    #' from the list of tickets and \code{TRUE} is returned. Otherwise,
+    #' returns \code{FALSE}
+    ticket_check = function (ticket) {
+      if (ticket %in% private$.tickets) {
+        private$.tickets <- setdiff(ticket, private$.tickets)
+        TRUE
+      } else {
+        FALSE
+      }
+    },
+
+    #' @section ticketed_url():
+    #
+    #' Create a URL with a ticket query parameter so users
+    #' can connect to this server
+    #'
+    #' @return {string} A ticket
+    ticketed_url = function () {
+      paste0(self$url, '/?ticket=', self$ticket_create())
+    },
+
+    #' @section token_create():
+    #'
+    #' Create a token (a multiple-use access token)
+    token_create = function () {
+      token <- paste(sample(c(LETTERS, letters, 0:9), 126, replace=TRUE), collapse='')
+      private$.tokens <- c(private$.tokens, token)
+      token
+    },
+
+    #' @section token_check():
+    #'
+    #' Check that a token is valid.
+    token_check = function (token) {
+      token %in% private$.tokens
+    },
+
+    #' @section error_403():
+    #'
+    #' Generate a 403 error
+    error_403 = function(request, what='') {
       list(body = paste0('Unauthorized ', what), status = 403, headers = list('Content-Type' = 'text/html'))
     },
 
-    error404 = function(request, what='') {
-      list(body = paste0('Not found: ', what), status = 404, headers = list('Content-Type' = 'text/html'))
+    #' @section error_404():
+    #'
+    #' Generate a 404 error
+    error_404 = function(request, what='') {
+      list(body = paste0('Not found ', what), status = 404, headers = list('Content-Type' = 'text/html'))
     },
 
-    error500 = function(request, error) {
-      list(body = paste0('Error: ', toString(error)), status = 500, headers = list('Content-Type' = 'text/html'))  # nocov
+    #' @section error_500():
+    #'
+    #' Generate a 500 error
+    error_500 = function(request, error) {
+      list(body = paste0('Error ', toString(error)), status = 500, headers = list('Content-Type' = 'text/html'))  # nocov
     }
 
   ),
@@ -284,7 +376,10 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
     .host = NULL,
     .address = NULL,
     .port = NULL,
-    .server = NULL
+    .authorization = NULL,
+    .server = NULL,
+    .tickets = NULL,
+    .tokens = NULL
   )
 )
 
