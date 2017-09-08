@@ -53,27 +53,22 @@
       
       </header><div class="row">
   <div class="contents col-md-9">
-    <div id="stencila-for-r" class="section level1">
-<div class="page-header"><h1 class="hasAnchor">
-<a href="#stencila-for-r" class="anchor"></a>Stencila for R</h1></div>
-
+    <div id="stencila-for-r" class="section level2">
+<h2 class="hasAnchor">
+<a href="#stencila-for-r" class="anchor"></a>Stencila for R</h2>
 <div id="install" class="section level3">
 <h3 class="hasAnchor">
 <a href="#install" class="anchor"></a>Install</h3>
-<p>Right now this package isn’t on CRAN, but you can install it from this repo using the <a href="https://github.com/hadley/devtools"><code>devtools</code></a> package:</p>
+
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">devtools::<span class="kw">install_github</span>(<span class="st">"stencila/r"</span>)</code></pre></div>
+<p>Alternatively, check the <a href="https://github.com/stencila/r/releases">releases page</a> for prebuilt versions.</p>
+<p>Then install the package so that other Stencila packages and applications can detect it:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">stencila:::<span class="kw"><a href="reference/install.html">install</a></span>()</code></pre></div>
 </div>
 <div id="use" class="section level3">
 <h3 class="hasAnchor">
 <a href="#use" class="anchor"></a>Use</h3>
-<p>At present, this package let’s you launch an execution context for R so you can run R code from within your stencils:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Load the library</span>
-<span class="kw">library</span>(stencila)
-
-<span class="co"># Start the Stencila R host so that it can respond to </span>
-<span class="co"># external requests to create and call execution contexts</span>
-host$<span class="kw"><a href="reference/start.html">start</a></span>()</code></pre></div>
-<p>In the future, you’ll also be able to launch and edit your stencils from within R or RStudio but we’re still working on that :).</p>
+<p>This package lets you run R code from inside Stencila Documents. When you start the <a href="https://github.com/stencila/desktop">Stencila Desktop</a> it will be automatically detect the installed R package and you’ll be able to execute R code cells from within your documents.</p>
 </div>
 </div>
   </div>
@@ -94,10 +89,7 @@ host$<span class="kw"><a href="reference/start.html">start</a></span>()</code></
 </ul>
 <h2>Dev status</h2>
 <ul class="list-unstyled">
-<li><a href="https://travis-ci.org/stencila/r"><img src="https://travis-ci.org/stencila/r.svg?branch=master" alt="Build status"></a></li>
-<li><a href="https://codecov.io/gh/stencila/r"><img src="https://codecov.io/gh/stencila/r/branch/master/graph/badge.svg" alt="Code coverage"></a></li>
-<li><a href="https://cran.r-project.org/package=stencila"><img src="http://www.r-pkg.org/badges/version/stencila" alt="CRAN"></a></li>
-<li><a href="https://gitter.im/stencila/stencila"><img src="https://badges.gitter.im/stencila/stencila.svg" alt="Chat"></a></li>
+<li><a href="https://github.com/hadley/devtools"><code>devtools</code></a></li>
 </ul>
 </div>
 </div>

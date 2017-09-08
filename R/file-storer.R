@@ -13,7 +13,7 @@ FileStorer <- R6::R6Class('FileStorer',
     #'   \item{version}{Version of storer. Currently ignored but required for compatability. Default \code{NULL}}
     #' }
     initialize = function (path = '/', version = NULL) {
-      path <- suppressWarnings(normalizePath(path))
+      path <- suppressWarnings(normalizePath(path, winslash='/'))
       if (file.exists(path)) {
         isdir <- file.info(path)[1, 'isdir']
       } else {

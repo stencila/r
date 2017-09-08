@@ -215,8 +215,8 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
     #'
     #' Handle a request for a static file
     static = function(request, path) {
-      static_path <- normalizePath(system.file('static', package = 'stencila'))
-      requested_path <- suppressWarnings(normalizePath(file.path(static_path, path)))
+      static_path <- normalizePath(system.file('static', package = 'stencila'), winslash='/')
+      requested_path <- suppressWarnings(normalizePath(file.path(static_path, path), winslash='/'))
       if (!str_detect(requested_path, paste0('^', static_path)) | str_detect(requested_path, '\\.\\./')) {
         # Don't allow any request outside of static folder
         self$error_403()
