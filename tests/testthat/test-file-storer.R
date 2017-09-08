@@ -12,11 +12,11 @@ describe('FileStorer', {
     expect_equal(s$getFiles(), I('main.md'))
 
     s <- FileStorer$new('~/some/dir')
-    expect_equal(s$getDirectory(), path.expand('~/some/dir'))
+    expect_equal(s$getDirectory(), normalizePath('~/some/dir', winslash='/', mustWork=FALSE))
     expect_equal(s$getMain(), NULL)
 
     s <- FileStorer$new('~/some/file.txt')
-    expect_equal(s$getDirectory(), path.expand('~/some'))
+    expect_equal(s$getDirectory(), normalizePath('~/some', winslash='/', mustWork=FALSE))
     expect_equal(s$getMain(), 'file.txt')
   })
 
