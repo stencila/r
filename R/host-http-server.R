@@ -19,6 +19,10 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
       private$.host <- host
       private$.address <- address
       private$.port <- port
+
+      auth <- Sys.getenv('STENCILA_AUTHORIZATION')
+      if (auth == 'true') authorization = TRUE
+      else if (auth == 'false') authorization = FALSE
       private$.authorization <- authorization
 
       private$.server <- NULL
@@ -318,7 +322,9 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
     #'
     #' @return {string} A ticket
     ticketed_url = function () {
-      paste0(self$url, '/?ticket=', self$ticket_create())
+      url <- self$url
+      if (private$.authorization) url <- paste0(url, '/?ticket=', self$ticket_create())
+      url
     },
 
     #' @section token_create():
