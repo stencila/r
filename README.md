@@ -26,6 +26,8 @@ stencila:::install()
 
 This package lets you run R code from inside Stencila Documents. When you start the [Stencila Desktop](https://github.com/stencila/desktop) it will be automatically detect the installed R package and you'll be able to execute R code cells from within your documents.
 
+Check out what people are doing with Stencila and R - [Giulio Valentino Dalla Riva](https://github.com/gvdr) has created Tiny Open Access Data Samples ([TOADS](https://github.com/gvdr/toads/)). These awesome open datasets teach programming and statistics using Stencila. Check out the TOADS!
+
 More documentation is available at https://stencila.github.io/r
 
 ### Discuss
