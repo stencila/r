@@ -11,6 +11,58 @@ describe('SqliteContext', {
 
   })
 
+  it('has a analyseCode method', {
+    c <- SqliteContext$new()
+
+    c$runCode('CREATE TABLE "table" (TEXT col1)')
+
+    # Not input because 'table' is a TABLE in the db
+    expect_equal(c$analyseCode('SELECT * FROM table'), list(
+      inputs = character(),
+      output = NULL,
+      value = TRUE,
+      errors = NULL
+    ))
+
+    # data is not a table, max is an interpolated variable, result is output
+    expect_equal(c$analyseCode('result = SELECT * FROM data WHERE x < ${max}'), list(
+      inputs = c('data', 'max'),
+      output = 'result',
+      value = TRUE,
+      errors = NULL
+    ))
+
+    # Not a select, so no value
+    expect_equal(c$analyseCode('UPDATE table SET col1=1'), list(
+      inputs = character(),
+      output = NULL,
+      value = FALSE,
+      errors = NULL
+    ))
+  })
+
+
+  it('has a executeCode method', {
+    c <- SqliteContext$new()
+
+    expect_equal(c$executeCode('SELECT 42 AS answer'), list(
+      inputs = character(),
+      output = NULL,
+      value = pack(data.frame(answer=42)),
+      errors = NULL
+    ))
+
+    expect_equal(c$executeCode('result = SELECT sum(col_a) AS sum_a FROM data WHERE col_a < ${max}', list(
+      data = pack(data.frame(col_a=1:10)),
+      max = pack(8)
+    )), list(
+      inputs = c('data', 'max'),
+      output = 'result',
+      value = pack(data.frame(sum_a=28)),
+      errors = NULL
+    ))
+  })
+
   it('has a runCode method', {
     c <- SqliteContext$new()
 
