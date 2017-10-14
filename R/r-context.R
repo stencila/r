@@ -69,6 +69,88 @@ RContext <- R6::R6Class('RContext',
       # Ensures no leakage between runCode and callCode (either way)
       env <- new.env(parent=packages_env)
       private$.func_env <- env
+
+      # Global variable names that should be ignored when determining inputs
+      # in `analyseCode()`
+      private$.globals <- ls(getNamespace('base'))
+    },
+
+    #' @section analyseCode():
+    #'
+    #' Analyse R code and return the names of inputs, outputs
+    #' and the implicitly returned vaue expression
+    #'
+    #' \describe{
+    #'   \item{code}{R code to be analysed}
+    #'   \item{exprOnly}{Ensure that the code is a simple expression?}
+    #' }
+    analyseCode = function(code, exprOnly = FALSE) {
+      inputs <- character()
+      output <- NULL
+      value <- NULL
+      errors <- NULL
+
+      # Parse the code
+      ast <- tryCatch(parse(text=code), error=identity)
+      if (inherits(ast, 'error')) {
+        errors <- c(errors, ast)
+      }
+
+      # Is an expression an assignment?
+      is.assignment <- function(expr) {
+        if (is.call(expr)) {
+          op <- expr[[1]]
+          if (op == '<-' | op == '=') return(TRUE)
+        }
+        FALSE
+      }
+
+      if (is.null(errors) & exprOnly) {
+        # Check for single, simple expression
+        fail = FALSE
+        if (length(ast) != 1) fail = TRUE
+        else {
+          expr <- ast[[1]]
+          # Dissallow assignments
+          if (is.assignment(expr)) fail <- TRUE
+        }
+        if (fail) errors = c(errors, 'Code is not a single, simple expression' )
+      }
+
+      if (is.null(errors)) {
+        # Determine which names are declared and which are used
+        declared <- NULL
+        for (expr in ast) {
+          if (is.assignment(expr)) {
+            if (is.name(expr[[2]])) declared <- c(declared, as.character(expr[[2]]))
+          }
+          used <- all.vars(expr)
+          undeclared <- !(used %in% declared) & !(used %in% private$.globals)
+          if (any(undeclared)) inputs <- c(inputs, used[undeclared])
+        }
+
+        if (length(ast) > 0) {
+          last <- ast[[length(ast)]]
+          if (is.assignment(last)) {
+            if (is.name(last[[2]])) {
+              output <- as.character(last[[2]])
+              value <- output
+            }
+          } else if (is.name(last)) {
+            output <- as.character(last)
+            value <- output
+          } else {
+            value <- deparse(last)
+          }
+        }
+      }
+
+      list(
+        inputs = inputs,
+        output = output,
+        value = value,
+        errors = errors
+      )
     },
 
     #' @section runCode():
@@ -146,6 +228,9 @@ RContext <- R6::R6Class('RContext',
   private = list(
     # Context's working directory
     .dir = NULL,
+
+    # Global variable names
+    .globals = NULL,
 
     # Context's global scope
     .global_env = NULL,

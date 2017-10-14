@@ -6,6 +6,55 @@ describe('RContext', {
     expect_equal(class(s)[1], "RContext")
   })
 
+  it("has an analyseCode method", {
+    s <- RContext$new()
+
+    expect_equal(s$analyseCode(''), list(
+      inputs=character(),
+      output=NULL,
+      value=NULL,
+      errors=NULL
+    ))
+
+    expect_equal(s$analyseCode('x * 2', exprOnly=TRUE), list(
+      inputs='x',
+      output=NULL,
+      value='x * 2',
+      errors=NULL
+    ))
+
+    expect_equal(s$analyseCode('x <- 2', exprOnly=TRUE), list(
+      inputs=character(),
+      output=NULL,
+      value=NULL,
+      errors='Code is not a single, simple expression'
+    ))
+
+    # x assigned and then used
+    expect_equal(s$analyseCode('x <- 2\nx'), list(
+      inputs=character(),
+      output='x',
+      value='x',
+      errors=NULL
+    ))
+
+    # x used and then assigned (this should not be allowed)
+    expect_equal(s$analyseCode('x\nx <- 2'), list(
+      inputs='x',
+      output='x',
+      value='x',
+      errors=NULL
+    ))
+
+    # globals are not included as inputs
+    expect_equal(s$analyseCode('cos(2 * pi * r)'), list(
+      inputs='r',
+      output=NULL,
+      value='cos(2 * pi * r)',
+      errors=NULL
+    ))
+  })
+
   it("has an runCode method", {
     s <- RContext$new()
 
