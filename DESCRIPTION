@@ -30,6 +30,7 @@ Suggests:
 RoxygenNote: 6.0.1
 Collate: 
     'addins.R'
+    'context.R'
     'file-storer.R'
     'host-http-server.R'
     'sqlite-context.R'

@@ -32,14 +32,27 @@ Currently the parameter \code{closed} defaults to \code{FALSE} so that you can u
 }
 }
 
-\section{runCode()}{
+\section{analyseCode()}{
+
+
+Analyse R code and return the names of inputs, outputs
+and the implicitly returned vaue expression
+
+\describe{
+  \item{code}{R code to be analysed}
+  \item{exprOnly}{Ensure that the code is a simple expression?}
+}
+}
+
+\section{executeCode()}{
 
 
 Run R code within the context's scope
 
 \describe{
   \item{code}{R code to be executed}
-  \item{options}{Any execution options}
+  \item{inputs}{A list with a data pack for each input}
+  \item{exprOnly}{Ensure that the code is a simple expression?}
 }
 }
 
@@ -52,18 +65,6 @@ Run R code within a local function scope
   \item{code}{R code to be executed}
   \item{inputs}{A list with a data pack for each input}
   \item{isolated}{Is the call isolated from the context's global environment}
-}
-}
-
-\section{codeDependencies()}{
-
-
-Returns an array of all variable names not declared within
-the piece of code. This might include global functions and variables used
-within the piece of code.
-
-\describe{
-  \item{code}{R code}
 }
 }
 

@@ -27,6 +27,7 @@
 #' context$callCode('plot(1,1)')$output
 #' @export
 RContext <- R6::R6Class('RContext',
+  inherit = Context,
   public = list(
 
     #' @section new():
@@ -87,13 +88,12 @@ RContext <- R6::R6Class('RContext',
     analyseCode = function(code, exprOnly = FALSE) {
       inputs <- character()
       output <- NULL
-      value <- NULL
-      errors <- NULL
+      messages <- NULL
 
       # Parse the code
       ast <- tryCatch(parse(text=code), error=identity)
       if (inherits(ast, 'error')) {
-        errors <- c(errors, ast)
+        messages <- c(messages, ast)
       }
 
       # Is an expression an assignment?
@@ -105,7 +105,7 @@ RContext <- R6::R6Class('RContext',
         FALSE
       }
 
-      if (is.null(errors) & exprOnly) {
+      if (is.null(messages) & exprOnly) {
         # Check for single, simple expression
         fail = FALSE
         if (length(ast) != 1) fail = TRUE
@@ -114,10 +114,17 @@ RContext <- R6::R6Class('RContext',
           # Dissallow assignments
           if (is.assignment(expr)) fail <- TRUE
         }
-        if (fail) errors = c(errors, 'Code is not a single, simple expression' )
+        if (fail) {
+          messages <- c(messages, list(
+            line = 0,
+            column = 0,
+            type = 'error',
+            message = 'Code is not a single, simple expression'
+          ))
+        }
       }
 
-      if (is.null(errors)) {
+      if (is.null(messages)) {
         # Determine which names are declared and which are used
         declared <- NULL
         for (expr in ast) {
@@ -134,13 +141,9 @@ RContext <- R6::R6Class('RContext',
           if (is.assignment(last)) {
             if (is.name(last[[2]])) {
               output <- as.character(last[[2]])
-              value <- output
             }
           } else if (is.name(last)) {
             output <- as.character(last)
-            value <- output
-          } else {
-            value <- deparse(last)
           }
         }
       }
@@ -148,22 +151,27 @@ RContext <- R6::R6Class('RContext',
       list(
         inputs = inputs,
         output = output,
-        value = value,
-        errors = errors
+        messages = messages
       )
     },
 
-    #' @section runCode():
+    #' @section executeCode():
     #'
     #' Run R code within the context's scope
     #'
     #' \describe{
     #'   \item{code}{R code to be executed}
-    #'   \item{options}{Any execution options}
+    #'   \item{inputs}{A list with a data pack for each input}
+    #'   \item{exprOnly}{Ensure that the code is a simple expression?}
     #' }
-    runCode = function(code, options = list()) {
+    executeCode = function(code, inputs = list(), exprOnly = FALSE) {
+        for (input in names(inputs)) private$.global_env[[input]] <- self$unpack(inputs[[input]])
         # Do eval and process into a result
-        evaluation <- evaluate::evaluate(code, envir=private$.global_env, output_handler=evaluate_output_handler)
+        evaluation <- evaluate::evaluate(
+          code,
+          envir=private$.global_env,
+          output_handler=evaluate_output_handler
+        )
         private$.result(evaluation)
     },
 
@@ -180,7 +188,7 @@ RContext <- R6::R6Class('RContext',
       # Create a local enviroment for execution
       parent <- if (isolated) private$.func_env  else private$.global_env
       local <- new.env(parent=parent)
-      for (input in names(inputs)) local[[input]] <- unpack(inputs[[input]])
+
 
       # Overide the return function so that we capture the first returned
       # value and stop execution (the `stop_on_error` below)
@@ -200,27 +208,6 @@ RContext <- R6::R6Class('RContext',
       if (has_returned) result$output <- pack(value_returned)
 
       result
-    },
-
-    #' @section codeDependencies():
-    #'
-    #' Returns an array of all variable names not declared within
-    #' the piece of code. This might include global functions and variables used
-    #' within the piece of code.
-    #'
-    #' \describe{
-    #'   \item{code}{R code}
-    #' }
-    codeDependencies = function(code) {
-      # `all.names` just parses out all variable names, it does not doo dependency analysis
-      # Package `codetools` or something similar probably nees to be used
-      # But see http://adv-r.had.co.nz/Expressions.html#ast-funs
-      names <- all.names(parse(text=code))
-      # Exclude name in base environment (which includes functions like '+', '-', 'if')
-      in_base <- names %in% ls(baseenv())
-      names <- names[!in_base]
-      # all.names includes duplicates, so...
-      unique(names)
     }
 
   ),
@@ -255,6 +242,7 @@ RContext <- R6::R6Class('RContext',
             errors[[length(errors)+1]] <- list(
               line = line,
               column = 0,
+              type = "error",
               message = item$message
             )
           }
@@ -267,11 +255,12 @@ RContext <- R6::R6Class('RContext',
       if (has_value) {
         # Errors can occur in conversion of values e.g. ggplots
         # so they must be caught here
-        output <- tryCatch(pack(last_value), error=identity)
+        output <- tryCatch(self$pack(last_value), error=identity)
         if (inherits(output, 'error')) {
           errors[[length(errors)+1]] <- list(
             line = 0,
             column = 0,
+            type = "error",
             message = output$message
           )
           output <- NULL
@@ -282,7 +271,10 @@ RContext <- R6::R6Class('RContext',
 
       if (length(errors) == 0) errors <- NULL
 
-      list(errors=errors, output=output)
+      list(
+        value = output,
+        messages = errors
+      )
     }
   )
 )

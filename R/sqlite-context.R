@@ -2,6 +2,7 @@
 #'
 #' @export
 SqliteContext <- R6::R6Class('SqliteContext',
+  inherit = Context,
   public = list(
 
     #' @section new():
@@ -44,18 +45,23 @@ SqliteContext <- R6::R6Class('SqliteContext',
       inputs <- character()
       output <- NULL
       value <- FALSE
-      errors <- NULL
+      messages <- NULL
 
       if (exprOnly) {
         # Only SELECT statements allowed
         if (!str_detect(code, regex('^\\s*SELECT\\s+', ignore_case = TRUE))) {
-          errors <- c(errors, 'Code must be a `SELECT` expression')
+          messages <- c(messages, list(
+            line = 0,
+            column = 0,
+            type = 'error',
+            message = 'Code must be a `SELECT` expression'
+          ))
         } else {
           value <- TRUE
         }
       }
 
-      if (length(errors) == 0) {
+      if (length(messages) == 0) {
         # Determine tabular data inputs
         match <- str_match(code, regex('SELECT\\b.+?\\bFROM\\s+(\\w+)', ignore_case = TRUE))[1,]
         if (!is.na(match[2])) {
@@ -78,7 +84,7 @@ SqliteContext <- R6::R6Class('SqliteContext',
         inputs = inputs,
         output = output,
         value = value,
-        errors = errors
+        messages = messages
       )
     },
 
@@ -95,7 +101,7 @@ SqliteContext <- R6::R6Class('SqliteContext',
 
       variables <- list()
       for (name in names(inputs)) {
-        value <- unpack(inputs[[name]])
+        value <- self$unpack(inputs[[name]])
         if (inherits(value, 'data.frame')) {
           DBI::dbWriteTable(private$.conn, name, value, overwrite=TRUE)
         } else {
@@ -116,78 +122,26 @@ SqliteContext <- R6::R6Class('SqliteContext',
         code <- match[3]
       }
 
-      func <- if(analysis$value) DBI::dbGetQuery else DBI::dbExecute
+      func <- if (analysis$value) DBI::dbGetQuery else DBI::dbExecute
       value <- tryCatch(func(private$.conn, code), error=identity)
       if (inherits(value, 'error')) {
-        errors <- list(list(
+        messages <- list(list(
           line = 0,
           column = 0,
+          type = "error",
           message = value$message
         ))
         value <- NULL
       } else {
-        errors <- NULL
+        messages <- NULL
       }
       list(
         inputs = analysis$inputs,
         output = analysis$output,
-        value = pack(value),
-        errors = errors
+        value = self$pack(value),
+        messages = messages
       )
-    },
-
-    #' @section runCode():
-    #'
-    #' Run R code within the context's scope
-    #'
-    #' \describe{
-    #'   \item{code}{SQL code to be executed}
-    #' }
-    runCode = function(code) {
-      func <- if(str_detect(code, '^(SELECT|select)\\b')) DBI::dbGetQuery else DBI::dbExecute
-      output <- tryCatch(func(private$.conn, code), error=identity)
-      if (inherits(output, 'error')) {
-        errors <- list(list(
-          line = 0,
-          column = 0,
-          message = output$message
-        ))
-        output <- NULL
-      } else {
-        errors <- NULL
-      }
-      list(errors=errors, output=pack(output))
-    },
-
-    #' @section callCode():
-    #'
-    #' Run R code within a local function scope
-    #'
-    #' \describe{
-    #'   \item{code}{SQL code to be executed}
-    #'   \item{inputs}{A list with a value pack for each input}
-    #' }
-    callCode = function(code, inputs = NULL) {
-      variables <- list()
-      for (name in names(inputs)) {
-        value <- unpack(inputs[[name]])
-        if (inherits(value, 'data.frame')) {
-          DBI::dbWriteTable(private$.conn, name, value, overwrite=TRUE)
-        } else {
-          variables[[name]] <- value
-        }
-      }
-      matches <- str_match_all(code, '\\$\\{(\\w+)\\}')[[1]]
-      if (nrow(matches) >= 1) {
-        for (match in 1:nrow(matches)) {
-          name <- matches[match,2]
-          value <- variables[[name]]
-          code <- str_replace_all(code, sprintf('\\$\\{%s\\}', name), toString(value))
-        }
-      }
-      self$runCode(code)
     }
-
   ),
 
   private = list(

@@ -15,14 +15,10 @@ navbar:
 
 reference:
   - title: Classes
-    contents:
+    contents:      
       - RContext
       - SqliteContext
       - FileStorer
       - Host
       - HostHttpServer
-  - title: Functions
-    contents:
-      - type
-      - pack
-      - unpack
+
