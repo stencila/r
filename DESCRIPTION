@@ -23,6 +23,8 @@ Imports:
     tidyverse,
     tools,
     urltools
+Remotes:
+    stencila/libcore/r
 Suggests:
     devtools,
     testthat,
@@ -37,4 +39,3 @@ Collate:
     'r-context.R'
     'host.R'
     'main.R'
-    'value.R'

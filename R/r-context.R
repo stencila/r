@@ -12,19 +12,16 @@
 #' context <- RContext$new()
 #'
 #' # Assign a variable within the context
-#' context$runCode('my_var <- 42')
+#' context$executeCode('my_var <- 42')
 #'
 #' # Get the variable as an output value
-#' context$runCode('my_var')
+#' context$executeCode('my_var')
 #'
 #' # The variable is NOT available in `callCode`
-#' context$callCode('my_var')$errors[[1]]$message
-#'
-#' # Intead, you can pass input values
-#' context$callCode('x * y', list(x=pack(6), y=pack(7)))
+#' context$executeCode('my_var')$messages[[1]]$message
 #'
 #' # Returned output value can include plots
-#' context$callCode('plot(1,1)')$output
+#' context$executeCode('plot(1,1)')$value
 #' @export
 RContext <- R6::R6Class('RContext',
   inherit = Context,
