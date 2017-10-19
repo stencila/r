@@ -170,43 +170,7 @@ RContext <- R6::R6Class('RContext',
           output_handler=evaluate_output_handler
         )
         private$.result(evaluation)
-    },
-
-    #' @section callCode():
-    #'
-    #' Run R code within a local function scope
-    #'
-    #' \describe{
-    #'   \item{code}{R code to be executed}
-    #'   \item{inputs}{A list with a data pack for each input}
-    #'   \item{isolated}{Is the call isolated from the context's global environment}
-    #' }
-    callCode = function(code, inputs = NULL, isolated = FALSE) {
-      # Create a local enviroment for execution
-      parent <- if (isolated) private$.func_env  else private$.global_env
-      local <- new.env(parent=parent)
-
-
-      # Overide the return function so that we capture the first returned
-      # value and stop execution (the `stop_on_error` below)
-      value_returned <- NULL
-      has_returned <- FALSE
-      local[['return']] <- function (value) {
-        value_returned <<- value
-        has_returned <<- TRUE
-        stop('~return~')
-      }
-
-      # Do eval and process into a result
-      evaluation <- evaluate::evaluate(code, envir=local, stop_on_error=1L, output_handler=evaluate_output_handler)
-      result <- private$.result(evaluation)
-
-      # If returned a value, use that as output
-      if (has_returned) result$output <- pack(value_returned)
-
-      result
     }
-
   ),
 
   private = list(
