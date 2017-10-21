@@ -132,4 +132,13 @@ describe('RContext', {
     expect_equal(s$executeCode('1\nbaz')$messages[[1]]$line, 2)
     expect_equal(s$executeCode('\n\nbaz')$messages[[1]]$line, 3)
   })
+
+
+  it("has a getFunction method", {
+    s <- RContext$new()
+
+    xml <- s$getFunction('sum')
+    doc <- xml2::read_xml(xml)
+    expect_equal(xml2::xml_text(xml2::xml_find_first(doc, '/function/name')), "sum")
+  })
 })
