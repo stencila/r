@@ -293,8 +293,7 @@ RContext <- R6::R6Class('RContext',
 # Specification of an RContext (used in host manifest)
 RContext$spec <- list(
   name = 'RContext',
-  base = 'Context',
-  aliases = c('r', 'R')
+  client = 'ContextHttpClient'
 )
 
 # List of packages made available within a RContext

@@ -154,6 +154,5 @@ SqliteContext <- R6::R6Class('SqliteContext',
 
 SqliteContext$spec <- list(
   name = 'SqliteContext',
-  base = 'Context',
-  aliases = c('sql', 'sqlite')
+  client = 'ContextHttpClient'
 )
