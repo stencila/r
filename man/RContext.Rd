@@ -56,18 +56,6 @@ Run R code within the context's scope
 }
 }
 
-\section{callCode()}{
-
-
-Run R code within a local function scope
-
-\describe{
-  \item{code}{R code to be executed}
-  \item{inputs}{A list with a data pack for each input}
-  \item{isolated}{Is the call isolated from the context's global environment}
-}
-}
-
 \examples{
 context <- RContext$new()
 
