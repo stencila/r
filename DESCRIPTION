@@ -14,6 +14,7 @@ Imports:
     evaluate,
     httpuv,
     jsonlite,
+    libcore,
     mime,
     methods,
     R6,
@@ -22,7 +23,10 @@ Imports:
     stringr,
     tidyverse,
     tools,
-    urltools
+    urltools,
+    xml2
+Remotes:
+    stencila/libcore/r
 Suggests:
     devtools,
     testthat,
@@ -30,10 +34,11 @@ Suggests:
 RoxygenNote: 6.0.1
 Collate: 
     'addins.R'
+    'context.R'
     'file-storer.R'
     'host-http-server.R'
     'sqlite-context.R'
     'r-context.R'
     'host.R'
+    'json.R'
     'main.R'
-    'value.R'

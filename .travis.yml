@@ -13,12 +13,3 @@ after_success:
     if [[ $TRAVIS_R_VERSION == 3.3.* ]]; then
       Rscript -e 'install.packages("covr"); covr::codecov()';
     fi
-
-notifications:
-  webhooks:
-    urls:
-      - secure: "c7sJb5i92rK48bkT/JEqjyrznBfLUAHcPr7vXTuFZGX5jn/g0tssCtsDiN08mvULuIJF2F2av/8SF9R2cSpeKkC69I9+YUn+uItq4zFISxzh7q3QfcWvQnbizCkjVDU+AxsTf4m9Kq3eatxwPNuAxRc6PGeaYQ5/NeMYFDkYGCk=" # Gitter
-
-env:
-  global:
-    secure: f35f/SrQk+p4+JVkvXayTNaVLkn07jfs9DjGr3G1aAwQtYip54HsMIj+wzPJZRwYsR7iPAZ4KOJnZPjVds6LUaKArg9NcY+NsRn3RyluYA8M/ePEYUsiVXIrbwRr9UDWWFArIoR50DGZLZlg7l8DCjlV3SWIUdxZj0K2D8vjUJBYamgIWE3dhXyizzsPkJQyzDZL5fmfGfHUihpto/IpLUz+zAd+J9478AMnfqeWCB4zmGVUeh1NBA8ZvmYcQUowl/OA+BRFRY/ZDlXlIiF2gjrx07xxpbd22mr1ryc0dKv69J+qeoxkwl1uiNVBsSPK/ATpLiUc+KC4mavBg2kL39oZkqmHpbsVugUCKjve2idBDLs21vgKFd5paTqmfIKvFVysW8yGg+06aG0AYD2DvBpZ114vmoyPgg9HyT01yCZN6wVJh7HCa74SSThCD5VLBc4xrMBsmQpbesWESAzsZaJkbTiQvcGh+4WsqMgU5Wd601FcEN9kGd7JtOnh5TyMrqv6ZMRTkb9AAkAicRm/Yh2m/cHY+cEX0ZmgfNrwz/uBZoCgowbD+FXLi6s9pi0vaUFOsAKGVmxH7vFkKfogioVEemZj8KMxZnUiaGu2e+4LczbKjpk7+mjYZrYVidg3ZXCY276wLvB2VJ7zEISTEsNsBPa9GVm20wmhKpnyZaA=

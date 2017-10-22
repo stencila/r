@@ -21,24 +21,27 @@ Create a new \code{SqliteContext}
 }
 }
 
-\section{runCode()}{
+\section{analyseCode()}{
 
 
-Run R code within the context's scope
+Analyse SQL code and return the names of inputs, outputs
+and the returned value
 
 \describe{
-  \item{code}{SQL code to be executed}
+  \item{code}{SQL code to be analysed}
+  \item{exprOnly}{Ensure that the code is a select expression?}
 }
 }
 
-\section{callCode()}{
+\section{executeCode()}{
 
 
-Run R code within a local function scope
+Run SQL code
 
 \describe{
   \item{code}{SQL code to be executed}
   \item{inputs}{A list with a value pack for each input}
+  \item{exprOnly}{Ensure that the code is a simple expression?}
 }
 }
 

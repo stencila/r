@@ -40,7 +40,7 @@ describe("Host", {
 
   it('has a put() method', {
     id <- h$post('RContext')
-    expect_equal(h$put(id, 'runCode', list(code='6*7'))$output, pack(42))
+    expect_equal(h$put(id, 'executeCode', list(code='6*7'))$value$data, 42)
     expect_error(h$put(id, 'fooBar'), 'Unknown method')
     expect_error(h$put('foo', 'bar'), 'Unknown instance')
   })
