@@ -69,6 +69,8 @@ SqliteContext <- R6::R6Class('SqliteContext',
           tables <- DBI::dbGetQuery(private$.conn, 'SELECT name FROM sqlite_master WHERE type=="table"')$name
           if (!table %in% tables) inputs <- c(inputs, table)
           value <- TRUE
+        } else if (str_detect(code, regex('^\\s*SELECT\\s+', ignore_case = TRUE))) {
+          value <- TRUE
         }
         # Determine other inputs (string interpolated using ${})
         inputs <- c(inputs, str_match_all(code, '\\$\\{(\\w+)\\}')[[1]][,2])
@@ -95,8 +97,9 @@ SqliteContext <- R6::R6Class('SqliteContext',
     #' \describe{
     #'   \item{code}{SQL code to be executed}
     #'   \item{inputs}{A list with a value pack for each input}
+    #'   \item{exprOnly}{Ensure that the code is a simple expression?}
     #' }
-    executeCode = function(code, inputs = NULL) {
+    executeCode = function(code, inputs = NULL, exprOnly = FALSE) {
       analysis <- self$analyseCode(code)
 
       variables <- list()

@@ -41,6 +41,7 @@ Run SQL code
 \describe{
   \item{code}{SQL code to be executed}
   \item{inputs}{A list with a value pack for each input}
+  \item{exprOnly}{Ensure that the code is a simple expression?}
 }
 }
 

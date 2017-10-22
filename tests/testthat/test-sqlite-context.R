@@ -2,7 +2,9 @@ describe('SqliteContext', {
   it('can be constructed', {
     # In-memory database
     c <- SqliteContext$new()
-    expect_equal(nrow(c$unpack(c$executeCode('SELECT * FROM sqlite_master')$value)), 0)
+
+    # Should start empty
+    expect_equal(c$executeCode('SELECT * FROM sqlite_master')$value$data$rows, 0)
 
     # On-disk database
     c <- SqliteContext$new(dir='test-dir-2')
@@ -16,6 +18,13 @@ describe('SqliteContext', {
     c <- SqliteContext$new()
 
     c$executeCode('CREATE TABLE "table" (TEXT col1)')
+
+    expect_equal(c$analyseCode('SELECT 42'), list(
+      inputs = character(),
+      output = NULL,
+      value = TRUE,
+      messages = NULL
+    ))
 
     # Not input because 'table' is a TABLE in the db
     expect_equal(c$analyseCode('SELECT * FROM table'), list(
@@ -46,12 +55,12 @@ describe('SqliteContext', {
   it('has a executeCode method', {
     c <- SqliteContext$new()
 
-    #expect_equal(c$executeCode('SELECT 42 AS answer'), list(
-    #  inputs = character(),
-    #  output = NULL,
-    #  value = pack(data.frame(answer=42)),
-    #  errors = NULL
-    #))
+    expect_equal(c$executeCode('SELECT 42 AS answer'), list(
+      inputs = character(),
+      output = NULL,
+      value = c$pack(data.frame(answer=42)),
+      messages = NULL
+    ))
 
     expect_equal(c$executeCode('result = SELECT sum(col_a) AS sum_a FROM data WHERE col_a < ${max}', list(
       data = c$pack(data.frame(col_a=1:10)),
