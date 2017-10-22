@@ -96,6 +96,12 @@ Handle a DELETE request
 Convert the body into a named list of arguments
 }
 
+\section{accepts_json()}{
+
+
+Does a request accept JSON?
+}
+
 \section{ticket_create()}{
 
 

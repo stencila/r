@@ -204,7 +204,7 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
     #'
     #' Handle a request to `home`
     home = function(request) {
-      if (!accepts_json(request)) {
+      if (!self$accepts_json(request)) {
         self$static(request, 'index.html')
       } else {
         list(
@@ -286,10 +286,19 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
     args = function(request) {
       if (!is.null(request$body) && nchar(request$body) > 0) {
         # Vectors need to converted into a list for `do.call` below
-        as.list(fromJSON(request$body, simplifyDataFrame=FALSE))
+        as.list(from_json(request$body))
       } else {
         list()
       }
+    },
+
+    #' @section accepts_json():
+    #'
+    #' Does a request accept JSON?
+    accepts_json = function(request) {
+      accept <- request$headers[['Accept']]
+      if (is.null(accept)) FALSE
+      else str_detect(accept, 'application/json')
     },
 
     #' @section ticket_create():
@@ -389,26 +398,3 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
   )
 )
 
-# Does request accept JSON?
-accepts_json <- function(request) {
-  accept <- request$headers[['Accept']]
-  if (is.null(accept)) FALSE
-  else str_detect(accept, 'application/json')
-}
-
-# Convert a value to JSON
-to_json <- function(value) {
-  # jsonlite converts empty R lists to empty JSON arrays, override that
-  if (is.list(value) & length(value)==0) '{}'
-  else toString(toJSON(value, auto_unbox=TRUE, null='null'))
-}
-# Create a hook for conversion of R6 instances to JSON
-methods::setClass('R6')
-asJSON <- jsonlite:::asJSON
-methods::setMethod('asJSON', 'R6', function(x, ...) {
-  members <- list()
-  for(name in ls(x, sorted=FALSE)) {
-    if (!is.function(x[[name]])) members[[name]] <- x[[name]]
-  }
-  to_json(members)
-})

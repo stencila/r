@@ -40,4 +40,5 @@ Collate:
     'sqlite-context.R'
     'r-context.R'
     'host.R'
+    'json.R'
     'main.R'

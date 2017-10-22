@@ -11,9 +11,10 @@ Context <- R6::R6Class('Context',
         list(
           type = 'table',
           data = list(
-            values = df,
+            type = 'table',
             columns = ncol(df),
-            rows = nrow(df)
+            rows = nrow(df),
+            data = df
           )
         )
       } else if (type == 'plot') {
@@ -42,23 +43,23 @@ Context <- R6::R6Class('Context',
     unpack = function (packed) {
       # If necessary convert JSON to list
       if (inherits(packed, "character")) {
-        packed <- fromJSON(packed)
+        packed <- from_json(packed)
       }
       # Ensure data package is a list with necessary properties
       if (!inherits(packed, "list") ) {
         stop("Package should be a list")
       }
+      if (!'type' %in% names(packed)) {
+        stop("should have field `type`")
+      }
 
       type <- packed$type
       if (type == 'array') {
-        obj <- fromJSON(content)
-        if (is.list(obj) && length(obj)==0) obj <- vector()
-        obj
+        if (is.list(packed$data) && length(packed$data) == 0) vector()
+        else packed$data
       } else if (type == 'table') {
-        values <- packed$data$values
-        do.call(data.frame, c(values, stringsAsFactors = FALSE))
+        do.call(data.frame, c(packed$data$data, stringsAsFactors = FALSE))
       } else {
-        if (is.na(packed$data)) stop(paste0('No data to unpack type "', type, '"'))
         packed$data
       }
     }
