@@ -146,7 +146,7 @@ RContext <- R6::R6Class('RContext',
       }
 
       list(
-        inputs = inputs,
+        inputs = I(inputs),
         output = output,
         messages = messages
       )
