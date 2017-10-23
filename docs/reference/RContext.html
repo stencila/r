@@ -135,7 +135,7 @@ and the implicitly returned vaue expression</p><dl class='dl-horizontal'>
 #&gt; NULL
 #&gt; 
 #&gt; $messages
-#&gt; NULL
+#&gt; list()
 #&gt; </div><div class='input'>
 <span class='co'># Get the variable as an output value</span>
 <span class='no'>context</span>$<span class='fu'>executeCode</span>(<span class='st'>'my_var'</span>)</div><div class='output co'>#&gt; $value
@@ -147,10 +147,10 @@ and the implicitly returned vaue expression</p><dl class='dl-horizontal'>
 #&gt; 
 #&gt; 
 #&gt; $messages
-#&gt; NULL
+#&gt; list()
 #&gt; </div><div class='input'>
 <span class='co'># The variable is NOT available in `callCode`</span>
-<span class='no'>context</span>$<span class='fu'>executeCode</span>(<span class='st'>'my_var'</span>)$<span class='no'>messages</span><span class='kw'>[[</span><span class='fl'>1</span>]]$<span class='no'>message</span></div><div class='output co'>#&gt; NULL</div><div class='input'>
+<span class='no'>context</span>$<span class='fu'>executeCode</span>(<span class='st'>'my_var'</span>)$<span class='no'>messages</span><span class='kw'>[[</span><span class='fl'>1</span>]]$<span class='no'>message</span></div><div class='output co'>#&gt; <span class='error'>Error in context$executeCode("my_var")$messages[[1]]: subscript out of bounds</span></div><div class='input'>
 <span class='co'># Returned output value can include plots</span>
 <span class='no'>context</span>$<span class='fu'>executeCode</span>(<span class='st'>'plot(1,1)'</span>)$<span class='no'>value</span></div><div class='output co'>#&gt; $type
 #&gt; [1] "image"

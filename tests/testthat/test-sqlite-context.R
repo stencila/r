@@ -36,7 +36,7 @@ describe('SqliteContext', {
 
     # data is not a table, max is an interpolated variable, result is output
     expect_equal(c$analyseCode('result = SELECT * FROM data WHERE x < ${max}'), list(
-      inputs = I(c('data', 'max')),
+      inputs = list('data', 'max'),
       output = 'result',
       value = TRUE,
       messages = list()
@@ -66,7 +66,7 @@ describe('SqliteContext', {
       data = c$pack(data.frame(col_a=1:10)),
       max = c$pack(8)
     )), list(
-      inputs = I(c('data', 'max')),
+      inputs = list('data', 'max'),
       output = 'result',
       value = c$pack(data.frame(sum_a=28)),
       messages = list()
