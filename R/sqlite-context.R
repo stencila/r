@@ -42,10 +42,10 @@ SqliteContext <- R6::R6Class('SqliteContext',
     #'   \item{exprOnly}{Ensure that the code is a select expression?}
     #' }
     analyseCode = function(code, exprOnly = FALSE) {
-      inputs <- character()
+      inputs <- list()
       output <- NULL
       value <- FALSE
-      messages <- NULL
+      messages <- list()
 
       if (exprOnly) {
         # Only SELECT statements allowed
@@ -83,7 +83,7 @@ SqliteContext <- R6::R6Class('SqliteContext',
       }
 
       list(
-        inputs = I(inputs),
+        inputs = inputs,
         output = output,
         value = value,
         messages = messages
@@ -136,7 +136,7 @@ SqliteContext <- R6::R6Class('SqliteContext',
         ))
         value <- NULL
       } else {
-        messages <- NULL
+        messages <- list()
       }
       list(
         inputs = analysis$inputs,

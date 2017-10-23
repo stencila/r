@@ -10,19 +10,19 @@ describe('RContext', {
     s <- RContext$new()
 
     expect_equal(s$analyseCode(''), list(
-      inputs=I(character()),
+      inputs=list(),
       output=NULL,
-      messages=NULL
+      messages=list()
     ))
 
     expect_equal(s$analyseCode('x * 2', exprOnly=TRUE), list(
-      inputs=I('x'),
+      inputs=list('x'),
       output=NULL,
-      messages=NULL
+      messages=list()
     ))
 
     expect_equal(s$analyseCode('x <- 2', exprOnly=TRUE), list(
-      inputs=I(character()),
+      inputs=list(),
       output=NULL,
       messages=list(
         line=0,
@@ -34,23 +34,23 @@ describe('RContext', {
 
     # x assigned and then used
     expect_equal(s$analyseCode('x <- 2\nx'), list(
-      inputs=I(character()),
+      inputs=list(),
       output='x',
-      messages=NULL
+      messages=list()
     ))
 
     # x used and then assigned (this should not be allowed)
     expect_equal(s$analyseCode('x\nx <- 2'), list(
-      inputs=I('x'),
+      inputs=list('x'),
       output='x',
-      messages=NULL
+      messages=list()
     ))
 
     # globals are not included as inputs
     expect_equal(s$analyseCode('cos(2 * pi * r)'), list(
-      inputs=I('r'),
+      inputs=list('r'),
       output=NULL,
-      messages=NULL
+      messages=list()
     ))
   })
 
@@ -59,7 +59,7 @@ describe('RContext', {
 
     expect_equal(s$executeCode(''), list(
       value=NULL,
-      messages=NULL
+      messages=list()
     ))
 
     expect_equal(s$executeCode('x <- 42')$value, NULL)

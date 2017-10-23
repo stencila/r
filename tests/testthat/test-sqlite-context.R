@@ -20,18 +20,18 @@ describe('SqliteContext', {
     c$executeCode('CREATE TABLE "table" (TEXT col1)')
 
     expect_equal(c$analyseCode('SELECT 42'), list(
-      inputs = I(character()),
+      inputs = list(),
       output = NULL,
       value = TRUE,
-      messages = NULL
+      messages = list()
     ))
 
     # Not input because 'table' is a TABLE in the db
     expect_equal(c$analyseCode('SELECT * FROM table'), list(
-      inputs = I(character()),
+      inputs = list(),
       output = NULL,
       value = TRUE,
-      messages = NULL
+      messages = list()
     ))
 
     # data is not a table, max is an interpolated variable, result is output
@@ -39,15 +39,15 @@ describe('SqliteContext', {
       inputs = I(c('data', 'max')),
       output = 'result',
       value = TRUE,
-      messages = NULL
+      messages = list()
     ))
 
     # Not a select, so no value
     expect_equal(c$analyseCode('UPDATE table SET col1=1'), list(
-      inputs = I(character()),
+      inputs = list(),
       output = NULL,
       value = FALSE,
-      messages = NULL
+      messages = list()
     ))
   })
 
@@ -56,10 +56,10 @@ describe('SqliteContext', {
     c <- SqliteContext$new()
 
     expect_equal(c$executeCode('SELECT 42 AS answer'), list(
-      inputs = I(character()),
+      inputs = list(),
       output = NULL,
       value = c$pack(data.frame(answer=42)),
-      messages = NULL
+      messages = list()
     ))
 
     expect_equal(c$executeCode('result = SELECT sum(col_a) AS sum_a FROM data WHERE col_a < ${max}', list(
@@ -69,7 +69,7 @@ describe('SqliteContext', {
       inputs = I(c('data', 'max')),
       output = 'result',
       value = c$pack(data.frame(sum_a=28)),
-      messages = NULL
+      messages = list()
     ))
 
     messages <- c$executeCode('SELECT * FROM does_not_exist')$messages

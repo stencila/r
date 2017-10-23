@@ -83,9 +83,9 @@ RContext <- R6::R6Class('RContext',
     #'   \item{exprOnly}{Ensure that the code is a simple expression?}
     #' }
     analyseCode = function(code, exprOnly = FALSE) {
-      inputs <- character()
+      inputs <- list()
       output <- NULL
-      messages <- NULL
+      messages <- list()
 
       # Parse the code
       ast <- tryCatch(parse(text=code), error=identity)
@@ -102,7 +102,7 @@ RContext <- R6::R6Class('RContext',
         FALSE
       }
 
-      if (is.null(messages) & exprOnly) {
+      if (length(messages) == 0 & exprOnly) {
         # Check for single, simple expression
         fail = FALSE
         if (length(ast) != 1) fail = TRUE
@@ -121,7 +121,7 @@ RContext <- R6::R6Class('RContext',
         }
       }
 
-      if (is.null(messages)) {
+      if (length(messages) == 0) {
         # Determine which names are declared and which are used
         declared <- NULL
         for (expr in ast) {
@@ -146,7 +146,7 @@ RContext <- R6::R6Class('RContext',
       }
 
       list(
-        inputs = I(inputs),
+        inputs = inputs,
         output = output,
         messages = messages
       )
@@ -242,7 +242,7 @@ RContext <- R6::R6Class('RContext',
     .result = function (evaluation) {
 
       line <- 0
-      errors <- list()
+      messages <- list()
       has_value <- FALSE
       last_value <- NULL
       for (item in evaluation) {
@@ -250,7 +250,7 @@ RContext <- R6::R6Class('RContext',
           line <- line + max(1, str_count(item, '\n'))
         } else if (inherits(item, 'error')) {
           if(item$message != '~return~') {
-            errors[[length(errors)+1]] <- list(
+            messages[[length(messages)+1]] <- list(
               line = line,
               column = 0,
               type = "error",
@@ -268,7 +268,7 @@ RContext <- R6::R6Class('RContext',
         # so they must be caught here
         output <- tryCatch(self$pack(last_value), error=identity)
         if (inherits(output, 'error')) {
-          errors[[length(errors)+1]] <- list(
+          messages[[length(messages)+1]] <- list(
             line = 0,
             column = 0,
             type = "error",
@@ -280,11 +280,9 @@ RContext <- R6::R6Class('RContext',
         output <- NULL
       }
 
-      if (length(errors) == 0) errors <- NULL
-
       list(
         value = output,
-        messages = errors
+        messages = messages
       )
     }
   )
