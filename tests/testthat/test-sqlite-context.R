@@ -20,7 +20,7 @@ describe('SqliteContext', {
     c$executeCode('CREATE TABLE "table" (TEXT col1)')
 
     expect_equal(c$analyseCode('SELECT 42'), list(
-      inputs = character(),
+      inputs = I(character()),
       output = NULL,
       value = TRUE,
       messages = NULL
@@ -28,7 +28,7 @@ describe('SqliteContext', {
 
     # Not input because 'table' is a TABLE in the db
     expect_equal(c$analyseCode('SELECT * FROM table'), list(
-      inputs = character(),
+      inputs = I(character()),
       output = NULL,
       value = TRUE,
       messages = NULL
@@ -36,7 +36,7 @@ describe('SqliteContext', {
 
     # data is not a table, max is an interpolated variable, result is output
     expect_equal(c$analyseCode('result = SELECT * FROM data WHERE x < ${max}'), list(
-      inputs = c('data', 'max'),
+      inputs = I(c('data', 'max')),
       output = 'result',
       value = TRUE,
       messages = NULL
@@ -44,7 +44,7 @@ describe('SqliteContext', {
 
     # Not a select, so no value
     expect_equal(c$analyseCode('UPDATE table SET col1=1'), list(
-      inputs = character(),
+      inputs = I(character()),
       output = NULL,
       value = FALSE,
       messages = NULL
@@ -56,7 +56,7 @@ describe('SqliteContext', {
     c <- SqliteContext$new()
 
     expect_equal(c$executeCode('SELECT 42 AS answer'), list(
-      inputs = character(),
+      inputs = I(character()),
       output = NULL,
       value = c$pack(data.frame(answer=42)),
       messages = NULL
@@ -66,7 +66,7 @@ describe('SqliteContext', {
       data = c$pack(data.frame(col_a=1:10)),
       max = c$pack(8)
     )), list(
-      inputs = c('data', 'max'),
+      inputs = I(c('data', 'max')),
       output = 'result',
       value = c$pack(data.frame(sum_a=28)),
       messages = NULL

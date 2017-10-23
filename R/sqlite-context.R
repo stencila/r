@@ -83,7 +83,7 @@ SqliteContext <- R6::R6Class('SqliteContext',
       }
 
       list(
-        inputs = inputs,
+        inputs = I(inputs),
         output = output,
         value = value,
         messages = messages
