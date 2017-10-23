@@ -17,9 +17,6 @@
 #' # Get the variable as an output value
 #' context$executeCode('my_var')
 #'
-#' # The variable is NOT available in `callCode`
-#' context$executeCode('my_var')$messages[[1]]$message
-#'
 #' # Returned output value can include plots
 #' context$executeCode('plot(1,1)')$value
 #' @export
