@@ -169,54 +169,30 @@ RContext <- R6::R6Class('RContext',
         private$.result(evaluation)
     },
 
-    getFunction = function(name){
-      # Use the Rd based documentation, if any, for the function
-      # Get the right help file and convert it into a list
-      # The "deparse(substitute(..))" converts the expression into a character
-      # and is what help does internally if it is not provided with
-      # a character string anyway.
-      # Thanks to Jeroen at
-      #   http://stackoverflow.com/questions/8918753/r-help-page-as-object
-      rd_files <- help(name)
-      if (length(rd_files) > 0) {
-          # Currently, taking the first found file
-          rd <- utils:::.getHelpFile(rd_files[1])
-          names(rd) <- substring(sapply(rd, attr, "Rd_tag"), 2)
+    getLibraries = function(){
+      xml <- lapply(ls(stencila:::functions_xml), function(name) get(name, env=functions_xml))
+      list(
+        local=paste0('<functions>', paste0(xml, collapse=''), '</functions>')
+      )
+    },
 
-          temp_args <- rd$arguments
-          rd$arguments <- NULL
-          docs <- lapply(rd, unlist)
-          docs <- lapply(docs, paste, collapse = "")
-
-          temp_args <- temp_args[sapply(temp_args, attr, "Rd_tag") == "\\item"]
-          temp_args <- lapply(temp_args, lapply, paste, collapse = "")
-          temp_args <- lapply(temp_args, "names<-", c("arg", "description"))
-          docs$arguments <- temp_args
-      } else {
-        docs <- list()
-      }
-
-      # Extract properties from the docs into a specification
-      spec <- xml_new_root("function")
-      xml_add_child(spec, "language", "r")
-      xml_add_child(spec, "name", docs[["name"]])
-      xml_add_child(spec, "title", docs[["title"]])
-      xml_add_child(spec, "summary", docs[["description"]])
-      xml_add_child(spec, "description", docs[["details"]])
-      xml_add_child(spec, "params", docs[["arguments"]])
-      xml_add_child(spec, "return", docs[["value"]])
-
-      # Rd examples area single single of code so put it
-      # into <examples><example><usage>
-      examples <- xml_add_child(spec, "examples")
-      example <- xml_add_child(examples, "example")
-      xml_add_child(example, "usage", docs[["examples"]])
-
-      # Jump through hoops to get XML string...
-      raw <- xml_serialize(spec, NULL)
-      raw <- raw[raw != 0]
-      char <- rawToChar(raw)
-      str_sub(char, str_locate(char, '<function>')[1], str_locate(char, '</function>')[2])
+    callFunction = function(library, name, args, namedArgs){
+      # At present we still need to unpack args and namedArgs
+      # but in the future this might be handled by execute itself.
+      argValues <- lapply(args, self$unpack)
+      namedArgValues <- lapply(args, self$unpack)
+      # Use `execute` to actually call the function
+      result <- execute(list(
+        type = 'call',
+        func = list(type = 'get', name = name),
+        args = argValues,
+        namedArgs = namedArgValues
+      ))
+      # Pack it up
+      list(
+        messages = list(),
+        value = self$pack(result)
+      )
     }
   ),
 

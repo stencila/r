@@ -31,10 +31,11 @@ Suggests:
     devtools,
     testthat,
     covr
-RoxygenNote: 6.0.1
+RoxygenNote: 6.0.1.9000
 Collate: 
     'addins.R'
     'context.R'
+    'execute.R'
     'file-storer.R'
     'host-http-server.R'
     'sqlite-context.R'
@@ -42,3 +43,4 @@ Collate:
     'host.R'
     'json.R'
     'main.R'
+    'register.R'
