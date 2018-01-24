@@ -50,12 +50,12 @@ SqliteContext <- R6::R6Class('SqliteContext',
       if (exprOnly) {
         # Only SELECT statements allowed
         if (!str_detect(code, regex('^\\s*SELECT\\s+', ignore_case = TRUE))) {
-          messages <- c(messages, list(
+          messages[[length(messages)+1]] <- list(
             line = 0,
             column = 0,
             type = 'error',
             message = 'Code must be a `SELECT` expression'
-          ))
+          )
         } else {
           value <- TRUE
         }
@@ -66,6 +66,7 @@ SqliteContext <- R6::R6Class('SqliteContext',
         match <- str_match(code, regex('SELECT\\b.+?\\bFROM\\s+(\\w+)', ignore_case = TRUE))[1,]
         if (!is.na(match[2])) {
           table <- match[2]
+          # Select from `sqlite_master` table in the `main` schema therby ignoring input tables in the `temp` schema
           tables <- DBI::dbGetQuery(private$.conn, 'SELECT name FROM sqlite_master WHERE type=="table"')$name
           if (!table %in% tables) inputs <- c(inputs, table)
           value <- TRUE
@@ -79,6 +80,19 @@ SqliteContext <- R6::R6Class('SqliteContext',
         if (!is.na(name)) {
           output <- name
           value <- TRUE
+        }
+      }
+
+      # Produce an error if user is attempting to 'overwrite' an input
+      if (!is.null(output)) {
+        if(output %in% inputs) {
+          messages[[length(messages)+1]] <- list(
+            line = 0,
+            column = 0,
+            type = 'error',
+            message = paste0('Attempting to overwrite cell input "', output, '"')
+          )
+          output <- NULL
         }
       }
 
@@ -106,7 +120,7 @@ SqliteContext <- R6::R6Class('SqliteContext',
       for (name in names(inputs)) {
         value <- self$unpack(inputs[[name]])
         if (inherits(value, 'data.frame')) {
-          DBI::dbWriteTable(private$.conn, name, value, overwrite=TRUE)
+          DBI::dbWriteTable(private$.conn, name, value, temporary=TRUE, overwrite=TRUE)
         } else {
           variables[[name]] <- value
         }
