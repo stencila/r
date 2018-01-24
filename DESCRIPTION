@@ -20,13 +20,14 @@ Imports:
     R6,
     RSQLite,
     rstudioapi,
+    roxygen2,
     stringr,
     tidyverse,
     tools,
     urltools,
     xml2
 Remotes:
-    stencila/libcore/r
+    klutometis/roxygen@bbf259ddee033a873426ded1e83cdd344b986595
 Suggests:
     devtools,
     testthat,

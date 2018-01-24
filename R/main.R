@@ -14,6 +14,7 @@
 #' @importFrom grDevices dev.off png replayPlot
 #' @importFrom jsonlite fromJSON toJSON
 #' @import methods
+#' @import roxygen2
 #' @import stringr
 #' @import tools
 #' @importFrom utils capture.output read.csv write.csv

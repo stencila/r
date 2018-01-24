@@ -8,6 +8,8 @@ functions_xml <- new.env(parent = emptyenv())
 #' Register a function
 #'
 #' @param name_or_path The name of the function or filesystem path to it's source code
+#' @param func A function. Optional.
+#' @param xml A XML specification of the function. Optional.
 #'
 #' @export
 register_function <- function(name_or_path, func, xml) {
@@ -23,7 +25,7 @@ register_function <- function(name_or_path, func, xml) {
     if (paste0(name, '.R') != basename(path)) stop('Name of function is not consistent with name of file: "', paste0(name, '.R'), '" != "', basename(path), '"')
     func <- get(name, envir = env)
     # Get documentation block from file if available
-    blocks <- roxygen2:::parse_file(path)
+    blocks <- roxygen2::parse_file(path)
     if (length(blocks) > 0) {
       # Convert to Rd
       rd_text <- roxygen2:::block_to_rd(blocks[[1]], '.')$format()
@@ -47,7 +49,7 @@ register_function <- function(name_or_path, func, xml) {
 
     if (is.null(rd)) {
       # Get the Rd based documentation, if any, for the function
-      rd_files <- help(rd_name)
+      rd_files <- utils::help(rd_name)
       if (length(rd_files) > 0) {
         # Currently, taking the first found file and convert it into a list
         rd <- utils:::.getHelpFile(rd_files[1])
@@ -128,8 +130,8 @@ register_function <- function(name_or_path, func, xml) {
     xml <- str_sub(char, str_locate(char, '<function>')[1], str_locate(char, '</function>')[2])
   }
 
-  assign(name, func, env=functions)
-  assign(name, xml, env=functions_xml)
+  assign(name, func, envir = functions)
+  assign(name, xml, envir = functions_xml)
 }
 
 #' Register a library of functions
