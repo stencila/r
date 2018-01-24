@@ -3,7 +3,7 @@
 Context <- R6::R6Class('Context',
   public = list(
     pack = function (value) {
-      type <- libcore::type(value)
+      type <- type(value)
       # Of course, the order of these if statements is important.
       # Rearrange with caution (and testing!)
       if (type == 'table') {
