@@ -24,12 +24,12 @@ describe('RContext', {
     expect_equal(s$analyseCode('x <- 2', exprOnly=TRUE), list(
       inputs=list(),
       output=NULL,
-      messages=list(
+      messages=list(list(
         line=0,
         column=0,
         type='error',
         message='Code is not a single, simple expression'
-      )
+      ))
     ))
 
     # x assigned and then used
@@ -42,8 +42,13 @@ describe('RContext', {
     # x used and then assigned (this should not be allowed)
     expect_equal(s$analyseCode('x\nx <- 2'), list(
       inputs=list('x'),
-      output='x',
-      messages=list()
+      output=NULL,
+      messages=list(list(
+        line=0,
+        column=0,
+        type='warning',
+        message='Ignoring attempt to use a cell input "x" as a cell output'
+      ))
     ))
 
     # globals are not included as inputs
