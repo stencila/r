@@ -142,6 +142,13 @@ RContext <- R6::R6Class('RContext',
         }
       }
 
+      # Ensure no circular dependency i.e. output is not in inputs
+      # (This can happen if a user types a variable into a cell
+      # just because they want to see it's value)
+      if (!is.null(output)) {
+        if(output %in% inputs) output <- NULL
+      }
+
       list(
         inputs = inputs,
         output = output,
