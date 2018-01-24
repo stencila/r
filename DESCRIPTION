@@ -44,3 +44,4 @@ Collate:
     'json.R'
     'main.R'
     'register.R'
+    'type.R'
