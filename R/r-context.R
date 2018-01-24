@@ -87,7 +87,7 @@ RContext <- R6::R6Class('RContext',
       # Parse the code
       ast <- tryCatch(parse(text=code), error=identity)
       if (inherits(ast, 'error')) {
-        messages <- c(messages, ast)
+        messages[[length(messages)+1]] <- ast
       }
 
       # Is an expression an assignment?
@@ -109,12 +109,12 @@ RContext <- R6::R6Class('RContext',
           if (is.assignment(expr)) fail <- TRUE
         }
         if (fail) {
-          messages <- c(messages, list(
+          messages[[length(messages)+1]] <- list(
             line = 0,
             column = 0,
             type = 'error',
             message = 'Code is not a single, simple expression'
-          ))
+          )
         }
       }
 
@@ -146,7 +146,15 @@ RContext <- R6::R6Class('RContext',
       # (This can happen if a user types a variable into a cell
       # just because they want to see it's value)
       if (!is.null(output)) {
-        if(output %in% inputs) output <- NULL
+        if(output %in% inputs) {
+          messages[[length(messages)+1]] <- list(
+            line = 0,
+            column = 0,
+            type = 'warning',
+            message = 'Ignoring attempt to use a cell input "x" as a cell output'
+          )
+          output <- NULL
+        }
       }
 
       list(
