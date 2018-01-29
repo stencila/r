@@ -12,7 +12,7 @@ functions_xml <- new.env(parent = emptyenv())
 #' @param xml A XML specification of the function. Optional.
 #'
 #' @export
-register_function <- function(name_or_path, func, xml) {
+function_register <- function(name_or_path, func, xml) {
   rd <- NULL
   if(file.exists(name_or_path)) {
     path <- name_or_path
@@ -132,6 +132,21 @@ register_function <- function(name_or_path, func, xml) {
 
   assign(name, func, envir = functions)
   assign(name, xml, envir = functions_xml)
+
+  list(name = name, func = func, xml = xml)
+}
+
+function_test <- function(path) {
+}
+
+function_document <- function(xml, dest) {
+  doc <- xml2::read_xml(xml)
+  md <- file(dest, "w")
+  cat('#', xml2::xml_text(xml2::xml_find_first(doc, ".//name")), file = md)
+}
+
+function_list <- function() {
+  ls(functions)
 }
 
 #' Register a library of functions
@@ -141,7 +156,51 @@ register_function <- function(name_or_path, func, xml) {
 #' @param path File system path to the library
 #'
 #' @export
-register_library <- function(path) {
-  files <- Sys.glob(file.path(path, '*.R'))
-  for (file in files) register_function(file)
+library_register <- function(path) {
+  files <- Sys.glob(file.path(path, 'funcs', '*.R'))
+  for (file in files) function_register(file)
 }
+
+#' @export
+library_test <- function(path = '.') {
+  # Get all functions
+  funcs_dir <- file.path(path, 'funcs')
+  files <- Sys.glob(file.path(funcs_dir, '*.R'))
+  if (!length(files)) stop("No R files in \"", funcs_dir, "\"")
+  # For each file run it's tests
+  for (file in files) {
+    # Register the function
+    registered <- function_register(file)
+    # Check that there is a test file for the function
+    test <- file.path(path, 'tests', paste0(registered$name, '.R'))
+    if (!file.exists(test)) stop("No test file for function \"", registered$name, "\"")
+    # Attach the function to the search path
+    env = list()
+    env[[registered$name]] = registered$func
+    attach(env)
+    # Run the test file
+    testthat::test_file(test)
+  }
+}
+
+#' Register a library of functions
+#'
+#' Registers the function in each `.R` file in a library directory.
+#'
+#' @param path File system path to the library
+#'
+#' @export
+library_document <- function(path = ".") {
+  # Get all functions
+  funcs_dir <- file.path(path, 'funcs')
+  files <- Sys.glob(file.path(funcs_dir, '*.R'))
+  if (!length(files)) stop("No R files in \"", funcs_dir, "\"")
+  # Generate documentation for each function
+  for (file in files) {
+    # Register the function
+    registered <- function_register(file)
+    # Generate Markdown documentation for static site
+    function_document(registered$xml, file.path(path, 'docs', paste0(registered$name, '.md')))
+  }
+}
+
