@@ -1,4 +1,9 @@
-Name: Open with Stencila
-Description: Open the file in the source editor using Stencila
+Name: Stencila: open file
+Description: Open the file currently in the source editor using Stencila
 Binding: addin_open
+Interactive: false
+
+Name: Stencila: register function
+Description: Register the function file in the source editor using Stencila
+Binding: addin_register
 Interactive: false
