@@ -131,7 +131,7 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
         # Check that host is in whitelist
         if (!is.null(origin)) {
           host <- str_match(origin, '^https?://([\\w.]+)(:\\d+)?')[1,2]
-          if (!(host %in% c('127.0.0.1', 'localhost', 'open.stenci.la'))) origin <- NULL
+          if (!str_detect(host, "(127\\.0\\.0\\.1)|(localhost)|(([^.]+\\.)?stenci.la)$")) origin <- NULL
         }
 
         # If an origin has been found and is authorized set CORS headers
