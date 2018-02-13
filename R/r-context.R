@@ -181,7 +181,13 @@ RContext <- R6::R6Class('RContext',
           envir=private$.global_env,
           output_handler=evaluate_output_handler
         )
-        private$.result(evaluation)
+        result <- private$.result(evaluation)
+        # Need to ensure any output is in value
+        output <- self$analyseCode(code)$output
+        if (!is.null(output)) {
+          result$value <- get(output, envir=private$.global_env)
+        }
+        result
     },
 
     getLibraries = function(){
