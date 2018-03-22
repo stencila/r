@@ -128,10 +128,13 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
           origin <- str_match(env$HTTP_REFERER, '^https?://([\\w.]+)(:\\d+)?')[1,1]
         }
 
-        # Check that host is in whitelist
+        # Check that origin is in whitelist of file://, http://127.0.0.1, http://localhost, or http://*.stenci.la
+        # The origin 'file://' is sent when a connection is made from Electron (i.e Stencila Desktop)
         if (!is.null(origin)) {
-          host <- str_match(origin, '^https?://([\\w.]+)(:\\d+)?')[1,2]
-          if (!str_detect(host, "(127\\.0\\.0\\.1)|(localhost)|(([^.]+\\.)?stenci.la)$")) origin <- NULL
+          if (origin != 'file://') {
+            host <- str_match(origin, '^https?://([\\w.]+)(:\\d+)?')[1,2]
+            if (!str_detect(host, "(127\\.0\\.0\\.1)|(localhost)|(([^.]+\\.)?stenci.la)$")) origin <- NULL
+          }
         }
 
         # If an origin has been found and is authorized set CORS headers
