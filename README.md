@@ -22,6 +22,8 @@ Then install the package so that other Stencila packages and applications can de
 stencila:::install()
 ```
 
+**Note** Installing Stencila package for R may take a while as there are a number of dependencies which need to be installed. 
+
 ### Use
 
 This package lets you run R code from inside Stencila Documents. When you start the [Stencila Desktop](https://github.com/stencila/desktop) it will be automatically detect the installed R package and you'll be able to execute R code cells from within your documents.
