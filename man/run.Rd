@@ -7,7 +7,7 @@
 run(...)
 }
 \arguments{
-\item{...}{Arguments to pass to \code{host$install}}
+\item{...}{Arguments to pass to \code{host$run}}
 }
 \description{
 Run the Stencila host

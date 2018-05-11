@@ -19,7 +19,7 @@ Alternatively, check the [releases page](https://github.com/stencila/r/releases)
 Then install the package so that other Stencila packages and applications can detect it:
 
 ```r
-stencila:::install()
+stencila::register()
 ```
 
 ### Use

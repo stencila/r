@@ -76,12 +76,12 @@ by peer hosts to determine which "types" this host provides and
 which "instances" have already been instantiated.
 }
 
-\section{install()}{
+\section{register()}{
 
 
-Install this Stencila \code{Host} on this machine.
+Register this Stencila \code{Host} on this machine.
 
-Installation of a host involves creating a file \code{r.json} inside of
+Registering a host involves creating a file \code{r.json} inside of
 the user's Stencila data (see \code{user_dir}) directory which describes
 the capabilities of this host.
 }

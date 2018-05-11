@@ -28,11 +28,12 @@ NULL
 # Set the package version string
 version <- tryCatch(toString(packageVersion("stencila")), error = '0.0.0')
 
-#' Install the Stencila host
+#' Register the Stencila host
 #'
-#' @param ... Arguments to pass to \code{host$install}
+#' @param ... Arguments to pass to \code{host$register}
 #' @seealso \code{Host}
-install <- function (...) host$install(...)
+#' @export
+register <- function (...) host$register(...)
 
 #' Display the Stencila host's environment
 #'
@@ -45,32 +46,37 @@ environ <- function () {
 #'
 #' @param ... Arguments to pass to \code{host$start}
 #' @seealso \code{Host}
+#' @export
 start <- function (...) host$start(...)
 
 #' Stop serving the Stencila host
 #'
-#' @param ... Arguments to pass to \code{host$install}
+#' @param ... Arguments to pass to \code{host$stop}
 #' @seealso \code{Host}
 #
 # Called 'stop_' because 'stop' masks `stats::stop`,
 # even within this package.
+#' @export
 stop_ <- function (...) host$stop(...)
 
 #' Run the Stencila host
 #'
-#' @param ... Arguments to pass to \code{host$install}
+#' @param ... Arguments to pass to \code{host$run}
 #' @seealso \code{Host}
+#' @export
 run <- function (...) host$run(...)
 
 #' Spawn a Stencila host
 #'
 #' @seealso \code{Host}
+#' @export
 spawn <- function (...) host$spawn(...)
 
 #' Open an address in Stencila
 #'
 #' @param ... Arguments to pass to \code{host$open}
 #' @seealso \code{Host}
+#' @export
 open <- function (...) host$open(...)
 
 # Hooks for namespace events
