@@ -32,7 +32,7 @@ Currently the parameter \code{closed} defaults to \code{FALSE} so that you can u
 }
 }
 
-\section{analyseCode()}{
+\section{compile()}{
 
 
 Analyse R code and return the names of inputs, outputs
@@ -44,7 +44,7 @@ and the implicitly returned vaue expression
 }
 }
 
-\section{executeCode()}{
+\section{execute()}{
 
 
 Run R code within the context's scope

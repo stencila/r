@@ -32,7 +32,7 @@ SqliteContext <- R6::R6Class('SqliteContext',
       DBI::dbDisconnect(private$.conn)
     },
 
-    #' @section analyseCode():
+    #' @section compile():
     #'
     #' Analyse SQL code and return the names of inputs, outputs
     #' and the returned value
@@ -41,7 +41,7 @@ SqliteContext <- R6::R6Class('SqliteContext',
     #'   \item{code}{SQL code to be analysed}
     #'   \item{exprOnly}{Ensure that the code is a select expression?}
     #' }
-    analyseCode = function(code, exprOnly = FALSE) {
+    compile = function(code, exprOnly = FALSE) {
       inputs <- list()
       output <- NULL
       value <- FALSE

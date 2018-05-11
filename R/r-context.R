@@ -70,7 +70,7 @@ RContext <- R6::R6Class('RContext',
       private$.globals <- ls(getNamespace('base'))
     },
 
-    #' @section analyseCode():
+    #' @section compile():
     #'
     #' Analyse R code and return the names of inputs, outputs
     #' and the implicitly returned vaue expression
@@ -79,7 +79,10 @@ RContext <- R6::R6Class('RContext',
     #'   \item{code}{R code to be analysed}
     #'   \item{exprOnly}{Ensure that the code is a simple expression?}
     #' }
-    analyseCode = function(code, exprOnly = FALSE) {
+    compile = function(cell) {
+      code <- cell$source$data
+      exprOnly <- cell$expr
+
       inputs <- list()
       output <- NULL
       messages <- list()
@@ -157,14 +160,17 @@ RContext <- R6::R6Class('RContext',
         }
       }
 
+      if (!is.null(output)) outputs <- list(list(name=output))
+      else outputs <- list()
+
       list(
-        inputs = inputs,
-        output = output,
+        inputs = lapply(inputs, function(item) list(name=item)),
+        outputs = outputs,
         messages = messages
       )
     },
 
-    #' @section executeCode():
+    #' @section execute():
     #'
     #' Run R code within the context's scope
     #'
@@ -173,21 +179,30 @@ RContext <- R6::R6Class('RContext',
     #'   \item{inputs}{A list with a data pack for each input}
     #'   \item{exprOnly}{Ensure that the code is a simple expression?}
     #' }
-    executeCode = function(code, inputs = list(), exprOnly = FALSE) {
-        for (input in names(inputs)) private$.global_env[[input]] <- self$unpack(inputs[[input]])
+    execute = function(cell) {
+        for (input in cell$inputs) private$.global_env[[input$name]] <- self$unpack(input$value)
+
         # Do eval and process into a result
+        code <- cell$source$data
         evaluation <- evaluate::evaluate(
           code,
           envir=private$.global_env,
           output_handler=evaluate_output_handler
         )
         result <- private$.result(evaluation)
+
         # Need to ensure any output is in value
-        output <- self$analyseCode(code)$output
-        if (!is.null(output)) {
-          result$value <- get(output, envir=private$.global_env)
+        outputs <- self$compile(cell)$outputs
+        if (length(outputs)) {
+          outputs[1]$value <- get(outputs[1]$name, envir=private$.global_env)
+        } else {
+          outputs <- list(list(value=result$value))
         }
-        result
+
+        list(
+          outputs = outputs,
+          messages = result$messages
+        )
     },
 
     getLibraries = function(){

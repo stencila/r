@@ -157,7 +157,9 @@ function_list <- function() {
 #'
 #' @export
 library_register <- function(path) {
+  if (!dir.exists(path)) stop("Path does not exist \"", path, "\"")
   files <- Sys.glob(file.path(path, 'funcs', '*.R'))
+  if (length(files) == 0) stop("No functions found in \"", file.path(path, 'funcs'), "\"")
   for (file in files) function_register(file)
 }
 

@@ -63,6 +63,10 @@ Context <- R6::R6Class('Context',
       } else {
         packed$data
       }
+    },
+
+    libraries = function (...) {
+      list()
     }
   )
 )

@@ -21,7 +21,7 @@ Create a new \code{SqliteContext}
 }
 }
 
-\section{analyseCode()}{
+\section{compile()}{
 
 
 Analyse SQL code and return the names of inputs, outputs

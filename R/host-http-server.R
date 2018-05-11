@@ -179,8 +179,13 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
       if (verb == 'OPTIONS') return(list(self$options))
 
       if (path == '/') return(list(self$home))
+      if (path == '/manifest') return(list(self$manifest))
       if (path == '/favicon.ico') return(list(self$static, 'favicon.ico'))
       if (str_sub(path, 1, 8) == '/static/') return(list(self$static, str_sub(path, 9)))
+
+      if (str_sub(path, 1, 9) == '/environ/') {
+        if (verb == 'POST') return(list(self$startup, str_sub(path, 10)))
+      }
 
       match <- str_match(path, '^/(.+?)(!(.+))?$')
       if (!is.na(match[1, 1])) {
@@ -243,6 +248,28 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
       }
     },
 
+    #' @section manifest():
+    #'
+    #' Handle a request for the host's manifest
+    manifest = function(request) {
+      list(
+        body = to_json(private$.host$manifest()),
+        status = 200,
+        headers = list('Content-Type'='application/json')
+      )
+    },
+
+    #' @section startup():
+    #'
+    #' Handle a request to start and environment
+    startup = function(request, type) {
+      list(
+        body = '',
+        status = 200,
+        headers = list('Content-Type'='application/json')
+      )
+    },
+
     #' @section post():
     #'
     #' Handle a POST request
@@ -288,8 +315,7 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
     #' Convert the body into a named list of arguments
     args = function(request) {
       if (!is.null(request$body) && nchar(request$body) > 0) {
-        # Vectors need to converted into a list for `do.call` below
-        as.list(from_json(request$body))
+        from_json(request$body)
       } else {
         list()
       }

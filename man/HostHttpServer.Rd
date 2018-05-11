@@ -68,6 +68,18 @@ Handle a request to `home`
 Handle a request for a static file
 }
 
+\section{manifest()}{
+
+
+Handle a request for the host's manifest
+}
+
+\section{startup()}{
+
+
+Handle a request to start and environment
+}
+
 \section{post()}{
 
 

@@ -62,6 +62,11 @@ stop_ <- function (...) host$stop(...)
 #' @seealso \code{Host}
 run <- function (...) host$run(...)
 
+#' Spawn a Stencila host
+#'
+#' @seealso \code{Host}
+spawn <- function (...) host$spawn(...)
+
 #' Open an address in Stencila
 #'
 #' @param ... Arguments to pass to \code{host$open}

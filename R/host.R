@@ -1,10 +1,7 @@
 # List of types that hosts supports
-#' @include file-storer.R
 #' @include r-context.R
 #' @include sqlite-context.R
 TYPES <- list(
-  FileStorer = FileStorer,
-
   RContext = RContext,
   SqliteContext = SqliteContext
 )
@@ -46,6 +43,7 @@ Host <- R6::R6Class("Host",
     #' Create a new \code{Host}
     initialize = function () {
       private$.id <- paste(c('r-', sample(c(letters, 0:9), 64, replace=TRUE)), collapse="")
+      private$.key <- paste(sample(c(letters, 0:9), 128, replace=TRUE), collapse="")
       private$.servers <- list()
       private$.instances <- list()
     },
@@ -60,7 +58,7 @@ Host <- R6::R6Class("Host",
       os <- tolower(Sys.info()["sysname"])
       dir <- switch(os,
         darwin = file.path(Sys.getenv("HOME"), 'Library', 'Application Support', 'Stencila'),
-        linux = file.path(Sys.getenv("HOME"), '.local', 'share', 'stencila'),
+        linux = file.path(Sys.getenv("HOME"), '.stencila'),
         windows = file.path(Sys.getenv("APPDATA"), 'Stencila')
       )
       if (!dir.exists(dir)) dir.create(dir, recursive = T)
@@ -144,26 +142,27 @@ Host <- R6::R6Class("Host",
     #' by peer hosts to determine which "types" this host provides and
     #' which "instances" have already been instantiated.
     manifest = function (complete=TRUE) {
+      environs <- list(
+        list(id='local', name='local', version='')
+      )
       manifest <- list(
         stencila = list(
           package = 'r',
           version = version
         ),
-        run = c(unname(Sys.which('R')), '--slave', '-e', 'stencila:::run(echo=TRUE)'),
-        types = TYPES_SPECS,
-        # For compatability with 0.27 API
-        schemes = list(
-          new = TYPES_SPECS
-        )
+        id = private$.id,
+        spawn = c(unname(Sys.which('Rscript')), '-e', 'stencila:::spawn()'),
+        environs = environs,
+        types = TYPES_SPECS
       )
       if (complete) {
         manifest <- c(manifest, list(
-          id = private$.id,
-          process = Sys.getpid(),
+          machine = list(),
+          process = list(
+            pid = Sys.getpid()
+          ),
           servers = self$servers,
-          instances = names(private$.instances),
-          # For compatability with 0.27 API
-          urls = self$urls
+          instances = names(private$.instances)
         ))
       }
       manifest
@@ -234,15 +233,15 @@ Host <- R6::R6Class("Host",
     #' \describe{
     #'   \item{id}{ID of instance}
     #'   \item{method}{Name of instance method}
-    #'   \item{args}{A list of of method arguments}
+    #'   \item{arg}{The argument to pass to the method}
     #'   \item{return}{The result of the method call}
     #' }
-    put  = function (id, method, args = NULL) {
+    put  = function (id, method, arg = NULL) {
       instance <- private$.instances[[id]]
       if (!is.null(instance)) {
         func <- instance[[method]]
         if (!is.null(func)) {
-          do.call(func, args)
+          do.call(func, list(arg))
         } else {
           stop(paste('Unknown method:', method))
         }
@@ -286,11 +285,19 @@ Host <- R6::R6Class("Host",
         private$.servers[['http']] <- server
         server$start()
 
-        # Register as a running host by creating a run file
-        file <- self$run_file()
-        file.create(file)
-        Sys.chmod(file, "0600")
-        cat(toJSON(self$manifest(), pretty=TRUE, auto_unbox=TRUE), file=file)
+        # Register as a running host ...
+        dir <- file.path(self$temp_dir(), 'hosts')
+        if (!file.exists(dir)) dir.create(dir, recursive=TRUE)
+        # ...by creating a run file
+        run_file <- file.path(dir, paste0(self$id, '.json'))
+        file.create(run_file)
+        Sys.chmod(run_file, "0600")
+        cat(toJSON(self$manifest(), pretty=TRUE, auto_unbox=TRUE), file=run_file)
+        # ...and a key file
+        key_file <- file.path(dir, paste0(self$id, '.key'))
+        file.create(key_file)
+        Sys.chmod(key_file, "0600")
+        cat(self$key, file=key_file)
 
         if (!quiet) {
           cat('Host has started at:', server$ticketed_url(), '\n')
@@ -334,7 +341,11 @@ Host <- R6::R6Class("Host",
       self$start(address=address, port=port, authorization=authorization, quiet=quiet)
 
       if (echo) {
-        cat(toJSON(self$manifest(), pretty=TRUE, auto_unbox=TRUE))
+        cat(to_json(list(
+          id = self$id,
+          manifest = self$manifest(),
+          key = self$key
+        )))
         flush.console()
       }
 
@@ -347,10 +358,14 @@ Host <- R6::R6Class("Host",
       )
     },
 
+    spawn = function (options=list()) {
+      self$run(authorization=FALSE, quiet=TRUE, echo=TRUE)
+    },
+
     #' @section open():
     #'
     #' Open a file in the browser.
-    open  = function (address='', external=FALSE) {
+    open = function (address='', external=FALSE) {
       # Difficult to test headlessly, so don't include in coverage
       # nocov start
       self$start()
@@ -389,6 +404,13 @@ Host <- R6::R6Class("Host",
       private$.id
     },
 
+    #' @section key:
+    #'
+    #' Get secret key of this host
+    key = function () {
+      private$.key
+    },
+
     #' @section servers:
     #'
     #' Get a list of servers for this host. Servers are identified by the protocol shorthand
@@ -415,6 +437,7 @@ Host <- R6::R6Class("Host",
 
   private = list(
     .id = NULL,
+    .key = NULL,
     .servers = NULL,
     .instances = NULL
   )

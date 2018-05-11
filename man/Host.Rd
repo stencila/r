@@ -118,7 +118,7 @@ Call a method of an instance
 \describe{
   \item{id}{ID of instance}
   \item{method}{Name of instance method}
-  \item{args}{A list of of method arguments}
+  \item{arg}{The argument to pass to the method}
   \item{return}{The result of the method call}
 }
 }
@@ -177,6 +177,12 @@ Open a file in the browser.
 
 
 Get unique ID of this host
+}
+
+\section{key}{
+
+
+Get secret key of this host
 }
 
 \section{servers}{
