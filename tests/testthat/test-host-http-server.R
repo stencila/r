@@ -170,8 +170,8 @@ test_that("HostHttpServer.put", {
 
   r1 = s$post(list(), 'RContext')
   id = fromJSON(r1$body)
-  r2 = s$put(list(body='{"code":"6*7"}'), id, 'runCode')
+  r2 = s$put(list(body='{"code":"6*7"}'), id, 'executeCode')
   expect_equal(r2$status, 200)
   expect_equal(r2$headers[['Content-Type']], 'application/json')
-  expect_equal(fromJSON(r2$body)$output$content, '42')
+  expect_equal(fromJSON(r2$body)$value$data, 42)
 })

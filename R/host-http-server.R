@@ -128,10 +128,13 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
           origin <- str_match(env$HTTP_REFERER, '^https?://([\\w.]+)(:\\d+)?')[1,1]
         }
 
-        # Check that host is in whitelist
+        # Check that origin is in whitelist of file://, http://127.0.0.1, http://localhost, or http://*.stenci.la
+        # The origin 'file://' is sent when a connection is made from Electron (i.e Stencila Desktop)
         if (!is.null(origin)) {
-          host <- str_match(origin, '^https?://([\\w.]+)(:\\d+)?')[1,2]
-          if (!(host %in% c('127.0.0.1', 'localhost', 'open.stenci.la'))) origin <- NULL
+          if (origin != 'file://') {
+            host <- str_match(origin, '^https?://([\\w.]+)(:\\d+)?')[1,2]
+            if (!str_detect(host, "(127\\.0\\.0\\.1)|(localhost)|(([^.]+\\.)?stenci.la)$")) origin <- NULL
+          }
         }
 
         # If an origin has been found and is authorized set CORS headers
@@ -176,8 +179,13 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
       if (verb == 'OPTIONS') return(list(self$options))
 
       if (path == '/') return(list(self$home))
+      if (path == '/manifest') return(list(self$manifest))
       if (path == '/favicon.ico') return(list(self$static, 'favicon.ico'))
       if (str_sub(path, 1, 8) == '/static/') return(list(self$static, str_sub(path, 9)))
+
+      if (str_sub(path, 1, 9) == '/environ/') {
+        if (verb == 'POST') return(list(self$startup, str_sub(path, 10)))
+      }
 
       match <- str_match(path, '^/(.+?)(!(.+))?$')
       if (!is.na(match[1, 1])) {
@@ -204,7 +212,7 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
     #'
     #' Handle a request to `home`
     home = function(request) {
-      if (!accepts_json(request)) {
+      if (!self$accepts_json(request)) {
         self$static(request, 'index.html')
       } else {
         list(
@@ -238,6 +246,28 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
           headers = list('Content-Type'=mimetype)
         )
       }
+    },
+
+    #' @section manifest():
+    #'
+    #' Handle a request for the host's manifest
+    manifest = function(request) {
+      list(
+        body = to_json(private$.host$manifest()),
+        status = 200,
+        headers = list('Content-Type'='application/json')
+      )
+    },
+
+    #' @section startup():
+    #'
+    #' Handle a request to start and environment
+    startup = function(request, type) {
+      list(
+        body = '',
+        status = 200,
+        headers = list('Content-Type'='application/json')
+      )
     },
 
     #' @section post():
@@ -285,11 +315,19 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
     #' Convert the body into a named list of arguments
     args = function(request) {
       if (!is.null(request$body) && nchar(request$body) > 0) {
-        # Vectors need to converted into a list for `do.call` below
-        as.list(fromJSON(request$body, simplifyDataFrame=FALSE))
+        from_json(request$body)
       } else {
         list()
       }
+    },
+
+    #' @section accepts_json():
+    #'
+    #' Does a request accept JSON?
+    accepts_json = function(request) {
+      accept <- request$headers[['Accept']]
+      if (is.null(accept)) FALSE
+      else str_detect(accept, 'application/json')
     },
 
     #' @section ticket_create():
@@ -389,26 +427,3 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
   )
 )
 
-# Does request accept JSON?
-accepts_json <- function(request) {
-  accept <- request$headers[['Accept']]
-  if (is.null(accept)) FALSE
-  else str_detect(accept, 'application/json')
-}
-
-# Convert a value to JSON
-to_json <- function(value) {
-  # jsonlite converts empty R lists to empty JSON arrays, override that
-  if (is.list(value) & length(value)==0) '{}'
-  else toString(toJSON(value, auto_unbox=TRUE, null='null'))
-}
-# Create a hook for conversion of R6 instances to JSON
-methods::setClass('R6')
-asJSON <- jsonlite:::asJSON
-methods::setMethod('asJSON', 'R6', function(x, ...) {
-  members <- list()
-  for(name in ls(x, sorted=FALSE)) {
-    if (!is.function(x[[name]])) members[[name]] <- x[[name]]
-  }
-  to_json(members)
-})

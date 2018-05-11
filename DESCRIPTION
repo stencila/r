@@ -6,7 +6,7 @@ Authors@R: c(person("Nokome", "Bentley", email = "nokome@stenci.la", role = c("a
 URL: https://github.com/stencila/r#readme
 BugReports: https://github.com/stencila/r/issues
 License: Apache-2.0
-Version: 0.28.1
+Version: 0.28.2
 LazyData: TRUE
 Imports:
     base64enc,
@@ -19,21 +19,29 @@ Imports:
     R6,
     RSQLite,
     rstudioapi,
+    roxygen2,
     stringr,
     tidyverse,
     tools,
-    urltools
+    urltools,
+    xml2
+Remotes:
+    klutometis/roxygen@bbf259ddee033a873426ded1e83cdd344b986595
 Suggests:
     devtools,
     testthat,
     covr
-RoxygenNote: 6.0.1
+RoxygenNote: 6.0.1.9000
 Collate: 
     'addins.R'
+    'context.R'
+    'execute.R'
     'file-storer.R'
     'host-http-server.R'
     'sqlite-context.R'
     'r-context.R'
     'host.R'
+    'json.R'
     'main.R'
-    'value.R'
+    'register.R'
+    'type.R'

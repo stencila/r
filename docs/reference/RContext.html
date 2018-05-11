@@ -108,30 +108,22 @@ including contexts for other languages, Documents, and Sheets.</p>
   <dt>closed</dt><dd><p>Context can not read from the global environment. Default <code>FALSE</code></p></dd>
 </dl>
     
-    <h2 class="hasAnchor" id="runcode-"><a class="anchor" href="#runcode-"></a>runCode()</h2>
+    <h2 class="hasAnchor" id="analysecode-"><a class="anchor" href="#analysecode-"></a>analyseCode()</h2>
+
+    
+    <p>Analyse R code and return the names of inputs, outputs
+and the implicitly returned vaue expression</p><dl class='dl-horizontal'>
+  <dt>code</dt><dd><p>R code to be analysed</p></dd>
+  <dt>exprOnly</dt><dd><p>Ensure that the code is a simple expression?</p></dd>
+</dl>
+    
+    <h2 class="hasAnchor" id="executecode-"><a class="anchor" href="#executecode-"></a>executeCode()</h2>
 
     
     <p>Run R code within the context's scope</p><dl class='dl-horizontal'>
   <dt>code</dt><dd><p>R code to be executed</p></dd>
-  <dt>options</dt><dd><p>Any execution options</p></dd>
-</dl>
-    
-    <h2 class="hasAnchor" id="callcode-"><a class="anchor" href="#callcode-"></a>callCode()</h2>
-
-    
-    <p>Run R code within a local function scope</p><dl class='dl-horizontal'>
-  <dt>code</dt><dd><p>R code to be executed</p></dd>
   <dt>inputs</dt><dd><p>A list with a data pack for each input</p></dd>
-  <dt>isolated</dt><dd><p>Is the call isolated from the context's global environment</p></dd>
-</dl>
-    
-    <h2 class="hasAnchor" id="codedependencies-"><a class="anchor" href="#codedependencies-"></a>codeDependencies()</h2>
-
-    
-    <p>Returns an array of all variable names not declared within
-the piece of code. This might include global functions and variables used
-within the piece of code.</p><dl class='dl-horizontal'>
-  <dt>code</dt><dd><p>R code</p></dd>
+  <dt>exprOnly</dt><dd><p>Ensure that the code is a simple expression?</p></dd>
 </dl>
     
 
@@ -139,52 +131,29 @@ within the piece of code.</p><dl class='dl-horizontal'>
     <pre class="examples"><div class='input'><span class='no'>context</span> <span class='kw'>&lt;-</span> <span class='no'>RContext</span>$<span class='fu'>new</span>()
 
 <span class='co'># Assign a variable within the context</span>
-<span class='no'>context</span>$<span class='fu'>runCode</span>(<span class='st'>'my_var &lt;- 42'</span>)</div><div class='output co'>#&gt; $errors
+<span class='no'>context</span>$<span class='fu'>executeCode</span>(<span class='st'>'my_var &lt;- 42'</span>)</div><div class='output co'>#&gt; $value
 #&gt; NULL
 #&gt; 
-#&gt; $output
-#&gt; NULL
+#&gt; $messages
+#&gt; list()
 #&gt; </div><div class='input'>
 <span class='co'># Get the variable as an output value</span>
-<span class='no'>context</span>$<span class='fu'>runCode</span>(<span class='st'>'my_var'</span>)</div><div class='output co'>#&gt; $errors
-#&gt; NULL
+<span class='no'>context</span>$<span class='fu'>executeCode</span>(<span class='st'>'my_var'</span>)</div><div class='output co'>#&gt; $value
+#&gt; $value$type
+#&gt; [1] "number"
 #&gt; 
-#&gt; $output
-#&gt; $output$type
-#&gt; [1] "float"
+#&gt; $value$data
+#&gt; [1] 42
 #&gt; 
-#&gt; $output$format
-#&gt; [1] "text"
 #&gt; 
-#&gt; $output$content
-#&gt; [1] "42"
-#&gt; 
-#&gt; </div><div class='input'>
-<span class='co'># The variable is NOT available in `callCode`</span>
-<span class='no'>context</span>$<span class='fu'>callCode</span>(<span class='st'>'my_var'</span>)$<span class='no'>errors</span><span class='kw'>[[</span><span class='fl'>1</span>]]$<span class='no'>message</span></div><div class='output co'>#&gt; NULL</div><div class='input'>
-<span class='co'># Intead, you can pass input values</span>
-<span class='no'>context</span>$<span class='fu'>callCode</span>(<span class='st'>'x * y'</span>, <span class='fu'>list</span>(<span class='kw'>x</span><span class='kw'>=</span><span class='fu'><a href='pack.html'>pack</a></span>(<span class='fl'>6</span>), <span class='kw'>y</span><span class='kw'>=</span><span class='fu'><a href='pack.html'>pack</a></span>(<span class='fl'>7</span>)))</div><div class='output co'>#&gt; $errors
-#&gt; NULL
-#&gt; 
-#&gt; $output
-#&gt; $output$type
-#&gt; [1] "float"
-#&gt; 
-#&gt; $output$format
-#&gt; [1] "text"
-#&gt; 
-#&gt; $output$content
-#&gt; [1] "42"
-#&gt; 
+#&gt; $messages
+#&gt; list()
 #&gt; </div><div class='input'>
 <span class='co'># Returned output value can include plots</span>
-<span class='no'>context</span>$<span class='fu'>callCode</span>(<span class='st'>'plot(1,1)'</span>)$<span class='no'>output</span></div><div class='output co'>#&gt; $type
+<span class='no'>context</span>$<span class='fu'>executeCode</span>(<span class='st'>'plot(1,1)'</span>)$<span class='no'>value</span></div><div class='output co'>#&gt; $type
 #&gt; [1] "image"
 #&gt; 
-#&gt; $format
-#&gt; [1] "src"
-#&gt; 
-#&gt; $content
+#&gt; $src
 #&gt; [1] "data:image/src;base64,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"
 #&gt; </div></pre>
   </div>
@@ -198,11 +167,9 @@ within the piece of code.</p><dl class='dl-horizontal'>
 
       <li><a href="#new-">new()</a></li>
 
-      <li><a href="#runcode-">runCode()</a></li>
+      <li><a href="#analysecode-">analyseCode()</a></li>
 
-      <li><a href="#callcode-">callCode()</a></li>
-
-      <li><a href="#codedependencies-">codeDependencies()</a></li>
+      <li><a href="#executecode-">executeCode()</a></li>
       
       <li><a href="#examples">Examples</a></li>
     </ul>

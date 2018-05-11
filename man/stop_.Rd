@@ -7,7 +7,7 @@
 stop_(...)
 }
 \arguments{
-\item{...}{Arguments to pass to \code{host$install}}
+\item{...}{Arguments to pass to \code{host$stop}}
 }
 \description{
 Stop serving the Stencila host

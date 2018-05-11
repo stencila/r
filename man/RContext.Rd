@@ -32,38 +32,27 @@ Currently the parameter \code{closed} defaults to \code{FALSE} so that you can u
 }
 }
 
-\section{runCode()}{
+\section{compile()}{
+
+
+Analyse R code and return the names of inputs, outputs
+and the implicitly returned vaue expression
+
+\describe{
+  \item{code}{R code to be analysed}
+  \item{exprOnly}{Ensure that the code is a simple expression?}
+}
+}
+
+\section{execute()}{
 
 
 Run R code within the context's scope
 
 \describe{
   \item{code}{R code to be executed}
-  \item{options}{Any execution options}
-}
-}
-
-\section{callCode()}{
-
-
-Run R code within a local function scope
-
-\describe{
-  \item{code}{R code to be executed}
   \item{inputs}{A list with a data pack for each input}
-  \item{isolated}{Is the call isolated from the context's global environment}
-}
-}
-
-\section{codeDependencies()}{
-
-
-Returns an array of all variable names not declared within
-the piece of code. This might include global functions and variables used
-within the piece of code.
-
-\describe{
-  \item{code}{R code}
+  \item{exprOnly}{Ensure that the code is a simple expression?}
 }
 }
 
@@ -71,18 +60,12 @@ within the piece of code.
 context <- RContext$new()
 
 # Assign a variable within the context
-context$runCode('my_var <- 42')
+context$executeCode('my_var <- 42')
 
 # Get the variable as an output value
-context$runCode('my_var')
-
-# The variable is NOT available in `callCode`
-context$callCode('my_var')$errors[[1]]$message
-
-# Intead, you can pass input values
-context$callCode('x * y', list(x=pack(6), y=pack(7)))
+context$executeCode('my_var')
 
 # Returned output value can include plots
-context$callCode('plot(1,1)')$output
+context$executeCode('plot(1,1)')$value
 }
 \keyword{datasets}
