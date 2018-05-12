@@ -19,7 +19,7 @@ Alternatively, check the [releases page](https://github.com/stencila/r/releases)
 Then install the package so that other Stencila packages and applications can detect it:
 
 ```r
-stencila::register()
+stencila:::register()
 ```
 
 **Note** Installing Stencila package for R may take a while as there are a number of dependencies which need to be installed. 
