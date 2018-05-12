@@ -348,6 +348,18 @@ Host <- R6::R6Class("Host",
         )))
         flush.console()
       }
+
+      if (!quiet) cat('Use Ctl+C (terminal) or Esc (RStudio) to stop\n')
+      tryCatch({
+          while (TRUE) {
+            # Process HTTP requests
+            httpuv::service()
+          }
+        },
+        interrupt = function (condition) {
+          self$stop(quiet=quiet)
+        }
+      )
     },
 
     spawn = function (options=list()) {
