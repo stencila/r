@@ -8,6 +8,8 @@ BugReports: https://github.com/stencila/r/issues
 License: Apache-2.0
 Version: 0.28.2
 LazyData: TRUE
+Depends:
+    httpuv (== 1.4.3)
 Imports:
     base64enc,
     DBI,

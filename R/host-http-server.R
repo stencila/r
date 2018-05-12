@@ -37,7 +37,7 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
       if (is.null(private$.server)) {
         while (private$.port < 65535) {
           result <- tryCatch(
-            httpuv::startDaemonizedServer(private$.address, private$.port, list(call=self$handle)),
+            httpuv::startServer(private$.address, private$.port, list(call=self$handle)),
             error = identity
           )
           if (inherits(result, 'error')) {
@@ -59,7 +59,7 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
     #' Stop the server
     stop = function() {
       if (!is.null(private$.server)) {
-        httpuv::stopDaemonizedServer(private$.server)
+        httpuv::stopServer(private$.server)
         private$.server <- NULL
       }
     },
