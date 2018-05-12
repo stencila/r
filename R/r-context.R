@@ -194,7 +194,8 @@ RContext <- R6::R6Class('RContext',
         # Need to ensure any output is in value
         outputs <- self$compile(cell)$outputs
         if (length(outputs)) {
-          outputs[1]$value <- get(outputs[1]$name, envir=private$.global_env)
+          value <- get(outputs[[1]]$name, envir=private$.global_env)
+          outputs[[1]]$value <- self$pack(value)
         } else {
           outputs <- list(list(value=result$value))
         }
