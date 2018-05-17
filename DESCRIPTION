@@ -30,9 +30,10 @@ Imports:
 Remotes:
     klutometis/roxygen@bbf259ddee033a873426ded1e83cdd344b986595
 Suggests:
+    covr,
     devtools,
-    testthat,
-    covr
+    lintr,
+    testthat
 RoxygenNote: 6.0.1.9000
 Collate: 
     'addins.R'
