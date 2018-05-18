@@ -47,8 +47,7 @@ Context <- R6::R6Class("Context",
       }
       # Ensure data package is a list with necessary properties
       if (!inherits(packed, "list") ) {
-        # FIX: workaround for change in stencila/stencila/ Engine?
-        return(packed)
+        stop("should be a list")
       }
       if (!"type" %in% names(packed)) {
         stop("should have field `type`")
