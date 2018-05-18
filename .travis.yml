@@ -12,7 +12,7 @@ cache: packages
 
 warnings_are_errors: false
 
-before_script:
+after_script:
   - Rscript -e 'lintr::lint_package()'
 
 after_success:
