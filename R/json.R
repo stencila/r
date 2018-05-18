@@ -1,6 +1,6 @@
 # Convert JSON to a value
 from_json <- function(json) {
-  fromJSON(json, simplifyDataFrame = FALSE)
+  jsonlite::fromJSON(json, simplifyDataFrame = FALSE)
 }
 
 # Convert a value to JSON
@@ -9,7 +9,7 @@ to_json <- function(value) {
   if (is.list(value) && length(value) == 0) {
     "{}"
   } else {
-    toString(toJSON(
+    toString(jsonlite::toJSON(
       value,
       null = "null",
       na = "null",

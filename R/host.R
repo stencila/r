@@ -179,7 +179,7 @@ Host <- R6::R6Class("Host",
       dir <- file.path(self$user_dir(), "hosts")
       if (!file.exists(dir)) dir.create(dir, recursive = TRUE)
       cat(
-        toJSON(
+        jsonlite::toJSON(
           self$manifest(complete = FALSE),
           pretty = TRUE, auto_unbox = TRUE,
           file = file.path(dir, "r.json")
@@ -295,7 +295,10 @@ Host <- R6::R6Class("Host",
         run_file <- file.path(dir, paste0(self$id, ".json"))
         file.create(run_file)
         Sys.chmod(run_file, "0600")
-        cat(toJSON(self$manifest(), pretty = TRUE, auto_unbox = TRUE), file = run_file)
+        cat(
+          jsonlite::toJSON(self$manifest(), pretty = TRUE, auto_unbox = TRUE),
+          file = run_file
+        )
         # ...and a key file
         key_file <- file.path(dir, paste0(self$id, ".key"))
         file.create(key_file)

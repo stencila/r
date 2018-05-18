@@ -127,9 +127,9 @@ describe("RContext", {
     } else {
       'x is ?'
     }"
-    expect_equal(s$unpack(s$executeCode(func, list(x=s$pack(1)))$value), "x is 1")
-    expect_equal(s$unpack(s$executeCode(func, list(x=s$pack(2)))$value), "x is 2")
-    expect_equal(s$unpack(s$executeCode(func, list(x=s$pack(3)))$value), "x is ?")
+    expect_equal(s$unpack(s$executeCode(func, list(x = s$pack(1)))$value), "x is 1")
+    expect_equal(s$unpack(s$executeCode(func, list(x = s$pack(2)))$value), "x is 2")
+    expect_equal(s$unpack(s$executeCode(func, list(x = s$pack(3)))$value), "x is ?")
 
     # Reports errors as expecte
     expect_equal(s$executeCode("baz")$messages[[1]]$line, 1)

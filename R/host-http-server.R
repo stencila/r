@@ -159,7 +159,7 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
 
         response
 
-      }, error = identity)
+      }, error = identity) # nolint (end of tryCatch block)
       if (inherits(response, "error")) self$error_500(request, response)
       else response
     },

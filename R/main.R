@@ -12,7 +12,6 @@
 # But these are imports for some commonly used functions:
 #
 #' @importFrom grDevices dev.off png replayPlot
-#' @importFrom jsonlite fromJSON toJSON
 #' @import methods
 #' @import roxygen2
 #' @import stringr
@@ -39,7 +38,7 @@ register <- function (...) host$register(...)
 #'
 #' @seealso \code{Host}
 environ <- function () {
-  cat(toJSON(host$environ(), pretty = TRUE, auto_unbox = TRUE))
+  cat(jsonlite::toJSON(host$environ(), pretty = TRUE, auto_unbox = TRUE))
 }
 
 #' Start serving the Stencila host

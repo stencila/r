@@ -19,7 +19,7 @@ describe("Host", {
     manifest <- h$manifest(complete = FALSE)
     expect_equal(
       manifest,
-      fromJSON(file.path(h$user_dir(), "hosts", "r.json"))
+      jsonlite::fromJSON(file.path(h$user_dir(), "hosts", "r.json"))
     )
   })
 

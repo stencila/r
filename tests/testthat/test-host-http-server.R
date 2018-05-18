@@ -124,7 +124,7 @@ test_that("HostHttpServer.home", {
 
   r <- s$home(list(headers = list("Accept" = "application/json")))
   expect_equal(r$status, 200)
-  expect_equal(fromJSON(r$body)$stencila, host$manifest()$stencila)
+  expect_equal(from_json(r$body)$stencila, host$manifest()$stencila)
 
   r <- s$home(list())
   expect_equal(r$status, 200)
@@ -158,7 +158,7 @@ test_that("HostHttpServer.get", {
   s <- HostHttpServer$new(host)
 
   r1 <- s$post(list(), "RContext")
-  r2 <- s$get(list(), fromJSON(r1$body))
+  r2 <- s$get(list(), from_json(r1$body))
   expect_equal(r2$status, 200)
   expect_equal(r2$headers[["Content-Type"]], "application/json")
   expect_equal(r2$body, "{}")
@@ -168,9 +168,9 @@ test_that("HostHttpServer.put", {
   s <- HostHttpServer$new(host)
 
   r1 <- s$post(list(), "RContext")
-  id <- fromJSON(r1$body)
+  id <- from_json(r1$body)
   r2 <- s$put(list(body = "{\"code\":\"6*7\"}"), id, "executeCode")
   expect_equal(r2$status, 200)
   expect_equal(r2$headers[["Content-Type"]], "application/json")
-  expect_equal(fromJSON(r2$body)$value$data, 42)
+  expect_equal(from_json(r2$body)$value$data, 42)
 })
