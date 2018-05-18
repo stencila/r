@@ -2,6 +2,33 @@
 #' variable packing and unpacking
 Context <- R6::R6Class("Context",
   public = list(
+
+    compile = function(cell) {
+      expr <- FALSE
+      global <- FALSE
+      if (typeof(cell) == "character") {
+        source <- cell
+      } else {
+        source <- cell$source$data
+        if (!is.null(cell$expr)) expr <- cell$expr
+        if (!is.null(cell$global)) global <- cell$global
+      }
+
+      list(
+        type = "cell",
+        source = list(
+          type = "string",
+          data = source
+        ),
+        expr = expr,
+        global = global,
+        options = list(),
+        inputs = list(),
+        outputs = list(),
+        messages = list()
+      )
+    },
+
     pack = function (value) {
       type <- type(value)
       # Of course, the order of these if statements is important.

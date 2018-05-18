@@ -12,17 +12,14 @@ test_that("HostHttpServer$stop+start", {
   s2$start()
   p1 <- as.integer(str_match(s1$url, "^http://127.0.0.1:(\\d+)")[1, 2])
   p2 <- as.integer(str_match(s2$url, "^http://127.0.0.1:(\\d+)")[1, 2])
-  expect_equal(p2, p1 + 10)
+  expect_true(p2 > p1)
   s2$stop()
-
-  # Unfortunately this timesout here. But will work from a separate R process.
-  #r <- GET(s$origin, timeout(10))
 
   s1$stop()
   expect_equal(s1$url, NULL)
 })
 
-test_that("HostHttpServer.route", {
+test_that("HostHttpServer$route", {
   s <- HostHttpServer$new(NULL)
 
   expect_equal(s$route("OPTIONS", NULL), list(s$options))
@@ -41,7 +38,7 @@ test_that("HostHttpServer.route", {
   expect_equal(s$route("DELETE", "/id"), list(s$delete, "id"))
 })
 
-test_that("HostHttpServer.handle", {
+test_that("HostHttpServer$handle", {
   s <- HostHttpServer$new(host)
 
   r <- s$handle(list(
@@ -121,7 +118,7 @@ test_that("HostHttpServer.options", {
   expect_equal(r$body, "")
 })
 
-test_that("HostHttpServer.home", {
+test_that("HostHttpServer$home", {
   s <- HostHttpServer$new(host)
 
   r <- s$home(list(headers = list("Accept" = "application/json")))
@@ -133,7 +130,7 @@ test_that("HostHttpServer.home", {
   expect_equal(r$headers[["Content-Type"]], "text/html")
 })
 
-test_that("HostHttpServer.static", {
+test_that("HostHttpServer$static", {
   s <- HostHttpServer$new(host)
 
   r <- s$static(list(), "logo-name-beta.svg")
@@ -148,7 +145,7 @@ test_that("HostHttpServer.static", {
   expect_equal(r$status, 403)
 })
 
-test_that("HostHttpServer.post", {
+test_that("HostHttpServer$post", {
   s <- HostHttpServer$new(host)
 
   r <- s$post(list(), "RContext")
@@ -156,23 +153,26 @@ test_that("HostHttpServer.post", {
   expect_equal(r$headers[["Content-Type"]], "application/json")
 })
 
-test_that("HostHttpServer.get", {
+test_that("HostHttpServer$get", {
   s <- HostHttpServer$new(host)
 
   r1 <- s$post(list(), "RContext")
-  r2 <- s$get(list(), from_json(r1$body))
+  id <- from_json(r1$body)
+
+  r2 <- s$get(list(), id)
   expect_equal(r2$status, 200)
   expect_equal(r2$headers[["Content-Type"]], "application/json")
   expect_equal(r2$body, "{}")
 })
 
-test_that("HostHttpServer.put", {
+test_that("HostHttpServer$put", {
   s <- HostHttpServer$new(host)
 
   r1 <- s$post(list(), "RContext")
   id <- from_json(r1$body)
-  r2 <- s$put(list(body = "{\"code\":\"6*7\"}"), id, "execute")
+
+  r2 <- s$put(list(body = "\"6*7\""), id, "execute")
   expect_equal(r2$status, 200)
   expect_equal(r2$headers[["Content-Type"]], "application/json")
-  expect_equal(from_json(r2$body)$value$data, 42)
+  expect_equal(from_json(r2$body)$type, "cell")
 })

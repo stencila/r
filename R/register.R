@@ -110,7 +110,7 @@ function_register <- function(name_or_path, func, xml) {
       xml_add_child(param, "description", arg$description)
     })
 
-    #xml_add_child(spec, "return", docs[["value"]])
+    xml_add_child(spec, "return", docs[["value"]])
 
     implems <- xml_add_child(spec, "implems")
     xml_add_child(implems, "implem", language = "r")

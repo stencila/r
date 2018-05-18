@@ -7,21 +7,21 @@ describe("Host", {
     expect_equal(class(h)[1], "Host")
   })
 
-  it("has an manifest() method", {
+  it("has a manifest() method", {
     manifest <- h$manifest()
     expect_equal(manifest$stencila$package, "r")
     expect_equal(manifest$stencila$version, version)
     expect_equal(length(manifest$urls), 0)
     expect_equal(length(manifest$instances), 0)
-    expect_true(length(manifest$schemes) > 0)
+    expect_true(length(manifest$types) > 0)
   })
 
-  it("has an install() method", {
-    h$install()
+  it("has a register() method", {
+    h$register()
     manifest <- h$manifest(complete = FALSE)
     expect_equal(
       manifest,
-      jsonlite::fromJSON(file.path(h$user_dir(), "hosts", "r.json"))
+      from_json(file.path(h$user_dir(), "hosts", "r.json"))
     )
   })
 
@@ -42,7 +42,7 @@ describe("Host", {
 
   it("has a put() method", {
     id <- h$post("RContext")
-    expect_equal(h$put(id, "execute", list(code = "6*7"))$value$data, 42)
+    expect_equal(h$put(id, "execute", "6*7")$type, "cell")
     expect_error(h$put(id, "fooBar"), "Unknown method")
     expect_error(h$put("foo", "bar"), "Unknown instance")
   })
@@ -58,11 +58,11 @@ describe("Host", {
     h$start(quiet = TRUE)
     expect_equal(names(h$servers), "http")
     expect_equal(length(h$servers), 1)
-    expect_equal(length(h$manifest()$urls), 1)
+    expect_equal(length(h$manifest()$servers), 1)
     expect_true(file.exists(h$run_file()))
     h$stop()
     expect_equal(length(h$servers), 0)
-    expect_equal(length(h$manifest()$urls), 0)
+    expect_equal(length(h$manifest()$servers), 0)
     expect_true(!file.exists(h$run_file()))
   })
 })

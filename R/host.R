@@ -182,8 +182,8 @@ Host <- R6::R6Class("Host",
         jsonlite::toJSON(
           self$manifest(complete = FALSE),
           pretty = TRUE, auto_unbox = TRUE,
-          file = file.path(dir, "r.json")
-        )
+        ),
+        file = file.path(dir, "r.json")
       )
     },
 

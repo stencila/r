@@ -7,18 +7,7 @@
 #' It implements the \code{Context} API so that it can talk to other parts of the platform,
 #' including contexts for other languages, Documents, and Sheets.
 #'
-#' @format \code{R6Class}.
-#' @examples
-#' context <- RContext$new()
-#'
-#' # Assign a variable within the context
-#' context$execute('my_var <- 42')
-#'
-#' # Get the variable as an output value
-#' context$execute('my_var')
-#'
-#' # Returned output value can include plots
-#' context$execute('plot(1,1)')$value
+#' @format \code{R6Class}
 #' @export
 RContext <- R6::R6Class("RContext",
   inherit = Context,
@@ -80,9 +69,9 @@ RContext <- R6::R6Class("RContext",
     #'   \item{exprOnly}{Ensure that the code is a simple expression?}
     #' }
     compile = function(cell) {
-      code <- cell$source$data
-      exprOnly <- cell$expr
+      cell <- super$compile(cell)
 
+      code <- cell$source$data
       inputs <- list()
       output <- NULL
       messages <- list()
@@ -102,7 +91,7 @@ RContext <- R6::R6Class("RContext",
         FALSE
       }
 
-      if (length(messages) == 0 & exprOnly) {
+      if (length(messages) == 0 & cell$expr) {
         # Check for single, simple expression
         fail <- FALSE
         if (length(ast) != 1) fail <- TRUE
@@ -160,14 +149,14 @@ RContext <- R6::R6Class("RContext",
         }
       }
 
-      if (!is.null(output)) outputs <- list(list(name = output))
-      else outputs <- list()
+      cell$inputs <- lapply(inputs, function(item) list(name = item))
 
-      list(
-        inputs = lapply(inputs, function(item) list(name = item)),
-        outputs = outputs,
-        messages = messages
-      )
+      if (!is.null(output)) cell$outputs <- list(list(name = output))
+      else cell$outputs <- list()
+
+      cell$messages <- messages
+
+      cell
     },
 
     #' @section execute():
@@ -180,39 +169,35 @@ RContext <- R6::R6Class("RContext",
     #'   \item{exprOnly}{Ensure that the code is a simple expression?}
     #' }
     execute = function(cell) {
-        for (input in cell$inputs) private$.global_env[[input$name]] <- self$unpack(input$value)
+      cell <- self$compile(cell)
 
-        # Do eval and process into a result
-        code <- cell$source$data
-        evaluation <- evaluate::evaluate(
-          code,
-          envir = private$.global_env,
-          output_handler = evaluate_output_handler
-        )
-        result <- private$.result(evaluation)
+      for (input in cell$inputs) private$.global_env[[input$name]] <- self$unpack(input$value)
 
-        # Need to ensure any output is in value
-        outputs <- self$compile(cell)$outputs
-        if (length(outputs)) {
-          value <- get(outputs[[1]]$name, envir = private$.global_env)
-          outputs[[1]]$value <- self$pack(value)
-        } else {
-          outputs <- list(list(value = result$value))
-        }
-
-        list(
-          outputs = outputs,
-          messages = result$messages
-        )
-    },
-
-    getLibraries = function(){
-      xml <- lapply(ls(stencila:::functions_xml), function(name) get(name, env = functions_xml))
-      list(
-        local = paste0("<functions>", paste0(xml, collapse = ""), "</functions>")
+      # Do eval and process into a result
+      code <- cell$source$data
+      evaluation <- evaluate::evaluate(
+        code,
+        envir = private$.global_env,
+        output_handler = evaluate_output_handler
       )
+      result <- private$.result(evaluation)
+
+      # Need to ensure any output is in value
+      outputs <- cell$outputs
+      if (length(outputs)) {
+        value <- get(outputs[[1]]$name, envir = private$.global_env)
+        outputs[[1]]$value <- self$pack(value)
+      } else {
+        outputs <- list(list(value = result$value))
+      }
+      cell$outputs <- outputs
+
+      cell$messages <- result$messages
+
+      cell
     },
 
+    #nolint start
     callFunction = function(library, name, args, namedArgs){
       # At present we still need to unpack args and namedArgs
       # but in the future this might be handled by execute itself.
@@ -231,6 +216,7 @@ RContext <- R6::R6Class("RContext",
         value = self$pack(result)
       )
     }
+    #nolint end
   ),
 
   private = list(
