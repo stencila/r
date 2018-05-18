@@ -104,7 +104,7 @@ SqliteContext <- R6::R6Class("SqliteContext",
       )
     },
 
-    #' @section executeCode():
+    #' @section execute():
     #'
     #' Run SQL code
     #'
@@ -113,7 +113,7 @@ SqliteContext <- R6::R6Class("SqliteContext",
     #'   \item{inputs}{A list with a value pack for each input}
     #'   \item{exprOnly}{Ensure that the code is a simple expression?}
     #' }
-    executeCode = function(code, inputs = NULL, exprOnly = FALSE) {
+    execute = function(code, inputs = NULL, exprOnly = FALSE) {
       analysis <- self$analyseCode(code)
 
       variables <- list()

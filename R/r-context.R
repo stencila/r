@@ -12,13 +12,13 @@
 #' context <- RContext$new()
 #'
 #' # Assign a variable within the context
-#' context$executeCode('my_var <- 42')
+#' context$execute('my_var <- 42')
 #'
 #' # Get the variable as an output value
-#' context$executeCode('my_var')
+#' context$execute('my_var')
 #'
 #' # Returned output value can include plots
-#' context$executeCode('plot(1,1)')$value
+#' context$execute('plot(1,1)')$value
 #' @export
 RContext <- R6::R6Class("RContext",
   inherit = Context,
