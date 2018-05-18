@@ -14,21 +14,21 @@ functions_xml <- new.env(parent = emptyenv())
 #' @export
 function_register <- function(name_or_path, func, xml) {
   rd <- NULL
-  if(file.exists(name_or_path)) {
+  if (file.exists(name_or_path)) {
     path <- name_or_path
     # Source the file into an environment and 'extract' the function
     env <- new.env()
-    source(path, local=env)
+    source(path, local = env)
     names <- ls(env)
-    if (length(names) > 1) stop('More than one name defined in source file: "', path, '" has "', paste(names, collapse=','), '"')
+    if (length(names) > 1) stop("More than one name defined in source file: \"", path, "\" has \"", paste(names, collapse = ","), "\"")
     name <- names[1]
-    if (paste0(name, '.R') != basename(path)) stop('Name of function is not consistent with name of file: "', paste0(name, '.R'), '" != "', basename(path), '"')
+    if (paste0(name, ".R") != basename(path)) stop("Name of function is not consistent with name of file: \"", paste0(name, ".R"), "\" != \"", basename(path), "\"")
     func <- get(name, envir = env)
     # Get documentation block from file if available
     blocks <- roxygen2::parse_file(path)
     if (length(blocks) > 0) {
       # Convert to Rd
-      rd_text <- roxygen2:::block_to_rd(blocks[[1]], '.')$format()
+      rd_text <- roxygen2:::block_to_rd(blocks[[1]], ".")$format()
       # Parse the generated .Rd file
       rd <- tools::parse_Rd(textConnection(rd_text))
     }
@@ -39,7 +39,7 @@ function_register <- function(name_or_path, func, xml) {
   if (missing(func)) {
     rd_name <- name
     func <- get(name)
-  } else if (mode(func) == 'character') {
+  } else if (mode(func) == "character") {
     rd_name <- func
     func <- get(func)
   }
@@ -73,8 +73,8 @@ function_register <- function(name_or_path, func, xml) {
     } else {
       # Extract docs from the functions source code
       src <- deparse(func, width.cutoff = 500, nlines = 1)
-      pars <- str_match(src, "function \\((.*)\\)")[1,2]
-      pars <- str_split(pars, ',')[[1]]
+      pars <- str_match(src, "function \\((.*)\\)")[1, 2]
+      pars <- str_split(pars, ",")[[1]]
       pars <- str_match(pars, "(\\w+)( = (.+))?")
       # Convert each parameter into a list of the form expected
       # to be in the `arguments` member of the documentation
@@ -84,7 +84,7 @@ function_register <- function(name_or_path, func, xml) {
       for (row in 1:nrow(pars)) {
         args[[row]] <- list(
           arg = pars[row, 2],
-          description = ''
+          description = ""
         )
       }
       docs <- list(arguments = args)
@@ -106,14 +106,14 @@ function_register <- function(name_or_path, func, xml) {
 
     params <- xml_add_child(spec, "params")
     lapply(docs$arguments, function(arg) {
-      param <- xml_add_child(params, "param", name=arg$arg)
+      param <- xml_add_child(params, "param", name = arg$arg)
       xml_add_child(param, "description", arg$description)
     })
 
     #xml_add_child(spec, "return", docs[["value"]])
 
     implems <- xml_add_child(spec, "implems")
-    xml_add_child(implems, "implem", language="r")
+    xml_add_child(implems, "implem", language = "r")
 
     # Rd examples area single single of code so put it
     # into <examples><example><usage>
@@ -127,7 +127,7 @@ function_register <- function(name_or_path, func, xml) {
     raw <- xml_serialize(spec, NULL)
     raw <- raw[raw != 0]
     char <- rawToChar(raw)
-    xml <- str_sub(char, str_locate(char, '<function>')[1], str_locate(char, '</function>')[2])
+    xml <- str_sub(char, str_locate(char, "<function>")[1], str_locate(char, "</function>")[2])
   }
 
   assign(name, func, envir = functions)
@@ -142,15 +142,15 @@ function_test <- function(path) {
 function_document <- function(xml, dest) {
   doc <- xml2::read_xml(xml)
   md <- file(dest, "w")
-  cat('#', xml2::xml_text(xml2::xml_find_first(doc, ".//name")), file = md)
+  cat("#", xml2::xml_text(xml2::xml_find_first(doc, ".//name")), file = md)
 }
 
 function_list <- function() {
   ls(functions)
 }
 
-#' Register a library of functions
-#'
+#'' Register a library of functions
+#''
 #' Registers the function in each `.R` file in a library directory.
 #'
 #' @param path File system path to the library
@@ -158,27 +158,27 @@ function_list <- function() {
 #' @export
 library_register <- function(path) {
   if (!dir.exists(path)) stop("Path does not exist \"", path, "\"")
-  files <- Sys.glob(file.path(path, 'funcs', '*.R'))
-  if (length(files) == 0) stop("No functions found in \"", file.path(path, 'funcs'), "\"")
+  files <- Sys.glob(file.path(path, "funcs", "*.R"))
+  if (length(files) == 0) stop("No functions found in \"", file.path(path, "funcs"), "\"")
   for (file in files) function_register(file)
 }
 
 #' @export
-library_test <- function(path = '.') {
+library_test <- function(path = ".") {
   # Get all functions
-  funcs_dir <- file.path(path, 'funcs')
-  files <- Sys.glob(file.path(funcs_dir, '*.R'))
+  funcs_dir <- file.path(path, "funcs")
+  files <- Sys.glob(file.path(funcs_dir, "*.R"))
   if (!length(files)) stop("No R files in \"", funcs_dir, "\"")
   # For each file run it's tests
   for (file in files) {
     # Register the function
     registered <- function_register(file)
     # Check that there is a test file for the function
-    test <- file.path(path, 'tests', paste0(registered$name, '.R'))
+    test <- file.path(path, "tests", paste0(registered$name, ".R"))
     if (!file.exists(test)) stop("No test file for function \"", registered$name, "\"")
     # Attach the function to the search path
-    env = list()
-    env[[registered$name]] = registered$func
+    env <- list()
+    env[[registered$name]] <- registered$func
     attach(env)
     # Run the test file
     testthat::test_file(test)
@@ -194,15 +194,14 @@ library_test <- function(path = '.') {
 #' @export
 library_document <- function(path = ".") {
   # Get all functions
-  funcs_dir <- file.path(path, 'funcs')
-  files <- Sys.glob(file.path(funcs_dir, '*.R'))
+  funcs_dir <- file.path(path, "funcs")
+  files <- Sys.glob(file.path(funcs_dir, "*.R"))
   if (!length(files)) stop("No R files in \"", funcs_dir, "\"")
   # Generate documentation for each function
   for (file in files) {
     # Register the function
     registered <- function_register(file)
     # Generate Markdown documentation for static site
-    function_document(registered$xml, file.path(path, 'docs', paste0(registered$name, '.md')))
+    function_document(registered$xml, file.path(path, "docs", paste0(registered$name, ".md")))
   }
 }
-

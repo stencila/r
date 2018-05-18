@@ -5,11 +5,11 @@ addin_open <- function() {
   path <- editor$path
   # If path is empty (as it is for a new document) we could revert to loading the
   # editor$contents but currently error
-  if (nchar(path)==0) stop('Error when attempting to open in Stencila: no file currently active', call.=FALSE)
+  if (nchar(path) == 0) stop("Error when attempting to open in Stencila: no file currently active", call. = FALSE)
   # Normalise the file path so it works with the `file://` address scheme
-  path <- normalizePath(path, winslash = '/')
+  path <- normalizePath(path, winslash = "/")
   # Open it!
-  host$open(paste0('file://', path))
+  host$open(paste0("file://", path))
 }
 
 #' Register the function in the source editor that is currently open
@@ -19,9 +19,9 @@ addin_register <- function() {
   path <- editor$path
   # If path is empty (as it is for a new document) we could revert to loading the
   # editor$contents but currently error
-  if (nchar(path)==0) stop('Error when attempting to open in Stencila: no file currently active', call.=FALSE)
+  if (nchar(path) == 0) stop("Error when attempting to open in Stencila: no file currently active", call. = FALSE)
   # Normalise the file path
-  path <- normalizePath(path, winslash = '/')
+  path <- normalizePath(path, winslash = "/")
   # Open it!
   function_register(path)
 }

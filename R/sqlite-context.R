@@ -1,7 +1,7 @@
 #' A SQLite context
 #'
 #' @export
-SqliteContext <- R6::R6Class('SqliteContext',
+SqliteContext <- R6::R6Class("SqliteContext",
   inherit = Context,
   public = list(
 
@@ -15,10 +15,10 @@ SqliteContext <- R6::R6Class('SqliteContext',
     initialize = function (dir=NULL) {
       # Set the working directory and connection
       private$.dir <- dir
-      db <- ':memory:'
+      db <- ":memory:"
       if (!is.null(dir)) {
         files <- list.files(dir)
-        matches <- grep('(.sqlite)|(.sqlite3)|(.db)|(.db3)$', files)
+        matches <- grep("(.sqlite)|(.sqlite3)|(.db)|(.db3)$", files)
         if (length(matches) > 0) {
           db <- file.path(dir, files[matches[1]])
         }
@@ -49,12 +49,12 @@ SqliteContext <- R6::R6Class('SqliteContext',
 
       if (exprOnly) {
         # Only SELECT statements allowed
-        if (!str_detect(code, regex('^\\s*SELECT\\s+', ignore_case = TRUE))) {
-          messages[[length(messages)+1]] <- list(
+        if (!str_detect(code, regex("^\\s*SELECT\\s+", ignore_case = TRUE))) {
+          messages[[length(messages) + 1]] <- list(
             line = 0,
             column = 0,
-            type = 'error',
-            message = 'Code must be a `SELECT` expression'
+            type = "error",
+            message = "Code must be a `SELECT` expression"
           )
         } else {
           value <- TRUE
@@ -63,34 +63,34 @@ SqliteContext <- R6::R6Class('SqliteContext',
 
       if (length(messages) == 0) {
         # Determine tabular data inputs
-        match <- str_match(code, regex('SELECT\\b.+?\\bFROM\\s+(\\w+)', ignore_case = TRUE))[1,]
+        match <- str_match(code, regex("SELECT\\b.+?\\bFROM\\s+(\\w+)", ignore_case = TRUE))[1, ]
         if (!is.na(match[2])) {
           table <- match[2]
           # Select from `sqlite_master` table in the `main` schema therby ignoring input tables in the `temp` schema
-          tables <- DBI::dbGetQuery(private$.conn, 'SELECT name FROM sqlite_master WHERE type=="table"')$name
+          tables <- DBI::dbGetQuery(private$.conn, "SELECT name FROM sqlite_master WHERE type==\"table\"")$name
           if (!table %in% tables) inputs <- c(inputs, table)
           value <- TRUE
-        } else if (str_detect(code, regex('^\\s*SELECT\\s+', ignore_case = TRUE))) {
+        } else if (str_detect(code, regex("^\\s*SELECT\\s+", ignore_case = TRUE))) {
           value <- TRUE
         }
         # Determine other inputs (string interpolated using ${})
-        inputs <- c(inputs, str_match_all(code, '\\$\\{(\\w+)\\}')[[1]][,2])
+        inputs <- c(inputs, str_match_all(code, "\\$\\{(\\w+)\\}")[[1]][, 2])
         # Is there an output?
-        name <- str_match(code, regex('^\\s*(\\w+)\\s*=\\s*\\bSELECT', ignore_case = TRUE))[1,2]
+        name <- str_match(code, regex("^\\s*(\\w+)\\s*=\\s*\\bSELECT", ignore_case = TRUE))[1, 2]
         if (!is.na(name)) {
           output <- name
           value <- TRUE
         }
       }
 
-      # Produce an error if user is attempting to 'overwrite' an input
+      # Produce an error if user is attempting to "overwrite" an input
       if (!is.null(output)) {
-        if(output %in% inputs) {
-          messages[[length(messages)+1]] <- list(
+        if (output %in% inputs) {
+          messages[[length(messages) + 1]] <- list(
             line = 0,
             column = 0,
-            type = 'error',
-            message = paste0('Attempting to overwrite cell input "', output, '"')
+            type = "error",
+            message = paste0("Attempting to overwrite cell input '", output, "'")
           )
           output <- NULL
         }
@@ -119,29 +119,29 @@ SqliteContext <- R6::R6Class('SqliteContext',
       variables <- list()
       for (name in names(inputs)) {
         value <- self$unpack(inputs[[name]])
-        if (inherits(value, 'data.frame')) {
-          DBI::dbWriteTable(private$.conn, name, value, temporary=TRUE, overwrite=TRUE)
+        if (inherits(value, "data.frame")) {
+          DBI::dbWriteTable(private$.conn, name, value, temporary = TRUE, overwrite = TRUE)
         } else {
           variables[[name]] <- value
         }
       }
-      matches <- str_match_all(code, '\\$\\{(\\w+)\\}')[[1]]
+      matches <- str_match_all(code, "\\$\\{(\\w+)\\}")[[1]]
       if (nrow(matches) >= 1) {
         for (match in 1:nrow(matches)) {
-          name <- matches[match,2]
+          name <- matches[match, 2]
           str <- toString(variables[[name]])
-          code <- str_replace_all(code, sprintf('\\$\\{%s\\}', name), str)
+          code <- str_replace_all(code, sprintf("\\$\\{%s\\}", name), str)
         }
       }
 
-      match <- str_match(code, regex('^\\s*(\\w+)\\s*=\\s*\\b(SELECT\\b.*)$', ignore_case = TRUE))[1,]
+      match <- str_match(code, regex("^\\s*(\\w+)\\s*=\\s*\\b(SELECT\\b.*)$", ignore_case = TRUE))[1, ]
       if (!is.na(match[3])) {
         code <- match[3]
       }
 
       func <- if (analysis$value) DBI::dbGetQuery else DBI::dbExecute
-      value <- tryCatch(func(private$.conn, code), error=identity)
-      if (inherits(value, 'error')) {
+      value <- tryCatch(func(private$.conn, code), error = identity)
+      if (inherits(value, "error")) {
         messages <- list(list(
           line = 0,
           column = 0,
@@ -170,6 +170,6 @@ SqliteContext <- R6::R6Class('SqliteContext',
 )
 
 SqliteContext$spec <- list(
-  name = 'SqliteContext',
-  client = 'ContextHttpClient'
+  name = "SqliteContext",
+  client = "ContextHttpClient"
 )

@@ -26,7 +26,7 @@ NULL
 # reason the are not exported
 
 # Set the package version string
-version <- tryCatch(toString(packageVersion("stencila")), error = '0.0.0')
+version <- tryCatch(toString(packageVersion("stencila")), error = "0.0.0")
 
 #' Register the Stencila host
 #'
@@ -39,7 +39,7 @@ register <- function (...) host$register(...)
 #'
 #' @seealso \code{Host}
 environ <- function () {
-  cat(toJSON(host$environ(), pretty=TRUE, auto_unbox=TRUE))
+  cat(toJSON(host$environ(), pretty = TRUE, auto_unbox = TRUE))
 }
 
 #' Start serving the Stencila host

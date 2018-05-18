@@ -9,7 +9,7 @@ TYPES <- list(
 # List of specifications for resource types
 TYPES_SPECS <- list()
 for (name in names(TYPES)) {
-  TYPES_SPECS[[name]] = TYPES[[name]]$spec
+  TYPES_SPECS[[name]] <- TYPES[[name]]$spec
 }
 
 #' A Host
@@ -42,8 +42,8 @@ Host <- R6::R6Class("Host",
     #'
     #' Create a new \code{Host}
     initialize = function () {
-      private$.id <- paste(c('r-', sample(c(letters, 0:9), 64, replace=TRUE)), collapse="")
-      private$.key <- paste(sample(c(letters, 0:9), 128, replace=TRUE), collapse="")
+      private$.id <- paste(c("r-", sample(c(letters, 0:9), 64, replace = TRUE)), collapse = "")
+      private$.key <- paste(sample(c(letters, 0:9), 128, replace = TRUE), collapse = "")
       private$.servers <- list()
       private$.instances <- list()
     },
@@ -57,9 +57,9 @@ Host <- R6::R6Class("Host",
     user_dir = function() {
       os <- tolower(Sys.info()["sysname"])
       dir <- switch(os,
-        darwin = file.path(Sys.getenv("HOME"), 'Library', 'Application Support', 'Stencila'),
-        linux = file.path(Sys.getenv("HOME"), '.stencila'),
-        windows = file.path(Sys.getenv("APPDATA"), 'Stencila')
+        darwin = file.path(Sys.getenv("HOME"), "Library", "Application Support", "Stencila"),
+        linux = file.path(Sys.getenv("HOME"), ".stencila"),
+        windows = file.path(Sys.getenv("APPDATA"), "Stencila")
       )
       if (!dir.exists(dir)) dir.create(dir, recursive = T)
       dir
@@ -74,15 +74,15 @@ Host <- R6::R6Class("Host",
       # Get system's temporary directory
       # Thanks to Steve Weston at https://stackoverflow.com/a/16492084/4625911
       os <- tolower(Sys.info()["sysname"])
-      envs <- Sys.getenv(c('TMPDIR', 'TMP', 'TEMP'))
+      envs <- Sys.getenv(c("TMPDIR", "TMP", "TEMP"))
       useable <- which(file.info(envs)$isdir & file.access(envs, 2) == 0)
       if (length(useable) > 0)
         temp <- envs[[useable[1]]]
-      else if (os == 'windows')
-        temp <- Sys.getenv('R_USER')
+      else if (os == "windows")
+        temp <- Sys.getenv("R_USER")
       else
-        temp <- '/tmp'
-      dir <- file.path(temp, 'stencila')
+        temp <- "/tmp"
+      dir <- file.path(temp, "stencila")
       if (!dir.exists(dir)) dir.create(dir, recursive = T)
       dir
     },
@@ -98,9 +98,9 @@ Host <- R6::R6Class("Host",
     #' directory to reduce the chances of a run file being present when a host
     #' has aborted with out by \code{host$stop()} being called.
     run_file = function() {
-      dir <- file.path(self$temp_dir(), 'hosts')
-      if (!file.exists(dir)) dir.create(dir, recursive=TRUE)
-      file.path(dir, paste0(self$id, '.json'))
+      dir <- file.path(self$temp_dir(), "hosts")
+      if (!file.exists(dir)) dir.create(dir, recursive = TRUE)
+      file.path(dir, paste0(self$id, ".json"))
     },
 
     #' @section new():
@@ -110,15 +110,15 @@ Host <- R6::R6Class("Host",
     environ = function () {
       # R
       env <- with(R.version, list(
-        version = paste(major, minor, sep='.'),
+        version = paste(major, minor, sep = "."),
         codename = nickname,
-        date = paste(year, month, day, sep='-'),
+        date = paste(year, month, day, sep = "-"),
         platform = platform
       ))
       # Installed packages and their versions in order of library paths
       # to prevent duplicates caused by the same package being in multiple libraries
       packages <- list()
-      for(library in .libPaths()) {
+      for (library in .libPaths()) {
         library_packages <- installed.packages(library)[, c(1, 3)]
         if (nrow(library_packages)) {
           for (row in 1:nrow(library_packages)) {
@@ -130,7 +130,7 @@ Host <- R6::R6Class("Host",
           }
         }
       }
-      env[['packages']] <- packages[sort(names(packages))]
+      env[["packages"]] <- packages[sort(names(packages))]
       env
     },
 
@@ -143,15 +143,15 @@ Host <- R6::R6Class("Host",
     #' which "instances" have already been instantiated.
     manifest = function (complete=TRUE) {
       environs <- list(
-        list(id='local', name='local', version='')
+        list(id = "local", name = "local", version = "")
       )
       manifest <- list(
         stencila = list(
-          package = 'r',
+          package = "r",
           version = version
         ),
         id = private$.id,
-        spawn = c(unname(Sys.which('Rscript')), '-e', 'stencila:::spawn()'),
+        spawn = c(unname(Sys.which("Rscript")), "-e", "stencila:::spawn()"),
         environs = environs,
         types = TYPES_SPECS
       )
@@ -175,12 +175,15 @@ Host <- R6::R6Class("Host",
     #' Registering a host involves creating a file \code{r.json} inside of
     #' the user's Stencila data (see \code{user_dir}) directory which describes
     #' the capabilities of this host.
-    register = function() {
-      dir <- file.path(self$user_dir(), 'hosts')
-      if (!file.exists(dir)) dir.create(dir, recursive=TRUE)
+    register = function () {
+      dir <- file.path(self$user_dir(), "hosts")
+      if (!file.exists(dir)) dir.create(dir, recursive = TRUE)
       cat(
-        toJSON(self$manifest(complete=FALSE), pretty=TRUE, auto_unbox=TRUE),
-        file=file.path(dir, 'r.json')
+        toJSON(
+          self$manifest(complete = FALSE),
+          pretty = TRUE, auto_unbox = TRUE,
+          file = file.path(dir, "r.json")
+        )
       )
     },
 
@@ -198,14 +201,14 @@ Host <- R6::R6Class("Host",
       Class <- TYPES[[type]]
       if (!is.null(Class)) {
         # Remove depreciated `name` arg from arguments
-        args[['name']] <- NULL
+        args[["name"]] <- NULL
         instance <- do.call(Class$new, args)
         # Generate and ID
-        id <- paste0(type, paste(sample(c(letters, 0:9), 10), collapse=''))
+        id <- paste0(type, paste(sample(c(letters, 0:9), 10), collapse = ""))
         private$.instances[[id]] <- instance
         id
       } else {
-        stop(paste('Unknown type:', type))
+        stop(paste("Unknown type:", type))
       }
     },
 
@@ -222,7 +225,7 @@ Host <- R6::R6Class("Host",
       if (!is.null(instance)) {
         instance
       } else {
-        stop(paste('Unknown instance:', id))
+        stop(paste("Unknown instance:", id))
       }
     },
 
@@ -243,10 +246,10 @@ Host <- R6::R6Class("Host",
         if (!is.null(func)) {
           do.call(func, list(arg))
         } else {
-          stop(paste('Unknown method:', method))
+          stop(paste("Unknown method:", method))
         }
       } else {
-        stop(paste('Unknown instance:', id))
+        stop(paste("Unknown instance:", id))
       }
     },
 
@@ -262,7 +265,7 @@ Host <- R6::R6Class("Host",
       if (!is.null(instance)) {
         private$.instances[[id]] <- NULL
       } else {
-        stop(paste('Unknown instance:', id))
+        stop(paste("Unknown instance:", id))
       }
     },
 
@@ -278,29 +281,29 @@ Host <- R6::R6Class("Host",
     #'
     #' Currently, HTTP is the only server available
     #' for hosts. We plan to implement a `HostWebsocketServer` soon.
-    start  = function (address='127.0.0.1', port=2000, authorization=TRUE, quiet=FALSE) {
-      if (is.null(private$.servers[['http']])) {
+    start  = function (address="127.0.0.1", port=2000, authorization=TRUE, quiet=FALSE) {
+      if (is.null(private$.servers[["http"]])) {
         # Start HTTP server
         server <- HostHttpServer$new(self, address, port, authorization)
-        private$.servers[['http']] <- server
+        private$.servers[["http"]] <- server
         server$start()
 
         # Register as a running host ...
-        dir <- file.path(self$temp_dir(), 'hosts')
-        if (!file.exists(dir)) dir.create(dir, recursive=TRUE)
+        dir <- file.path(self$temp_dir(), "hosts")
+        if (!file.exists(dir)) dir.create(dir, recursive = TRUE)
         # ...by creating a run file
-        run_file <- file.path(dir, paste0(self$id, '.json'))
+        run_file <- file.path(dir, paste0(self$id, ".json"))
         file.create(run_file)
         Sys.chmod(run_file, "0600")
-        cat(toJSON(self$manifest(), pretty=TRUE, auto_unbox=TRUE), file=run_file)
+        cat(toJSON(self$manifest(), pretty = TRUE, auto_unbox = TRUE), file = run_file)
         # ...and a key file
-        key_file <- file.path(dir, paste0(self$id, '.key'))
+        key_file <- file.path(dir, paste0(self$id, ".key"))
         file.create(key_file)
         Sys.chmod(key_file, "0600")
-        cat(self$key, file=key_file)
+        cat(self$key, file = key_file)
 
         if (!quiet) {
-          cat('Host has started at:', server$ticketed_url(), '\n')
+          cat("Host has started at:", server$ticketed_url(), "\n")
         }
       }
       invisible(self)
@@ -321,7 +324,7 @@ Host <- R6::R6Class("Host",
       file <- self$run_file()
       if (file.exists(file)) file.remove(file)
 
-      if (!quiet) cat('Host has stopped\n')
+      if (!quiet) cat("Host has stopped\n")
 
       invisible(self)
     },
@@ -336,9 +339,9 @@ Host <- R6::R6Class("Host",
     #' }
     #'
     #' Start serving the Stencila host and wait for connections indefinitely
-    run  = function (address='127.0.0.1', port=2000, authorization=TRUE, quiet=FALSE, echo=FALSE) {
-      if (echo) quiet = TRUE
-      self$start(address=address, port=port, authorization=authorization, quiet=quiet)
+    run  = function (address="127.0.0.1", port=2000, authorization=TRUE, quiet=FALSE, echo=FALSE) {
+      if (echo) quiet <- TRUE
+      self$start(address = address, port = port, authorization = authorization, quiet = quiet)
 
       if (echo) {
         cat(to_json(list(
@@ -349,7 +352,7 @@ Host <- R6::R6Class("Host",
         flush.console()
       }
 
-      if (!quiet) cat('Use Ctl+C (terminal) or Esc (RStudio) to stop\n')
+      if (!quiet) cat("Use Ctl+C (terminal) or Esc (RStudio) to stop\n")
       tryCatch({
           while (TRUE) {
             # Process HTTP requests
@@ -357,31 +360,31 @@ Host <- R6::R6Class("Host",
           }
         },
         interrupt = function (condition) {
-          self$stop(quiet=quiet)
+          self$stop(quiet = quiet)
         }
       )
     },
 
     spawn = function (options=list()) {
-      self$run(authorization=FALSE, quiet=TRUE, echo=TRUE)
+      self$run(authorization = FALSE, quiet = TRUE, echo = TRUE)
     },
 
     #' @section open():
     #'
     #' Open a file in the browser.
-    open = function (address='', external=FALSE) {
+    open = function (address="", external=FALSE) {
       # Difficult to test headlessly, so don't include in coverage
       # nocov start
       self$start()
       # Eventually we plan to serve static HTML, JS and CSS from within the package
       # but for now use S3 bucket http://open.stenci.la
-      origin <- 'http://open.stenci.la'
-      server <- private$.servers[['http']]
+      origin <- "http://open.stenci.la"
+      server <- private$.servers[["http"]]
       peer <- server$url
       ticket <- server$ticket_create()
-      url <- sprintf('%s/?address=%s&peers=%s/?ticket=%s', origin, address, peer, ticket)
+      url <- sprintf("%s/?address=%s&peers=%s/?ticket=%s", origin, address, peer, ticket)
       # See if there is a `viewer` option (defined by RStudio if we are in RStudio)
-      viewer <- getOption('viewer')
+      viewer <- getOption("viewer")
       # Currently, force external because Stencila will not run in the older
       # browser that is embedded in RStdio (as of Stencila 0.27 and RStudio 1.0.153)
       external <- TRUE
