@@ -1,6 +1,8 @@
 context("SqliteContext")
 
 describe("SqliteContext", {
+  skip("in progress")
+
   it("can be constructed", {
     # In-memory database
     c <- SqliteContext$new()

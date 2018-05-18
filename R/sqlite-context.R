@@ -1,3 +1,5 @@
+# nolint start
+
 #' A SQLite context
 #'
 #' @export
@@ -173,3 +175,5 @@ SqliteContext$spec <- list(
   name = "SqliteContext",
   client = "ContextHttpClient"
 )
+
+# nolint end
