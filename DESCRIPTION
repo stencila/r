@@ -39,7 +39,6 @@ Collate:
     'addins.R'
     'context.R'
     'execute.R'
-    'file-storer.R'
     'host-http-server.R'
     'sqlite-context.R'
     'r-context.R'
