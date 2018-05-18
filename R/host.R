@@ -1,12 +1,10 @@
 # List of types that hosts supports
 #' @include r-context.R
-#' @include sqlite-context.R
 TYPES <- list(
-  RContext = RContext,
-  SqliteContext = SqliteContext
+  RContext = RContext
 )
 
-# List of specifications for resource types
+# List of specifications for the types
 TYPES_SPECS <- list()
 for (name in names(TYPES)) {
   TYPES_SPECS[[name]] <- TYPES[[name]]$spec
