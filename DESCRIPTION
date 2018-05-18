@@ -21,7 +21,6 @@ Imports:
     rstudioapi,
     roxygen2,
     stringr,
-    tidyverse,
     tools,
     urltools,
     xml2

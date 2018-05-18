@@ -293,11 +293,7 @@ RContext$spec <- list(
 # List of packages made available within a RContext
 RContext$packages <-  c(
   # Usual base packages (type `search()` in a naked R session)
-  "methods", "datasets", "utils", "grDevices", "graphics", "stats",
-  # Core tidyverse packages http://tidyverse.org/
-  "ggplot2", "tibble", "tidyr", "readr", "purrr", "dplyr",
-  # Other useful tidyverse packages
-  "stringr"
+  "methods", "datasets", "utils", "grDevices", "graphics", "stats"
 )
 
 # Custom output handler for the `run` and `call` methods
