@@ -2,7 +2,9 @@
 % Please edit documentation in R/register.R
 \name{library_register}
 \alias{library_register}
-\title{Register a library of functions}
+\title{' Register a library of functions
+'
+Registers the function in each `.R` file in a library directory.}
 \usage{
 library_register(path)
 }
@@ -10,5 +12,7 @@ library_register(path)
 \item{path}{File system path to the library}
 }
 \description{
+' Register a library of functions
+'
 Registers the function in each `.R` file in a library directory.
 }

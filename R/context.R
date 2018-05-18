@@ -1,37 +1,64 @@
 #' A base for context classes to share implementation of
 #' variable packing and unpacking
-Context <- R6::R6Class('Context',
+Context <- R6::R6Class("Context",
   public = list(
+
+    compile = function(cell) {
+      expr <- FALSE
+      global <- FALSE
+      if (typeof(cell) == "character") {
+        source <- cell
+      } else {
+        source <- cell$source$data
+        if (!is.null(cell$expr)) expr <- cell$expr
+        if (!is.null(cell$global)) global <- cell$global
+      }
+
+      list(
+        type = "cell",
+        source = list(
+          type = "string",
+          data = source
+        ),
+        expr = expr,
+        global = global,
+        options = list(),
+        inputs = list(),
+        outputs = list(),
+        messages = list()
+      )
+    },
+
     pack = function (value) {
       type <- type(value)
       # Of course, the order of these if statements is important.
       # Rearrange with caution (and testing!)
-      if (type == 'table') {
+      if (type == "table") {
         df <- as.data.frame(value)
         list(
-          type = 'table',
+          type = "table",
           data = list(
-            type = 'table',
+            type = "table",
             columns = ncol(df),
             rows = nrow(df),
             data = df
           )
         )
-      } else if (type == 'plot') {
-        format <- 'src'
-        path <- tempfile(fileext=paste0('.', format))
+      } else if (type == "plot") {
+        format <- "src"
+        path <- tempfile(fileext = paste0(".", format))
         png(path)
-        if (inherits(value, 'recordedplot')) replayPlot(value)
+        if (inherits(value, "recordedplot")) replayPlot(value)
         else print(value)
         dev.off()
         list (
-          type = 'image',
-          src = paste0('data:image/', format, ';base64,', base64enc::base64encode(path))
+          type = "image",
+          src = paste0("data:image/", format, ";base64,", base64enc::base64encode(path))
         )
-      } else if (type == 'unknown') {
+      } else if (type == "unknown") {
         # Unknown types serialised using `print` which may be customised
         # e.g. `print.table` is used for the results of `summary`
-        content <- paste(capture.output(print(value)), collapse = '\n')
+        content <- paste(capture.output(print(value)), collapse = "\n")
       } else {
         list(
           type = type,
@@ -47,18 +74,17 @@ Context <- R6::R6Class('Context',
       }
       # Ensure data package is a list with necessary properties
       if (!inherits(packed, "list") ) {
-        # FIX: workaround for change in stencila/stencila/ Engine?
-        return(packed)
+        stop("should be a list")
       }
-      if (!'type' %in% names(packed)) {
+      if (!"type" %in% names(packed)) {
         stop("should have field `type`")
       }
 
       type <- packed$type
-      if (type == 'array') {
+      if (type == "array") {
         if (is.list(packed$data) && length(packed$data) == 0) vector()
         else packed$data
-      } else if (type == 'table') {
+      } else if (type == "table") {
         do.call(data.frame, c(packed$data$data, stringsAsFactors = FALSE))
       } else {
         packed$data

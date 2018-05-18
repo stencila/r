@@ -18,13 +18,23 @@
 <!-- Font Awesome icons -->
 <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
 
+<!-- clipboard.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.7.1/clipboard.min.js" integrity="sha384-cV+rhyOuRHc9Ub/91rihWcGmMmCXDeksTtCihMupQHSsi8GIIRDG0ThDc3HGQFJ3" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
 <script src="../jquery.sticky-kit.min.js"></script>
 <script src="../pkgdown.js"></script>
-  
-  
+
+
+
+<meta property="og:title" content="A HTTP server for a Host — HostHttpServer" />
+
+<meta property="og:description" content="Normally there is no need to create a new HostHttpServer, instead
+use the start method of the host instance." />
+<meta name="twitter:card" content="summary" />
+
+
 <!-- mathjax -->
 <script src='https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
 
@@ -47,8 +57,12 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="../index.html">Stencila for R</a>
+      <span class="navbar-brand">
+        <a class="navbar-link" href="../index.html">stencila</a>
+        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.28.3</span>
+      </span>
     </div>
+
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li>
@@ -67,6 +81,7 @@
   </a>
 </li>
       </ul>
+      
     </div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
@@ -74,16 +89,20 @@
       
       </header>
 
-      <div class="row">
+<div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>A HTTP server for a Host</h1>
+    <small class="dont-index">Source: <a href='https://github.com/stencila/r#readme/blob/master/R/host-http-server.R'><code>R/host-http-server.R</code></a></small>
+    <div class="hidden name"><code>HostHttpServer.Rd</code></div>
     </div>
 
+    <div class="ref-description">
     
     <p>Normally there is no need to create a new <code>HostHttpServer</code>, instead
 use the <code>start</code> method of the <code>host</code> instance.</p>
     
+    </div>
 
     <pre class="usage"><span class='no'>HostHttpServer</span></pre>
         
@@ -139,6 +158,16 @@ use the <code>start</code> method of the <code>host</code> instance.</p>
 
     
     <p>Handle a request for a static file</p>
+    
+    <h2 class="hasAnchor" id="manifest-"><a class="anchor" href="#manifest-"></a>manifest()</h2>
+
+    
+    <p>Handle a request for the host's manifest</p>
+    
+    <h2 class="hasAnchor" id="startup-"><a class="anchor" href="#startup-"></a>startup()</h2>
+
+    
+    <p>Handle a request to start and environment</p>
     
     <h2 class="hasAnchor" id="post-"><a class="anchor" href="#post-"></a>post()</h2>
 
@@ -240,6 +269,10 @@ can connect to this server</p>
 
       <li><a href="#static-">static()</a></li>
 
+      <li><a href="#manifest-">manifest()</a></li>
+
+      <li><a href="#startup-">startup()</a></li>
+
       <li><a href="#post-">post()</a></li>
 
       <li><a href="#put-">put()</a></li>
@@ -278,11 +311,14 @@ can connect to this server</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="http://hadley.github.io/pkgdown/">pkgdown</a>.</p>
+  <p>Site built with <a href="http://pkgdown.r-lib.org/">pkgdown</a>.</p>
 </div>
 
       </footer>
    </div>
 
+  
+
   </body>
 </html>
+

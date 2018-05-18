@@ -1,10 +1,14 @@
-describe('Context.pack()', {
+context("Context")
+
+describe("Context.pack()", {
   c <- Context$new()
   check <- function (x, json) {
     p <- c$pack(x)
     j <- to_json(p)
     expect_equal(j, json)
   }
+
+  # nolint start
 
   it("works for primitive types", {
     check(NULL, '{"type":"null","data":null}')
@@ -25,7 +29,7 @@ describe('Context.pack()', {
 
   it("works for lists", {
     check(
-      list(a = 1, b = 3.14, c = 'foo', d = list(e = 1, f = 2)),
+      list(a = 1, b = 3.14, c = "foo", d = list(e = 1, f = 2)),
       '{"type":"object","data":{"a":1,"b":3.14,"c":"foo","d":{"e":1,"f":2}}}'
     )
   })
@@ -39,42 +43,46 @@ describe('Context.pack()', {
   it("works for data frames and matrices", {
     check(data.frame(), '{"type":"table","data":{"type":"table","columns":0,"rows":0,"data":{}}}')
     check(data.frame(a = 1:3), '{"type":"table","data":{"type":"table","columns":1,"rows":3,"data":{"a":[1,2,3]}}}')
-    check(data.frame(a = 1:3, b = c('x', 'y', 'z')), '{"type":"table","data":{"type":"table","columns":2,"rows":3,"data":{"a":[1,2,3],"b":["x","y","z"]}}}')
+    check(data.frame(a = 1:3, b = c("x", "y", "z")), '{"type":"table","data":{"type":"table","columns":2,"rows":3,"data":{"a":[1,2,3],"b":["x","y","z"]}}}')
 
     check(matrix(data = 1:4, nrow = 2), '{"type":"table","data":{"type":"table","columns":2,"rows":2,"data":{"V1":[1,2],"V2":[3,4]}}}')
   })
 
+  # nolint end
+
   it("works for recorded plots", {
     # For recodPlot to work..
     png(tempfile())
-    dev.control('enable')
+    dev.control("enable")
 
     plot(mpg~disp, mtcars)
     p <- c$pack(recordPlot())
-    expect_equal(p$type, 'image')
-    expect_equal(str_sub(p$src, 1, 10), 'data:image')
+    expect_equal(p$type, "image")
+    expect_equal(str_sub(p$src, 1, 10), "data:image")
   })
 
-  if (require('ggplot2', quietly=T)) {
+  if (require("ggplot2", quietly = T)) {
     it("works for ggplots", {
-      p <- c$pack(ggplot(mtcars) + geom_point(aes(x=disp,y=mpg)))
-      expect_equal(p$type, 'image')
-      expect_equal(str_sub(p$src, 1, 10), 'data:image')
+      p <- c$pack(ggplot(mtcars) + geom_point(aes(x = disp, y = mpg)))
+      expect_equal(p$type, "image")
+      expect_equal(str_sub(p$src, 1, 10), "data:image")
     })
   }
 })
 
-describe('Context.unpack()', {
+describe("Context.unpack()", {
   c <- Context$new()
+
+  # nolint start
 
   it("can take a list or a JSON stringing", {
     expect_null(c$unpack('{"type":"null", "data":null}'))
-    expect_null(c$unpack(list(type = 'null', data = NULL)))
+    expect_null(c$unpack(list(type = "null", data = NULL)))
   })
 
   it("errors if package is malformed", {
-    expect_error(c$unpack(1), 'should be a list')
-    expect_error(c$unpack(list()), 'should have field `type`')
+    expect_error(c$unpack(1), "should be a list")
+    expect_error(c$unpack(list()), "should have field `type`")
   })
 
   it("works for primitive types", {
@@ -100,8 +108,10 @@ describe('Context.unpack()', {
     expect_equal(c$unpack('{"type":"array","data":[1,2,3,4,5]}'), 1:5)
   })
 
+  # nolint end
+
   it("works for tabular data", {
-    df <- data.frame(a=1:3, b=c('x','y','z'), stringsAsFactors=FALSE)
+    df <- data.frame(a = 1:3, b = c("x", "y", "z"), stringsAsFactors = FALSE)
     expect_equal(
       c$unpack(c$pack(df)),
       df

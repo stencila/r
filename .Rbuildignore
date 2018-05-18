@@ -11,3 +11,4 @@
 ^_pkgdown\.yml$
 ^stencila_.+\.tar\.gz$
 ^docs$
+^\.lintr$

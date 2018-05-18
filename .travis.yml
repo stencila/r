@@ -1,15 +1,16 @@
 language: r
+
 r:
   - oldrel
   - release
   - devel
+
+r_github_packages:
+  - r-lib/covr
 
 cache: packages
 
 warnings_are_errors: false
 
 after_success:
-  - |
-    if [[ $TRAVIS_R_VERSION == 3.3.* ]]; then
-      Rscript -e 'install.packages("covr"); covr::codecov()';
-    fi
+  - Rscript -e 'covr::codecov()'

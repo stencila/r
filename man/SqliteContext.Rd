@@ -33,7 +33,7 @@ and the returned value
 }
 }
 
-\section{executeCode()}{
+\section{execute()}{
 
 
 Run SQL code

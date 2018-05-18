@@ -4,7 +4,7 @@
 \name{RContext}
 \alias{RContext}
 \title{A R context}
-\format{\code{R6Class}.}
+\format{\code{R6Class}}
 \usage{
 RContext
 }
@@ -56,16 +56,4 @@ Run R code within the context's scope
 }
 }
 
-\examples{
-context <- RContext$new()
-
-# Assign a variable within the context
-context$executeCode('my_var <- 42')
-
-# Get the variable as an output value
-context$executeCode('my_var')
-
-# Returned output value can include plots
-context$executeCode('plot(1,1)')$value
-}
 \keyword{datasets}
