@@ -367,7 +367,7 @@ Host <- R6::R6Class("Host",
     },
 
     spawn = function (options=list()) {
-      self$run(authorization = FALSE, quiet = TRUE, echo = TRUE)
+      self$run(quiet = TRUE, echo = TRUE)
     },
 
     #' @section open():
