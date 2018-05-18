@@ -38,17 +38,25 @@ We love feedback. Create a [new issue](https://github.com/stencila/r/issues/new)
 
 ### Develop
 
-Most development tasks can be run using `make` shortcuts or RStudio keyboard shortcuts.
+Most development tasks can be run from R, using `make` shortcuts or RStudio keyboard shortcuts.
 
-Task                                                    | `make`                | RStudio         |
+Task                                                    | `make`                | R/RStudio       |
 ------------------------------------------------------- |-----------------------|-----------------|
-Install dependencies                                    | `make setup`          | 
-Run tests                                               | `make test`           | `Ctrl+Shift+T`
-Run tests with coverage                                 | `make cover`          |
+Install development dependencies                        | `make setup`          | 
+Run linting                                             | `make lint`           | `lintr::lint_package()`
+Run tests                                               | `make test`           | `devtools::test()` or `Ctrl+Shift+T`
+Run tests with coverage                                 | `make cover`          | `covr::package_coverage()`
 Build documentation                                     | `make docs`           |
 Check the package                                       | `make check`          | `Ctrl+Shift+E`
 Build                                                   | `make build`          | `Ctrl+Shift+B`
 Clean                                                   | `make clean`          |
+
+To run test files individually, in R use `test_file`:
+
+```r
+library(testthat)
+test_file('tests/testthat/test-r-context.R')
+```
 
 To get started, please read our contributor [code of conduct](CONDUCT.md), then [get in touch](https://gitter.im/stencila/stencila) or checkout the [platform-wide, cross-repository kanban board](https://github.com/orgs/stencila/projects/1), or just send in a pull request!
 
