@@ -18,13 +18,23 @@
 <!-- Font Awesome icons -->
 <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
 
+<!-- clipboard.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.7.1/clipboard.min.js" integrity="sha384-cV+rhyOuRHc9Ub/91rihWcGmMmCXDeksTtCihMupQHSsi8GIIRDG0ThDc3HGQFJ3" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
 <script src="../jquery.sticky-kit.min.js"></script>
 <script src="../pkgdown.js"></script>
-  
-  
+
+
+
+<meta property="og:title" content="A Host — Host" />
+
+<meta property="og:description" content="Hosts allows you to remotely create, get, run methods of, and delete instances of various types.
+The types can be thought of a "services" provided by the host e.g. `RContext`, `FileSystemStorer`" />
+<meta name="twitter:card" content="summary" />
+
+
 <!-- mathjax -->
 <script src='https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
 
@@ -47,8 +57,12 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="../index.html">Stencila for R</a>
+      <span class="navbar-brand">
+        <a class="navbar-link" href="../index.html">stencila</a>
+        <span class="label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.28.3</span>
+      </span>
     </div>
+
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li>
@@ -67,6 +81,7 @@
   </a>
 </li>
       </ul>
+      
     </div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
@@ -74,16 +89,20 @@
       
       </header>
 
-      <div class="row">
+<div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>A Host</h1>
+    <small class="dont-index">Source: <a href='https://github.com/stencila/r#readme/blob/master/R/host.R'><code>R/host.R</code></a></small>
+    <div class="hidden name"><code>Host.Rd</code></div>
     </div>
 
+    <div class="ref-description">
     
     <p>Hosts allows you to remotely create, get, run methods of, and delete instances of various types.
 The types can be thought of a "services" provided by the host e.g. `RContext`, `FileSystemStorer`</p>
     
+    </div>
 
     <pre class="usage"><span class='no'>Host</span></pre>
         
@@ -142,18 +161,19 @@ has aborted with out by <code>host$stop()</code> being called.</p>
 by peer hosts to determine which "types" this host provides and
 which "instances" have already been instantiated.</p>
     
-    <h2 class="hasAnchor" id="install-"><a class="anchor" href="#install-"></a>install()</h2>
+    <h2 class="hasAnchor" id="register-"><a class="anchor" href="#register-"></a>register()</h2>
 
     
-    <p>Install this Stencila <code>Host</code> on this machine.</p>
-<p>Installation of a host involves creating a file <code>r.json</code> inside of
+    <p>Register this Stencila <code>Host</code> on this machine.</p>
+<p>Registering a host involves creating a file <code>r.json</code> inside of
 the user's Stencila data (see <code>user_dir</code>) directory which describes
 the capabilities of this host.</p>
     
     <h2 class="hasAnchor" id="post-"><a class="anchor" href="#post-"></a>post()</h2>
 
     
-    <p>Create a new instance of a type</p><dl class='dl-horizontal'>
+    <p>Create a new instance of a type</p>
+<dl class='dl-horizontal'>
   <dt>type</dt><dd><p>Type of new instance</p></dd>
   <dt>args</dt><dd><p>Arguments to be passed to type constructor</p></dd>
   <dt>name</dt><dd><p>Name of new instance. Depreciated but retained for compatability.</p></dd>
@@ -163,7 +183,8 @@ the capabilities of this host.</p>
     <h2 class="hasAnchor" id="get-"><a class="anchor" href="#get-"></a>get()</h2>
 
     
-    <p>Get an instance</p><dl class='dl-horizontal'>
+    <p>Get an instance</p>
+<dl class='dl-horizontal'>
   <dt>id</dt><dd><p>ID of instance</p></dd>
   <dt>return</dt><dd><p>The instance</p></dd>
 </dl>
@@ -171,24 +192,27 @@ the capabilities of this host.</p>
     <h2 class="hasAnchor" id="put-"><a class="anchor" href="#put-"></a>put()</h2>
 
     
-    <p>Call a method of an instance</p><dl class='dl-horizontal'>
+    <p>Call a method of an instance</p>
+<dl class='dl-horizontal'>
   <dt>id</dt><dd><p>ID of instance</p></dd>
   <dt>method</dt><dd><p>Name of instance method</p></dd>
-  <dt>args</dt><dd><p>A list of of method arguments</p></dd>
+  <dt>arg</dt><dd><p>The argument to pass to the method</p></dd>
   <dt>return</dt><dd><p>The result of the method call</p></dd>
 </dl>
     
     <h2 class="hasAnchor" id="delete-"><a class="anchor" href="#delete-"></a>delete()</h2>
 
     
-    <p>Delete an instance</p><dl class='dl-horizontal'>
+    <p>Delete an instance</p>
+<dl class='dl-horizontal'>
   <dt>id</dt><dd><p>ID of the instance</p></dd>
 </dl>
     
     <h2 class="hasAnchor" id="start-"><a class="anchor" href="#start-"></a>start()</h2>
 
     
-    <p>Start serving this host</p><dl class='dl-horizontal'>
+    <p>Start serving this host</p>
+<dl class='dl-horizontal'>
   <dt>address</dt><dd><p>The address to listen. Default '127.0.0.1'</p></dd>
   <dt>port</dt><dd><p>The port to listen on. Default 2000</p></dd>
   <dt>quiet</dt><dd><p>Don't print out message. Default FALSE</p></dd>
@@ -222,6 +246,11 @@ for hosts. We plan to implement a `HostWebsocketServer` soon.</p>
     
     <p>Get unique ID of this host</p>
     
+    <h2 class="hasAnchor" id="key"><a class="anchor" href="#key"></a>key</h2>
+
+    
+    <p>Get secret key of this host</p>
+    
     <h2 class="hasAnchor" id="servers"><a class="anchor" href="#servers"></a>servers</h2>
 
     
@@ -235,9 +264,9 @@ e.g. `http` for `HostHttpServer`</p>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='no'>host</span>$<span class='no'>servers</span></div><div class='output co'>#&gt; list()</div><div class='input'><span class='no'>host</span>$<span class='fu'><a href='start.html'>start</a></span>()</div><div class='output co'>#&gt; Host has started at: http://127.0.0.1:2010/?ticket=CTYMZDY8RqtM </div><div class='input'><span class='no'>host</span>$<span class='no'>servers</span></div><div class='output co'>#&gt; $http
+    <pre class="examples"><div class='input'><span class='no'>host</span>$<span class='no'>servers</span></div><div class='output co'>#&gt; list()</div><div class='input'><span class='no'>host</span>$<span class='fu'><a href='start.html'>start</a></span>()</div><div class='output co'>#&gt; Host has started at: http://127.0.0.1:2000/?ticket=CTYMZDY8RqtM </div><div class='input'><span class='no'>host</span>$<span class='no'>servers</span></div><div class='output co'>#&gt; $http
 #&gt; $http$url
-#&gt; [1] "http://127.0.0.1:2010"
+#&gt; [1] "http://127.0.0.1:2000"
 #&gt; 
 #&gt; $http$ticket
 #&gt; [1] "8tDgrqBNSnda"
@@ -262,7 +291,7 @@ e.g. `http` for `HostHttpServer`</p>
 
       <li><a href="#manifest-">manifest()</a></li>
 
-      <li><a href="#install-">install()</a></li>
+      <li><a href="#register-">register()</a></li>
 
       <li><a href="#post-">post()</a></li>
 
@@ -282,6 +311,8 @@ e.g. `http` for `HostHttpServer`</p>
 
       <li><a href="#id">id</a></li>
 
+      <li><a href="#key">key</a></li>
+
       <li><a href="#servers">servers</a></li>
 
       <li><a href="#urls">urls</a></li>
@@ -298,11 +329,14 @@ e.g. `http` for `HostHttpServer`</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="http://hadley.github.io/pkgdown/">pkgdown</a>.</p>
+  <p>Site built with <a href="http://pkgdown.r-lib.org/">pkgdown</a>.</p>
 </div>
 
       </footer>
    </div>
 
+  
+
   </body>
 </html>
+

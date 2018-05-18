@@ -22,6 +22,8 @@ Then install the package so that other Stencila packages and applications can de
 stencila:::register()
 ```
 
+**Note** This package is not yet compatible with Stencila Desktop 0.28.0. We are working on upgrades to make that possible.
+
 **Note** Installing Stencila package for R may take a while as there are a number of dependencies which need to be installed. 
 
 ### Use
