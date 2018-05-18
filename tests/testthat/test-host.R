@@ -1,3 +1,5 @@
+context("Host")
+
 describe("Host", {
   h <- Host$new()
 

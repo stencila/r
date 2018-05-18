@@ -1,3 +1,5 @@
+context("Context")
+
 describe("Context.pack()", {
   c <- Context$new()
   check <- function (x, json) {

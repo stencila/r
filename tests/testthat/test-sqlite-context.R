@@ -1,3 +1,5 @@
+context("SqliteContext")
+
 describe("SqliteContext", {
   it("can be constructed", {
     # In-memory database

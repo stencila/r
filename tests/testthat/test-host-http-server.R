@@ -1,3 +1,5 @@
+context("HostHttpServer")
+
 test_that("HostHttpServer$stop+start", {
   s1 <- HostHttpServer$new(NULL)
   s2 <- HostHttpServer$new(NULL)

@@ -1,3 +1,5 @@
+context("RContext")
+
 describe("RContext", {
 
   it("can be constructed", {
