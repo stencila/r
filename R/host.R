@@ -412,7 +412,7 @@ Host <- R6::R6Class("Host",
       if (is.null(host)) key <- private$.key
       else {
         # TODO Support token generation for peers based on held keys
-        stop("Generation of tokens for peer hosts is not yet supported")
+        stop("Generation of tokens for peer hosts is not yet supported") # nocov
       }
       jose::jwt_encode_hmac(jose::jwt_claim(), secret = charToRaw(key))
     },

@@ -90,8 +90,8 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
         }
 
         # Create response
-        endpoint <- self$route(request$method, request$path)
-        method <- endpoint[[1]]
+        endpoint <- self$route(request$method, request$path, authorized)
+        method <- self[endpoint[1]]
         if (length(endpoint) == 1) response <- method(request)
         else response <- do.call(method, c(list(request = request), endpoint[2:length(endpoint)]))
 
@@ -136,6 +136,9 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
               # "how long the response to the preflight request can be cached for without sending another preflight request"
               "Access-Control-Max-Age" = "86400" # 24 hours
             ))
+            # TODO return a response instead of doing routing
+            # It seems necessary to have at least one header set
+            #list(body = "", status = 200, headers = list("Content-Type" = "text/plain")))
           }
           response$headers <- c(response$headers, cors_headers)
         }
@@ -153,47 +156,49 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
     #' @section route():
     #'
     #' Route a HTTP request
-    route = function(verb, path) {
-      # Public endpoints
+    route = function(verb, path = NULL, authorized = FALSE) {
+      if (path == "/") return(c("static", "index.html"))
+      if (str_sub(path, 1, 8) == "/static/") return(c("static", str_sub(path, 9)))
 
-      if (verb == "OPTIONS") return(list(self$options))
-      if (path == "/") return(list(self$home))
-      if (str_sub(path, 1, 8) == "/static/") return(list(self$static, str_sub(path, 9)))
+      version <- str_match(path, "^/(v\\d+)")[, 2]
+      if (is.na(version)) {
+        if (path == "/manifest") return(c("run", "manifest"))
 
-      if (path == "/manifest") return(list(self$manifest))
+        if (!authorized) return("error_401")
 
-      # Private endpoints for which authorization is necessary
+        if (str_sub(path, 1, 9) == "/environ/") {
+          if (verb == "POST") return(c("run", "startup", str_sub(path, 10)))
+        }
 
-      if (str_sub(path, 1, 9) == "/environ/") {
-        if (verb == "POST") return(list(self$startup, str_sub(path, 10)))
+        match <- str_match(path, "^/(.+?)(!(.+))?$")
+        if (!is.na(match[1, 1])) {
+          id <- match[1, 2]
+          method <- match[1, 4]
+          if (verb == "POST" & !is.null(id)) return(c("run", "create", id))
+          if (verb == "DELETE" & !is.null(id)) return(c("run", "destroy", id))
+          if (verb == "PUT" & !is.null(id) & !is.null(method)) return(c("run", "call", id, method))
+        }
+      } else if (version == "v1") {
+        parts <- str_split(path, "/")[[1]][-1]
+        resource <- parts[2]
+
+        if (verb == "GET" && resource == "manifest") return(c("run", "manifest"))
+
+        if (!authorized) return("error_401")
+
+        if (resource %in% c("environs", "services", "instances") && verb == "GET") {
+          return(c("run", resource))
+        }
+        if (resource == "instances" && length(parts) >= 3) {
+          id <- parts[3]
+          method <- parts[4]
+          if (verb == "POST" && !is.null(id)) return(c("run", "create", id))
+          if (verb == "DELETE" && !is.null(id)) return(c("run", "destroy", id))
+          if (verb == "PUT" && !is.null(id) & !is.null(method)) return(c("run", "call", id, method))
+        }
       }
 
-      match <- str_match(path, "^/(.+?)(!(.+))?$")
-      if (!is.na(match[1, 1])) {
-        id <- match[1, 2]
-        method <- match[1, 4]
-        if (verb == "POST" & !is.null(id)) return(list(self$post, id))
-        else if (verb == "GET" & !is.null(id)) return(list(self$get, id))
-        else if (verb == "PUT" & !is.null(id) & !is.null(method)) return(list(self$put, id, method))
-        else if (verb == "DELETE" & !is.null(id)) return(list(self$delete, id))
-      }
-
-      return(NULL)
-    },
-
-    #' @section options():
-    #'
-    #' Handle a OPTIONS request
-    options = function(request) {
-      # It seems necessary to have at least one header set
-      list(body = "", status = 200, headers = list("Content-Type" = "text/plain"))
-    },
-
-    #' @section home():
-    #'
-    #' Handle a request to `home`
-    home = function(request) {
-      self$static(request, "index.html")
+      return("error_400")
     },
 
     #' @section static():
@@ -221,105 +226,62 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
       }
     },
 
-    #' @section manifest():
+    #' @section run():
     #'
-    #' Handle a request for the host's manifest
-    manifest = function(request) {
-      list(
-        body = to_json(private$.host$manifest()),
-        status = 200,
-        headers = list("Content-Type" = "application/json")
-      )
-    },
-
-    #' @section startup():
-    #'
-    #' Handle a request to start and environment
-    startup = function(request, type) {
-      list(
-        body = "",
-        status = 200,
-        headers = list("Content-Type" = "application/json")
-      )
-    },
-
-    #' @section post():
-    #'
-    #' Handle a POST request
-    post = function(request, type) {
-      list(
-        body = to_json(private$.host$post(type, self$args(request))),
-        status = 200,
-        headers = list("Content-Type" = "application/json")
-      )
-    },
-
-    #' @section post():
-    #'
-    #' Handle a GET request
-    get = function(request, id) {
-      list(
-        body = to_json(private$.host$get(id)),
-        status = 200,
-        headers = list("Content-Type" = "application/json")
-      )
-    },
-
-    #' @section put():
-    #'
-    #' Handle a PUT request
-    put = function(request, id, method) {
-        list(
-          body = to_json(private$.host$put(id, method, self$args(request))),
-          status = 200,
-          headers = list("Content-Type" = "application/json")
-        )
-    },
-
-    #' @section delete():
-    #'
-    #' Handle a DELETE request
-    delete = function(request, id) {
-      stop("Not yet implemeted")
-    },
-
-    #' @section args():
-    #'
-    #' Convert the body into a named list of arguments
-    args = function(request) {
+    #' Handle a request to call a host method
+    run = function(request, method, arg) {
+      args <- list(arg)
       if (!is.null(request$body) && nchar(request$body) > 0) {
-        from_json(request$body)
-      } else {
-        list()
+        args <- c(from_json(request$body))
       }
+      result <- do.call(private$.host[[method]], args)
+      list(
+        body = to_json(result),
+        status = 200,
+        headers = list("Content-Type" = "application/json")
+      )
+    },
+
+    #' @section error():
+    #'
+    #' Generate an error response
+    error = function(request, code, name, what = "") {
+      list(body = paste0(name, ": ", what), status = code, headers = list("Content-Type" = "text/html"))
+    },
+
+    #' @section error_400():
+    #'
+    #' Generate a 400 error
+    error_400 = function(request, what = "") {
+      self$error(request, 400, "Bad request", what)
     },
 
     #' @section error_401():
     #'
     #' Generate a 401 error
     error_401 = function(request, what = "") {
-      list(body = paste0("Unauthorized ", what), status = 401, headers = list("Content-Type" = "text/html"))
+      self$error(request, 401, "Unauthorized ", what)
     },
 
     #' @section error_403():
     #'
     #' Generate a 403 error
     error_403 = function(request, what = "") {
-      list(body = paste0("Forbidden ", what), status = 403, headers = list("Content-Type" = "text/html"))
+      self$error(request, 403, "Forbidden ", what)
     },
 
     #' @section error_404():
     #'
     #' Generate a 404 error
     error_404 = function(request, what = "") {
-      list(body = paste0("Not found ", what), status = 404, headers = list("Content-Type" = "text/html"))
+      self$error(request, 404, "Not found ", what)
     },
 
     #' @section error_500():
     #'
     #' Generate a 500 error
     error_500 = function(request, error) {
-      list(body = paste0("Error ", toString(error)), status = 500, headers = list("Content-Type" = "text/html"))  # nocov
+      self$error(request, 500, "Internal error ", toString(error))  # nocov
     }
   ),
 

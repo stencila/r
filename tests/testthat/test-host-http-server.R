@@ -20,17 +20,36 @@ test_that("HostHttpServer$stop+start", {
 })
 
 test_that("HostHttpServer$route", {
-  skip("WIP")
-
   s <- HostHttpServer$new(NULL)
 
-  expect_equal(s$route("OPTIONS", NULL), list(s$options))
-  expect_equal(s$route("GET", "/"), list(s$home))
-  expect_equal(s$route("GET", "/static/some/file.js"), list(s$static, "some/file.js"))
-  expect_equal(s$route("POST", "/type"), list(s$post, "type"))
-  expect_equal(s$route("GET", "/id"), list(s$get, "id"))
-  expect_equal(s$route("PUT", "/id!method"), list(s$put, "id", "method"))
-  expect_equal(s$route("DELETE", "/id"), list(s$delete, "id"))
+  expect_equal(s$route("GET", "/"), c("static", "index.html"))
+  expect_equal(s$route("GET", "/static/some/file.js"), c("static", "some/file.js"))
+
+  # Unversioned requests
+
+  expect_equal(s$route("GET", "/manifest"), c("run", "manifest"))
+  expect_equal(s$route("POST", "/type", TRUE), c("run", "create", "type"))
+  expect_equal(s$route("PUT", "/id!method", TRUE), c("run", "call", "id", "method"))
+  expect_equal(s$route("DELETE", "/id", TRUE), c("run", "destroy", "id"))
+
+  # v1 requests
+
+  expect_equal(s$route("GET", "/v1/manifest", FALSE), c("run", "manifest"))
+
+  expect_equal(s$route("GET", "/v1/services", TRUE), c("run", "services"))
+
+  expect_equal(s$route("GET", "/v1/instances", TRUE), c("run", "instances"))
+  expect_equal(s$route("GET", "/v1/instances", FALSE), "error_401")
+
+  expect_equal(s$route("POST", "/v1/instances/Service", TRUE), c("run", "create", "Service"))
+  expect_equal(s$route("POST", "/v1/instances/Service", FALSE), "error_401")
+
+  expect_equal(s$route("DELETE", "/v1/instances/instance1", TRUE), c("run", "destroy", "instance1"))
+
+  expect_equal(s$route("PUT", "/v1/instances/instance1/method", TRUE), c("run", "call", "instance1", "method"))
+  expect_equal(s$route("PUT", "/v1/instances/instance1/method", FALSE), "error_401")
+
+  expect_equal(s$route("PUT", "/v1/foobar", TRUE), "error_400")
 })
 
 test_that("HostHttpServer$handle", {
@@ -107,22 +126,6 @@ test_that("HostHttpServer$handle", {
   expect_equal(r$headers[["Access-Control-Allow-Origin"]], NULL)
 })
 
-test_that("HostHttpServer.options", {
-  s <- HostHttpServer$new(host)
-
-  r <- s$options()
-  expect_equal(r$status, 200)
-  expect_equal(r$body, "")
-})
-
-test_that("HostHttpServer$home", {
-  s <- HostHttpServer$new(host)
-
-  r <- s$home(list())
-  expect_equal(r$status, 200)
-  expect_equal(r$headers[["Content-Type"]], "text/html")
-})
-
 test_that("HostHttpServer$static", {
   s <- HostHttpServer$new(host)
 
@@ -138,16 +141,14 @@ test_that("HostHttpServer$static", {
   expect_equal(r$status, 403)
 })
 
-test_that("HostHttpServer$post", {
+test_that("HostHttpServer$call", {
+  skip("WIP")
+
   s <- HostHttpServer$new(host)
 
   r <- s$post(list(), "RContext")
   expect_equal(r$status, 200)
   expect_equal(r$headers[["Content-Type"]], "application/json")
-})
-
-test_that("HostHttpServer$get", {
-  s <- HostHttpServer$new(host)
 
   r1 <- s$post(list(), "RContext")
   id <- from_json(r1$body)
@@ -156,10 +157,6 @@ test_that("HostHttpServer$get", {
   expect_equal(r2$status, 200)
   expect_equal(r2$headers[["Content-Type"]], "application/json")
   expect_equal(r2$body, "{}")
-})
-
-test_that("HostHttpServer$put", {
-  s <- HostHttpServer$new(host)
 
   r1 <- s$post(list(), "RContext")
   id <- from_json(r1$body)
