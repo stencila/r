@@ -79,13 +79,13 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
 
         # Check authorization status
         authorized <- FALSE
-        if (Sys.getenv("STENCILA_AUTH") == 'false') {
+        if (Sys.getenv("STENCILA_AUTH") == "false") {
           authorized <- TRUE
         } else {
           auth_header <- request$headers$Authorization
           if (!is.null(auth_header)) {
-            token <- str_match(auth_header, 'Bearer (.+)')[, 2]
-            authorized <- private$.host$authorizeToken(token)
+            token <- str_match(auth_header, "Bearer (.+)")[, 2]
+            authorized <- private$.host$authorize_token(token)
           }
         }
 
