@@ -279,10 +279,10 @@ Host <- R6::R6Class("Host",
     #'
     #' Currently, HTTP is the only server available
     #' for hosts. We plan to implement a `HostWebsocketServer` soon.
-    start  = function (address="127.0.0.1", port=2000, authorization=TRUE, quiet=FALSE) {
+    start  = function (address="127.0.0.1", port=2000, quiet=FALSE) {
       if (is.null(private$.servers[["http"]])) {
         # Start HTTP server
-        server <- HostHttpServer$new(self, address, port, authorization)
+        server <- HostHttpServer$new(self, address, port)
         private$.servers[["http"]] <- server
         server$start()
 
@@ -304,7 +304,7 @@ Host <- R6::R6Class("Host",
         cat(self$key, file = key_file)
 
         if (!quiet) {
-          cat("Host has started at:", server$ticketed_url(), "\n")
+          cat("Host has started at:", server$url, "\n")
         }
       }
       invisible(self)
@@ -382,8 +382,7 @@ Host <- R6::R6Class("Host",
       origin <- "http://open.stenci.la"
       server <- private$.servers[["http"]]
       peer <- server$url
-      ticket <- server$ticket_create()
-      url <- sprintf("%s/?address=%s&peers=%s/?ticket=%s", origin, address, peer, ticket)
+      url <- sprintf("%s/?address=%s&peers=%s", origin, address, peer)
       # See if there is a `viewer` option (defined by RStudio if we are in RStudio)
       viewer <- getOption("viewer")
       # Currently, force external because Stencila will not run in the older
@@ -400,8 +399,40 @@ Host <- R6::R6Class("Host",
       }
       invisible(self)
       # nocov end
-    }
+    },
 
+    #' @section open():
+    #'
+    #' Generate a request token for a peer host (or this host)
+    #'
+    #' \describe{
+    #'   \item{token}{The request token}
+    #' }
+    generate_token = function (host = NULL) {
+      if (is.null(host)) key <- private$.key
+      else {
+        # TODO Support token generation for peers based on held keys
+        stop('Generation of tokens for peer hosts is not yet supported')
+      }
+      jose::jwt_encode_hmac(jose::jwt_claim(), secret = charToRaw(key))
+    },
+
+    #' @section open():
+    #'
+    #' Authorize a request token.
+    #'
+    #' \describe{
+    #'   \item{token}{The request token}
+    #' }
+    authorize_token = function (token) {
+      body <- tryCatch(
+        jose::jwt_decode_hmac(token, secret = charToRaw(private$.key)),
+        error = identity
+      )
+      # TODO Test request sequence order if `hid` (host id) and `seq` (sequence) claims
+      # are in token body. These can, optionally, be set by clients to prevent token replay attacks.
+      if (inherits(body, "error")) FALSE else TRUE
+    }
   ),
 
   active = list(
@@ -428,8 +459,7 @@ Host <- R6::R6Class("Host",
       for (name in names(private$.servers)) {
         server <- private$.servers[[name]]
         servers[[name]] <- list(
-          url = server$url,
-          ticket = server$ticket_create()
+          url = server$url
         )
       }
       servers

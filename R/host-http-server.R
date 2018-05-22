@@ -3,31 +3,25 @@
 #' Normally there is no need to create a new \code{HostHttpServer}, instead
 #' use the \code{start} method of the \code{host} instance.
 #'
+#' Note for developers: the general approach taken in developing this class is
+#' to mirror implementations in Node and Python to make it easier to port
+#' code between the languages and ensure consisten implementations.
+#'
 #' @format \code{R6Class}.
 HostHttpServer <- R6::R6Class("HostHttpServer",
   public = list(
-
     #' @section new():
     #'
     #' \describe{
     #'   \item{host}{The host to be served}
     #'   \item{address}{The port to listen on. Default \code{'127.0.0.1'}}
     #'   \item{port}{The port to listen on. Default \code{2000}}
-    #'   \item{authorization}{Authorization for all requests. Default \code{TRUE}}
     #' }
-    initialize = function(host, address="127.0.0.1", port=2000, authorization=TRUE) {
+    initialize = function(host, address="127.0.0.1", port=2000) {
       private$.host <- host
       private$.address <- address
       private$.port <- port
-
-      auth <- Sys.getenv("STENCILA_AUTHORIZATION")
-      if (auth == "true") authorization <- TRUE
-      else if (auth == "false") authorization <- FALSE
-      private$.authorization <- authorization
-
       private$.server <- NULL
-      private$.tickets <- NULL
-      private$.tokens <- NULL
     },
 
     #' @section start():
@@ -77,29 +71,21 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
           method = env$REQUEST_METHOD,
           headers = list(
             Accept = env$HTTP_ACCEPT,
+            Authorization = env$HTTP_AUTHORIZATION,
             Cookie = env$HTTP_COOKIE
           ),
           body = paste(env$rook.input$read_lines(), collapse = "")
         )
 
-        # Check authorization. Note that browsers do not send credentials (e.g. cookies)
-        # in OPTIONS requests
-        cookie_header <- NULL
-        if (private$.authorization & request$method != "OPTIONS") {
-          # Check for ticket
-          ticket <- urltools::param_get(paste0(request$path, request$query), "ticket")$ticket
-          if (!is.na(ticket)) {
-            # Check ticket is valid
-            if (!self$ticket_check(ticket)) return(self$error_403(request, paste0(": invalid ticket : ", ticket)))
-            else {
-              # Set token cookie
-              cookie_header <- list("Set-Cookie" = paste0("token=", self$token_create(), "; Path=/"))
-            }
-          } else {
-            # Check for token
-            cookie <- request$headers$Cookie
-            token <- if (is.null(cookie)) NA else str_match(cookie, "token=([a-zA-Z0-9]+)")[1, 2]
-            if (is.na(token) | !self$token_check(token)) return(self$error_403(request, paste0(": invalid token : ", token)))
+        # Check authorization status
+        authorized <- FALSE
+        if (Sys.getenv("STENCILA_AUTH") == 'false') {
+          authorized <- TRUE
+        } else {
+          auth_header <- request$headers$Authorization
+          if (!is.null(auth_header)) {
+            token <- str_match(auth_header, 'Bearer (.+)')[, 2]
+            authorized <- private$.host$authorizeToken(token)
           }
         }
 
@@ -168,12 +154,15 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
     #'
     #' Route a HTTP request
     route = function(verb, path) {
-      if (verb == "OPTIONS") return(list(self$options))
+      # Public endpoints
 
+      if (verb == "OPTIONS") return(list(self$options))
       if (path == "/") return(list(self$home))
-      if (path == "/manifest") return(list(self$manifest))
-      if (path == "/favicon.ico") return(list(self$static, "favicon.ico"))
       if (str_sub(path, 1, 8) == "/static/") return(list(self$static, str_sub(path, 9)))
+
+      if (path == "/manifest") return(list(self$manifest))
+
+      # Private endpoints for which authorization is necessary
 
       if (str_sub(path, 1, 9) == "/environ/") {
         if (verb == "POST") return(list(self$startup, str_sub(path, 10)))
@@ -204,15 +193,7 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
     #'
     #' Handle a request to `home`
     home = function(request) {
-      if (!self$accepts_json(request)) {
-        self$static(request, "index.html")
-      } else {
-        list(
-          body = to_json(private$.host$manifest()),
-          status = 200,
-          headers = list("Content-Type" = "application/json")
-        )
-      }
+      self$static(request, "index.html")
     },
 
     #' @section static():
@@ -223,9 +204,9 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
       requested_path <- suppressWarnings(normalizePath(file.path(static_path, path), winslash = "/"))
       if (!str_detect(requested_path, paste0("^", static_path)) | str_detect(requested_path, "\\.\\./")) {
         # Don't allow any request outside of static folder
-        self$error_403()
+        self$error_403(requested_path)
       } else if (!file.exists(requested_path)) {
-        self$error_404()
+        self$error_404(requested_path)
       } else {
         file_connection <- file(requested_path, "r")
         lines <- suppressWarnings(readLines(file_connection))
@@ -313,71 +294,18 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
       }
     },
 
-    #' @section accepts_json():
+    #' @section error_401():
     #'
-    #' Does a request accept JSON?
-    accepts_json = function(request) {
-      accept <- request$headers[["Accept"]]
-      if (is.null(accept)) FALSE
-      else str_detect(accept, "application/json")
-    },
-
-    #' @section ticket_create():
-    #'
-    #' Create a ticket (a single-use access token)
-    ticket_create = function () {
-      ticket <- paste(sample(c(LETTERS, letters, 0:9), 12, replace = TRUE), collapse = "")
-      private$.tickets <- c(private$.tickets, ticket)
-      ticket
-    },
-
-    #' @section ticket_check():
-    #'
-    #' Check that a ticket is valid. If it is, then it is removed
-    #' from the list of tickets and \code{TRUE} is returned. Otherwise,
-    #' returns \code{FALSE}
-    ticket_check = function (ticket) {
-      if (ticket %in% private$.tickets) {
-        private$.tickets <- setdiff(ticket, private$.tickets)
-        TRUE
-      } else {
-        FALSE
-      }
-    },
-
-    #' @section ticketed_url():
-    #
-    #' Create a URL with a ticket query parameter so users
-    #' can connect to this server
-    #'
-    #' @return {string} A ticket
-    ticketed_url = function () {
-      url <- self$url
-      if (private$.authorization) url <- paste0(url, "/?ticket=", self$ticket_create())
-      url
-    },
-
-    #' @section token_create():
-    #'
-    #' Create a token (a multiple-use access token)
-    token_create = function () {
-      token <- paste(sample(c(LETTERS, letters, 0:9), 126, replace = TRUE), collapse = "")
-      private$.tokens <- c(private$.tokens, token)
-      token
-    },
-
-    #' @section token_check():
-    #'
-    #' Check that a token is valid.
-    token_check = function (token) {
-      token %in% private$.tokens
+    #' Generate a 401 error
+    error_401 = function(request, what = "") {
+      list(body = paste0("Unauthorized ", what), status = 401, headers = list("Content-Type" = "text/html"))
     },
 
     #' @section error_403():
     #'
     #' Generate a 403 error
     error_403 = function(request, what = "") {
-      list(body = paste0("Unauthorized ", what), status = 403, headers = list("Content-Type" = "text/html"))
+      list(body = paste0("Forbidden ", what), status = 403, headers = list("Content-Type" = "text/html"))
     },
 
     #' @section error_404():
@@ -393,10 +321,22 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
     error_500 = function(request, error) {
       list(body = paste0("Error ", toString(error)), status = 500, headers = list("Content-Type" = "text/html"))  # nocov
     }
-
   ),
 
   active = list(
+    #' @section address:
+    #'
+    #' The address of the server
+    address = function() {
+      private$.address
+    },
+
+    #' @section port:
+    #'
+    #' The port of the server
+    port = function() {
+      private$.port
+    },
 
     #' @section url:
     #'
@@ -405,16 +345,12 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
       if (is.null(private$.server)) NULL
       else paste0("http://", private$.address, ":", private$.port)
     }
-
   ),
 
   private = list(
     .host = NULL,
     .address = NULL,
     .port = NULL,
-    .authorization = NULL,
-    .server = NULL,
-    .tickets = NULL,
-    .tokens = NULL
+    .server = NULL
   )
 )
