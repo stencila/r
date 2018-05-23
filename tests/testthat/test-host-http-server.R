@@ -28,6 +28,10 @@ test_that("HostHttpServer$route", {
   # Unversioned requests
 
   expect_equal(s$route("GET", "/manifest"), c("run", "manifest"))
+
+  expect_equal(s$route("POST", "/environ/local", TRUE), c("run", "startup", "local"))
+  expect_equal(s$route("DELETE", "/environ/id", TRUE), c("run", "shutdown", "id"))
+
   expect_equal(s$route("POST", "/type", TRUE), c("run", "create", "type"))
   expect_equal(s$route("PUT", "/id!method", TRUE), c("run", "call", "id", "method"))
   expect_equal(s$route("DELETE", "/id", TRUE), c("run", "destroy", "id"))
@@ -35,21 +39,26 @@ test_that("HostHttpServer$route", {
   # v1 requests
 
   expect_equal(s$route("GET", "/v1/manifest", FALSE), c("run", "manifest"))
+  expect_equal(s$route("GET", "/v1/environs", FALSE), c("run", "environs"))
+  expect_equal(s$route("GET", "/v1/services", FALSE), c("run", "services"))
 
-  expect_equal(s$route("GET", "/v1/services", TRUE), c("run", "services"))
+  expect_equal(s$route("GET", "/v1/hosts", TRUE), c("run", "hosts"))
+  expect_equal(s$route("POST", "/v1/hosts/local", TRUE), c("run", "startup", "local"))
+  expect_equal(s$route("DELETE", "/v1/hosts/id", TRUE), c("run", "shutdown", "id"))
+  expect_equal(s$route("GET", "/v1/hosts", FALSE), c("error_401", "/v1/hosts"))
 
   expect_equal(s$route("GET", "/v1/instances", TRUE), c("run", "instances"))
-  expect_equal(s$route("GET", "/v1/instances", FALSE), "error_401")
+  expect_equal(s$route("GET", "/v1/instances", FALSE), c("error_401", "/v1/instances"))
 
   expect_equal(s$route("POST", "/v1/instances/Service", TRUE), c("run", "create", "Service"))
-  expect_equal(s$route("POST", "/v1/instances/Service", FALSE), "error_401")
+  expect_equal(s$route("POST", "/v1/instances/Service", FALSE), c("error_401", "/v1/instances/Service"))
 
   expect_equal(s$route("DELETE", "/v1/instances/instance1", TRUE), c("run", "destroy", "instance1"))
 
   expect_equal(s$route("PUT", "/v1/instances/instance1/method", TRUE), c("run", "call", "instance1", "method"))
-  expect_equal(s$route("PUT", "/v1/instances/instance1/method", FALSE), "error_401")
+  expect_equal(s$route("PUT", "/v1/instances/instance1/method", FALSE), c("error_401", "/v1/instances/instance1/method"))
 
-  expect_equal(s$route("PUT", "/v1/foobar", TRUE), "error_400")
+  expect_equal(s$route("PUT", "/v1/foobar", TRUE), c("error_400", "/v1/foobar"))
 })
 
 test_that("HostHttpServer$handle", {

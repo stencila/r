@@ -41,7 +41,12 @@ Host <- R6::R6Class("Host",
     #' Create a new \code{Host}
     initialize = function () {
       private$.id <- paste(c("r-", sample(c(letters, 0:9), 64, replace = TRUE)), collapse = "")
-      private$.key <- paste(sample(c(letters, 0:9), 128, replace = TRUE), collapse = "")
+      if (Sys.getenv("STENCILA_AUTH") == "false") {
+        key <- NULL
+      } else {
+        key <- paste(sample(c(letters, 0:9), 64, replace = TRUE), collapse = "")
+      }
+      private$.key <- key
       private$.servers <- list()
       private$.instances <- list()
     },
@@ -159,8 +164,7 @@ Host <- R6::R6Class("Host",
           process = list(
             pid = Sys.getpid()
           ),
-          servers = self$servers,
-          instances = names(private$.instances)
+          servers = self$servers
         ))
       }
       manifest
@@ -179,10 +183,21 @@ Host <- R6::R6Class("Host",
       cat(
         jsonlite::toJSON(
           self$manifest(complete = FALSE),
-          pretty = TRUE, auto_unbox = TRUE,
+          pretty = TRUE, auto_unbox = TRUE
         ),
         file = file.path(dir, "r.json")
       )
+    },
+
+    # TODO: these methods implement edndpoints for
+    # starting and stopping hosts in other environments
+    # (e.g. a Docker container). Currently, only 'local'
+    # environment is supported
+    startup = function (environ) {
+      list(path = "")
+    },
+    shutdown = function (host) {
+      TRUE
     },
 
     #' @section create():
@@ -304,7 +319,12 @@ Host <- R6::R6Class("Host",
         cat(self$key, file = key_file)
 
         if (!quiet) {
-          cat("Host has started at:", server$url, "\n")
+          cat("Host HTTP server has started:\n")
+          cat("  URL:", server$url, "\n")
+          cat("  Key:", self$key, "\n")
+          if (is.null(self$key)) {
+            cat("  Warning: authentication has been disabled!\n")
+          }
         }
       }
       invisible(self)
@@ -340,9 +360,9 @@ Host <- R6::R6Class("Host",
     #' }
     #'
     #' Start serving the Stencila host and wait for connections indefinitely
-    run  = function (address="127.0.0.1", port=2000, authorization=TRUE, quiet=FALSE, echo=FALSE) {
+    run  = function (address="127.0.0.1", port=2000, quiet=FALSE, echo=FALSE) {
       if (echo) quiet <- TRUE
-      self$start(address = address, port = port, authorization = authorization, quiet = quiet)
+      self$start(address = address, port = port, quiet = quiet)
 
       if (echo) {
         cat(to_json(list(

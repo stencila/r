@@ -81,7 +81,7 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
 
         # Check authorization status
         authorized <- FALSE
-        if (Sys.getenv("STENCILA_AUTH") == "false") {
+        if (is.null(private$.host$key)) {
           authorized <- TRUE
         } else {
           auth_header <- request$headers$Authorization
@@ -131,7 +131,7 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
             cors_headers <- c(cors_headers, list(
               # Allowable methods and headers
               "Access-Control-Allow-Methods" = "GET, POST, PUT, DELETE, OPTIONS",
-              "Access-Control-Allow-Headers" = "Content-Type",
+              "Access-Control-Allow-Headers" = "Authorization, Content-Type",
               # "how long the response to the preflight request can be cached for without sending another preflight request"
               "Access-Control-Max-Age" = "86400" # 24 hours
             ))
@@ -172,10 +172,11 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
         # Unversioned API endpoints
         if (path == "/manifest") return(c("run", "manifest"))
 
-        if (!authorized) return("error_401")
+        if (!authorized) return(c("error_401", path))
 
         if (str_sub(path, 1, 9) == "/environ/") {
           if (verb == "POST") return(c("run", "startup", str_sub(path, 10)))
+          if (verb == "DELETE") return(c("run", "shutdown", str_sub(path, 10)))
         }
 
         match <- str_match(path, "^/(.+?)(!(.+))?$")
@@ -191,23 +192,28 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
         parts <- str_split(path, "/")[[1]][-1]
         resource <- parts[2]
 
-        if (verb == "GET" && resource == "manifest") return(c("run", "manifest"))
+        if (verb == "GET" && resource %in% c("manifest", "environs", "services")) return(c("run", resource))
 
-        if (!authorized) return("error_401")
+        if (!authorized) return(c("error_401", path))
 
-        if (resource %in% c("environs", "services", "instances") && verb == "GET") {
-          return(c("run", resource))
+        if (resource == "hosts") {
+          id <- parts[3]
+          if (verb == "GET") return(c("run", "hosts"))
+          if (verb == "POST" && !is.null(id)) return(c("run", "startup", id))
+          if (verb == "DELETE" && !is.null(id)) return(c("run", "shutdown", id))
         }
-        if (resource == "instances" && length(parts) >= 3) {
+
+        if (resource == "instances") {
           id <- parts[3]
           method <- parts[4]
+          if (verb == "GET") return(c("run", "instances"))
           if (verb == "POST" && !is.null(id)) return(c("run", "create", id))
           if (verb == "DELETE" && !is.null(id)) return(c("run", "destroy", id))
           if (verb == "PUT" && !is.null(id) & !is.null(method)) return(c("run", "call", id, method))
         }
       }
 
-      return("error_400")
+      return(c("error_400", path))
     },
 
     #' @section static():

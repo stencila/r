@@ -86,7 +86,7 @@ the user's Stencila data (see \code{user_dir}) directory which describes
 the capabilities of this host.
 }
 
-\section{post()}{
+\section{create()}{
 
 
 Create a new instance of a type
@@ -110,7 +110,7 @@ Get an instance
 }
 }
 
-\section{put()}{
+\section{call()}{
 
 
 Call a method of an instance
@@ -171,6 +171,22 @@ Start serving the Stencila host and wait for connections indefinitely
 
 
 Open a file in the browser.
+
+
+
+Generate a request token for a peer host (or this host)
+
+\describe{
+  \item{token}{The request token}
+}
+
+
+
+Authorize a request token.
+
+\describe{
+  \item{token}{The request token}
+}
 }
 
 \section{id}{

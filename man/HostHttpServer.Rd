@@ -8,12 +8,14 @@
 \usage{
 HostHttpServer
 }
-\value{
-{string} A ticket
-}
 \description{
 Normally there is no need to create a new \code{HostHttpServer}, instead
 use the \code{start} method of the \code{host} instance.
+}
+\details{
+Note for developers: the general approach taken in developing this class is
+to mirror implementations in Node and Python to make it easier to port
+code between the languages and ensure consisten implementations.
 }
 \section{new()}{
 
@@ -22,7 +24,6 @@ use the \code{start} method of the \code{host} instance.
   \item{host}{The host to be served}
   \item{address}{The port to listen on. Default \code{'127.0.0.1'}}
   \item{port}{The port to listen on. Default \code{2000}}
-  \item{authorization}{Authorization for all requests. Default \code{TRUE}}
 }
 }
 
@@ -50,100 +51,34 @@ Handle a HTTP request
 Route a HTTP request
 }
 
-\section{options()}{
-
-
-Handle a OPTIONS request
-}
-
-\section{home()}{
-
-
-Handle a request to `home`
-}
-
 \section{static()}{
 
 
 Handle a request for a static file
 }
 
-\section{manifest()}{
+\section{run()}{
 
 
-Handle a request for the host's manifest
+Handle a request to call a host method
 }
 
-\section{startup()}{
+\section{error()}{
 
 
-Handle a request to start and environment
+Generate an error response
 }
 
-\section{post()}{
+\section{error_400()}{
 
 
-Handle a POST request
-
-
-
-Handle a GET request
+Generate a 400 error
 }
 
-\section{put()}{
+\section{error_401()}{
 
 
-Handle a PUT request
-}
-
-\section{delete()}{
-
-
-Handle a DELETE request
-}
-
-\section{args()}{
-
-
-Convert the body into a named list of arguments
-}
-
-\section{accepts_json()}{
-
-
-Does a request accept JSON?
-}
-
-\section{ticket_create()}{
-
-
-Create a ticket (a single-use access token)
-}
-
-\section{ticket_check()}{
-
-
-Check that a ticket is valid. If it is, then it is removed
-from the list of tickets and \code{TRUE} is returned. Otherwise,
-returns \code{FALSE}
-}
-
-\section{ticketed_url()}{
-
-Create a URL with a ticket query parameter so users
-can connect to this server
-}
-
-\section{token_create()}{
-
-
-Create a token (a multiple-use access token)
-}
-
-\section{token_check()}{
-
-
-Check that a token is valid.
+Generate a 401 error
 }
 
 \section{error_403()}{
@@ -162,6 +97,18 @@ Generate a 404 error
 
 
 Generate a 500 error
+}
+
+\section{address}{
+
+
+The address of the server
+}
+
+\section{port}{
+
+
+The port of the server
 }
 
 \section{url}{
