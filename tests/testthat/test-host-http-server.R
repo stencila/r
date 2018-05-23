@@ -53,37 +53,21 @@ test_that("HostHttpServer$route", {
 })
 
 test_that("HostHttpServer$handle", {
-  skip("WIP")
-
   s <- HostHttpServer$new(host)
 
+  # Home
   r <- s$handle(list(
     PATH_INFO = "/",
     REQUEST_METHOD = "GET",
-    HTTP_ACCEPT = "",
-    rook.input = list(read_lines = function() NULL)
-  ))
-  expect_equal(r$status, 403)
-
-  # Authorization using a ticket
-  r <- s$handle(list(
-    PATH_INFO = "/",
-    QUERY_STRING = paste0("?ticket=", s$ticket_create()),
-    REQUEST_METHOD = "GET",
-    HTTP_ACCEPT = "",
     rook.input = list(read_lines = function() NULL)
   ))
   expect_equal(r$status, 200)
-  expect_equal(str_sub(r$headers["Set-Cookie"], 1, 6), "token=")
-  token <- str_match(r$headers["Set-Cookie"], "token=([a-zA-Z0-9]+);")[1, 2]
   expect_equal(str_sub(r$body, 1, 23), "<!doctype html>\n<html>\n")
 
-  # Authorization using a token
+  # Manifest
   r <- s$handle(list(
-    PATH_INFO = "/",
+    PATH_INFO = "/v1/manifest",
     REQUEST_METHOD = "GET",
-    HTTP_ACCEPT = "application/json",
-    HTTP_COOKIE = paste0("token=", token),
     rook.input = list(read_lines = function() NULL)
   ))
   expect_equal(r$status, 200)
@@ -92,9 +76,8 @@ test_that("HostHttpServer$handle", {
   # Browser-based CORS request
   for (origin in c("http://127.0.0.1:2000", "http://localhost:2010", "https://open.stenci.la")) {
     r <- s$handle(list(
-      PATH_INFO = "/",
+      PATH_INFO = "/v1/manifest",
       REQUEST_METHOD = "GET",
-      HTTP_COOKIE = paste0("token=", token),
       HTTP_REFERER = sprintf("%s/some/file/path", origin),
       rook.input = list(read_lines = function() NULL)
     ))
@@ -105,7 +88,7 @@ test_that("HostHttpServer$handle", {
   # Browser-based CORS pre-flight request
   for (origin in c("http://127.0.0.1:2000", "http://localhost:2010", "https://open.stenci.la")) {
     r <- s$handle(list(
-      PATH_INFO = "/",
+      PATH_INFO = "/v1/manifest",
       REQUEST_METHOD = "OPTIONS",
       HTTP_ORIGIN = origin,
       rook.input = list(read_lines = function() NULL)
@@ -141,28 +124,30 @@ test_that("HostHttpServer$static", {
   expect_equal(r$status, 403)
 })
 
-test_that("HostHttpServer$call", {
-  skip("WIP")
-
+test_that("HostHttpServer$run", {
   s <- HostHttpServer$new(host)
+  req <- list()
 
-  r <- s$post(list(), "RContext")
+  # Get manifest
+  r <- s$run(req, "manifest")
   expect_equal(r$status, 200)
   expect_equal(r$headers[["Content-Type"]], "application/json")
 
-  r1 <- s$post(list(), "RContext")
-  id <- from_json(r1$body)
+  # Create an RContext
+  r <- s$run(req, "create", "RContext")
+  expect_equal(r$status, 200)
+  expect_equal(r$headers[["Content-Type"]], "application/json")
+  id <- from_json(r$body)
 
-  r2 <- s$get(list(), id)
-  expect_equal(r2$status, 200)
-  expect_equal(r2$headers[["Content-Type"]], "application/json")
-  expect_equal(r2$body, "{}")
+  # Call a context method
+  r <- s$run(list(body = "\"6*7\""), "call", id, "execute")
+  expect_equal(r$status, 200)
+  expect_equal(r$headers[["Content-Type"]], "application/json")
+  cell <- from_json(r$body)
+  expect_equal(cell$type, "cell")
 
-  r1 <- s$post(list(), "RContext")
-  id <- from_json(r1$body)
-
-  r2 <- s$put(list(body = "\"6*7\""), id, "execute")
-  expect_equal(r2$status, 200)
-  expect_equal(r2$headers[["Content-Type"]], "application/json")
-  expect_equal(from_json(r2$body)$type, "cell")
+  # Delete the context
+  r <- s$run(req, "delete", id)
+  expect_equal(r$status, 200)
+  expect_equal(r$headers[["Content-Type"]], "application/json")
 })

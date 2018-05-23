@@ -25,30 +25,30 @@ describe("Host", {
     )
   })
 
-  it("has a post() method", {
-    id1 <- host$post("RContext")
-    id2 <- host$post("RContext")
+  it("has a create() method", {
+    id1 <- host$create("RContext")
+    id2 <- host$create("RContext")
     expect_true(id1 != id2)
 
-    expect_error(host$post("Foo"), "Unknown type")
+    expect_error(host$create("Foo"), "Unknown type")
   })
 
   it("has a get() method", {
-    id <- host$post("RContext")
+    id <- host$create("RContext")
     expect_true(inherits(host$get(id), "RContext"))
 
     expect_error(host$get("foo"), "Unknown instance")
   })
 
-  it("has a put() method", {
-    id <- host$post("RContext")
-    expect_equal(host$put(id, "execute", "6*7")$type, "cell")
-    expect_error(host$put(id, "fooBar"), "Unknown method")
-    expect_error(host$put("foo", "bar"), "Unknown instance")
+  it("has a call() method", {
+    id <- host$create("RContext")
+    expect_equal(host$call(id, "execute", "6*7")$type, "cell")
+    expect_error(host$call(id, "fooBar"), "Unknown method")
+    expect_error(host$call("foo", "bar"), "Unknown instance")
   })
 
   it("has a delete() method", {
-    id <- host$post("RContext")
+    id <- host$create("RContext")
     expect_true(inherits(host$get(id), "RContext"))
     host$delete(id)
     expect_error(host$delete(id), "Unknown instance")

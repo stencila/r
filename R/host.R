@@ -185,7 +185,7 @@ Host <- R6::R6Class("Host",
       )
     },
 
-    #' @section post():
+    #' @section create():
     #'
     #' Create a new instance of a type
     #'
@@ -195,7 +195,7 @@ Host <- R6::R6Class("Host",
     #'   \item{name}{Name of new instance. Depreciated but retained for compatability.}
     #'   \item{return}{Address of the newly created instance}
     #' }
-    post = function (type, args = list(), name = NULL) {
+    create = function (type, args = list(), name = NULL) {
       Class <- TYPES[[type]]
       if (!is.null(Class)) {
         # Remove depreciated `name` arg from arguments
@@ -227,7 +227,7 @@ Host <- R6::R6Class("Host",
       }
     },
 
-    #' @section put():
+    #' @section call():
     #'
     #' Call a method of an instance
     #'
@@ -237,7 +237,7 @@ Host <- R6::R6Class("Host",
     #'   \item{arg}{The argument to pass to the method}
     #'   \item{return}{The result of the method call}
     #' }
-    put  = function (id, method, arg = NULL) {
+    call  = function (id, method, arg = NULL) {
       instance <- private$.instances[[id]]
       if (!is.null(instance)) {
         func <- instance[[method]]

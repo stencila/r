@@ -72,7 +72,9 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
           headers = list(
             Accept = env$HTTP_ACCEPT,
             Authorization = env$HTTP_AUTHORIZATION,
-            Cookie = env$HTTP_COOKIE
+            Cookie = env$HTTP_COOKIE,
+            Referer = env$HTTP_REFERER,
+            Origin = env$HTTP_ORIGIN
           ),
           body = paste(env$rook.input$read_lines(), collapse = "")
         )
@@ -89,21 +91,15 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
           }
         }
 
-        # Create response
-        endpoint <- self$route(request$method, request$path, authorized)
-        method <- self[endpoint[1]]
-        if (length(endpoint) == 1) response <- method(request)
-        else response <- do.call(method, c(list(request = request), endpoint[2:length(endpoint)]))
-
         # Add CORS headers used to control access by browsers. In particular, CORS
         # can prevent access by XHR requests made by Javascript in third party sites.
         # See https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS
 
         # Get the Origin header (sent in CORS and POST requests) and fall back to Referer header
         # if it is not present (either of these should be present in most browser requests)
-        origin <- env$HTTP_ORIGIN
-        if (is.null(origin) & !is.null(env$HTTP_REFERER)) {
-          origin <- str_match(env$HTTP_REFERER, "^https?://([\\w.]+)(:\\d+)?")[1, 1]
+        origin <- request$headers$Origin
+        if (is.null(origin) & !is.null(request$headers$Referer)) {
+          origin <- str_match(request$headers$Referer, "^https?://([\\w.]+)(:\\d+)?")[1, 1]
         }
 
         # Check that origin is in whitelist of file://, http://127.0.0.1, http://localhost, or http://*.stenci.la
@@ -114,6 +110,9 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
             if (!str_detect(host, "(127\\.0\\.0\\.1)|(localhost)|(([^.]+\\.)?stenci.la)$")) origin <- NULL
           }
         }
+
+        # Return an empty response (although it seems necessary to have at least one header set)
+        headers <- list("Content-Type" = "text/plain")
 
         # If an origin has been found and is authorized set CORS headers
         # Without these headers browser XHR request get an error like:
@@ -136,15 +135,23 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
               # "how long the response to the preflight request can be cached for without sending another preflight request"
               "Access-Control-Max-Age" = "86400" # 24 hours
             ))
-            # TODO return a response instead of doing routing
-            # It seems necessary to have at least one header set
-            #list(body = "", status = 200, headers = list("Content-Type" = "text/plain")))
           }
-          response$headers <- c(response$headers, cors_headers)
+          headers <- c(headers, cors_headers)
         }
 
-        # Set token cookie if necessary
-        if (!is.null(cookie_header)) response$headers <- c(response$headers, cookie_header)
+        if (request$method == "OPTIONS") {
+          return(list(body = "", status = 200, headers = headers))
+        }
+
+        # Create response
+        endpoint <- self$route(request$method, request$path, authorized)
+        method_name <- endpoint[1]
+        method_args <- endpoint[2:length(endpoint)]
+        method <- self[[method_name]]
+        response <- do.call(method, c(list(request = request), method_args))
+
+        # Add neceesary headers
+        response$headers <- c(response$headers, headers)
 
         response
 
@@ -162,6 +169,7 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
 
       version <- str_match(path, "^/(v\\d+)")[, 2]
       if (is.na(version)) {
+        # Unversioned API endpoints
         if (path == "/manifest") return(c("run", "manifest"))
 
         if (!authorized) return("error_401")
@@ -179,6 +187,7 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
           if (verb == "PUT" & !is.null(id) & !is.null(method)) return(c("run", "call", id, method))
         }
       } else if (version == "v1") {
+        # Versioned API endpoints
         parts <- str_split(path, "/")[[1]][-1]
         resource <- parts[2]
 
@@ -229,14 +238,15 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
     #' @section run():
     #'
     #' Handle a request to call a host method
-    run = function(request, method, arg) {
-      args <- list(arg)
+    run = function(request, method, ...) {
+      args <- list(...)
       if (!is.null(request$body) && nchar(request$body) > 0) {
-        args <- c(from_json(request$body))
+        args <- c(args, from_json(request$body))
       }
       result <- do.call(private$.host[[method]], args)
+      json <- to_json(result)
       list(
-        body = to_json(result),
+        body = json,
         status = 200,
         headers = list("Content-Type" = "application/json")
       )
