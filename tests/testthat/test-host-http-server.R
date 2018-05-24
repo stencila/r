@@ -22,52 +22,61 @@ test_that("HostHttpServer$stop+start", {
 test_that("HostHttpServer$route", {
   s <- HostHttpServer$new(NULL)
 
-  expect_equal(s$route("OPTIONS", NULL), list(s$options))
+  expect_equal(s$route("GET", "/"), c("static", "index.html"))
+  expect_equal(s$route("GET", "/static/some/file.js"), c("static", "some/file.js"))
 
-  expect_equal(s$route("GET", "/"), list(s$home))
+  # Unversioned requests
 
-  expect_equal(s$route("GET", "/static/some/file.js"), list(s$static, "some/file.js"))
-  expect_equal(s$route("GET", "/favicon.ico"), list(s$static, "favicon.ico"))
+  expect_equal(s$route("GET", "/manifest"), c("run", "manifest"))
 
-  expect_equal(s$route("POST", "/type"), list(s$post, "type"))
+  expect_equal(s$route("POST", "/environ/local", TRUE), c("run", "startup", "local"))
+  expect_equal(s$route("DELETE", "/environ/id", TRUE), c("run", "shutdown", "id"))
 
-  expect_equal(s$route("GET", "/id"), list(s$get, "id"))
+  expect_equal(s$route("POST", "/type", TRUE), c("run", "create", "type"))
+  expect_equal(s$route("PUT", "/id!method", TRUE), c("run", "call", "id", "method"))
+  expect_equal(s$route("DELETE", "/id", TRUE), c("run", "destroy", "id"))
 
-  expect_equal(s$route("PUT", "/id!method"), list(s$put, "id", "method"))
+  # v1 requests
 
-  expect_equal(s$route("DELETE", "/id"), list(s$delete, "id"))
+  expect_equal(s$route("GET", "/v1/manifest", FALSE), c("run", "manifest"))
+  expect_equal(s$route("GET", "/v1/environs", FALSE), c("run", "environs"))
+  expect_equal(s$route("GET", "/v1/services", FALSE), c("run", "services"))
+
+  expect_equal(s$route("GET", "/v1/hosts", TRUE), c("run", "hosts"))
+  expect_equal(s$route("POST", "/v1/hosts/local", TRUE), c("run", "startup", "local"))
+  expect_equal(s$route("DELETE", "/v1/hosts/id", TRUE), c("run", "shutdown", "id"))
+  expect_equal(s$route("GET", "/v1/hosts", FALSE), c("error_401", "/v1/hosts"))
+
+  expect_equal(s$route("GET", "/v1/instances", TRUE), c("run", "instances"))
+  expect_equal(s$route("GET", "/v1/instances", FALSE), c("error_401", "/v1/instances"))
+
+  expect_equal(s$route("POST", "/v1/instances/Service", TRUE), c("run", "create", "Service"))
+  expect_equal(s$route("POST", "/v1/instances/Service", FALSE), c("error_401", "/v1/instances/Service"))
+
+  expect_equal(s$route("DELETE", "/v1/instances/instance1", TRUE), c("run", "destroy", "instance1"))
+
+  expect_equal(s$route("PUT", "/v1/instances/instance1/method", TRUE), c("run", "call", "instance1", "method"))
+  expect_equal(s$route("PUT", "/v1/instances/instance1/method", FALSE), c("error_401", "/v1/instances/instance1/method"))
+
+  expect_equal(s$route("PUT", "/v1/foobar", TRUE), c("error_400", "/v1/foobar"))
 })
 
 test_that("HostHttpServer$handle", {
   s <- HostHttpServer$new(host)
 
+  # Home
   r <- s$handle(list(
     PATH_INFO = "/",
     REQUEST_METHOD = "GET",
-    HTTP_ACCEPT = "",
-    rook.input = list(read_lines = function() NULL)
-  ))
-  expect_equal(r$status, 403)
-
-  # Authorization using a ticket
-  r <- s$handle(list(
-    PATH_INFO = "/",
-    QUERY_STRING = paste0("?ticket=", s$ticket_create()),
-    REQUEST_METHOD = "GET",
-    HTTP_ACCEPT = "",
     rook.input = list(read_lines = function() NULL)
   ))
   expect_equal(r$status, 200)
-  expect_equal(str_sub(r$headers["Set-Cookie"], 1, 6), "token=")
-  token <- str_match(r$headers["Set-Cookie"], "token=([a-zA-Z0-9]+);")[1, 2]
   expect_equal(str_sub(r$body, 1, 23), "<!doctype html>\n<html>\n")
 
-  # Authorization using a token
+  # Manifest
   r <- s$handle(list(
-    PATH_INFO = "/",
+    PATH_INFO = "/v1/manifest",
     REQUEST_METHOD = "GET",
-    HTTP_ACCEPT = "application/json",
-    HTTP_COOKIE = paste0("token=", token),
     rook.input = list(read_lines = function() NULL)
   ))
   expect_equal(r$status, 200)
@@ -76,9 +85,8 @@ test_that("HostHttpServer$handle", {
   # Browser-based CORS request
   for (origin in c("http://127.0.0.1:2000", "http://localhost:2010", "https://open.stenci.la")) {
     r <- s$handle(list(
-      PATH_INFO = "/",
+      PATH_INFO = "/v1/manifest",
       REQUEST_METHOD = "GET",
-      HTTP_COOKIE = paste0("token=", token),
       HTTP_REFERER = sprintf("%s/some/file/path", origin),
       rook.input = list(read_lines = function() NULL)
     ))
@@ -89,7 +97,7 @@ test_that("HostHttpServer$handle", {
   # Browser-based CORS pre-flight request
   for (origin in c("http://127.0.0.1:2000", "http://localhost:2010", "https://open.stenci.la")) {
     r <- s$handle(list(
-      PATH_INFO = "/",
+      PATH_INFO = "/v1/manifest",
       REQUEST_METHOD = "OPTIONS",
       HTTP_ORIGIN = origin,
       rook.input = list(read_lines = function() NULL)
@@ -110,26 +118,6 @@ test_that("HostHttpServer$handle", {
   expect_equal(r$headers[["Access-Control-Allow-Origin"]], NULL)
 })
 
-test_that("HostHttpServer.options", {
-  s <- HostHttpServer$new(host)
-
-  r <- s$options()
-  expect_equal(r$status, 200)
-  expect_equal(r$body, "")
-})
-
-test_that("HostHttpServer$home", {
-  s <- HostHttpServer$new(host)
-
-  r <- s$home(list(headers = list("Accept" = "application/json")))
-  expect_equal(r$status, 200)
-  expect_equal(from_json(r$body)$stencila, host$manifest()$stencila)
-
-  r <- s$home(list())
-  expect_equal(r$status, 200)
-  expect_equal(r$headers[["Content-Type"]], "text/html")
-})
-
 test_that("HostHttpServer$static", {
   s <- HostHttpServer$new(host)
 
@@ -145,34 +133,30 @@ test_that("HostHttpServer$static", {
   expect_equal(r$status, 403)
 })
 
-test_that("HostHttpServer$post", {
+test_that("HostHttpServer$run", {
   s <- HostHttpServer$new(host)
+  req <- list()
 
-  r <- s$post(list(), "RContext")
+  # Get manifest
+  r <- s$run(req, "manifest")
   expect_equal(r$status, 200)
   expect_equal(r$headers[["Content-Type"]], "application/json")
-})
 
-test_that("HostHttpServer$get", {
-  s <- HostHttpServer$new(host)
+  # Create an RContext
+  r <- s$run(req, "create", "RContext")
+  expect_equal(r$status, 200)
+  expect_equal(r$headers[["Content-Type"]], "application/json")
+  id <- from_json(r$body)
 
-  r1 <- s$post(list(), "RContext")
-  id <- from_json(r1$body)
+  # Call a context method
+  r <- s$run(list(body = "\"6*7\""), "call", id, "execute")
+  expect_equal(r$status, 200)
+  expect_equal(r$headers[["Content-Type"]], "application/json")
+  cell <- from_json(r$body)
+  expect_equal(cell$type, "cell")
 
-  r2 <- s$get(list(), id)
-  expect_equal(r2$status, 200)
-  expect_equal(r2$headers[["Content-Type"]], "application/json")
-  expect_equal(r2$body, "{}")
-})
-
-test_that("HostHttpServer$put", {
-  s <- HostHttpServer$new(host)
-
-  r1 <- s$post(list(), "RContext")
-  id <- from_json(r1$body)
-
-  r2 <- s$put(list(body = "\"6*7\""), id, "execute")
-  expect_equal(r2$status, 200)
-  expect_equal(r2$headers[["Content-Type"]], "application/json")
-  expect_equal(from_json(r2$body)$type, "cell")
+  # Delete the context
+  r <- s$run(req, "delete", id)
+  expect_equal(r$status, 200)
+  expect_equal(r$headers[["Content-Type"]], "application/json")
 })

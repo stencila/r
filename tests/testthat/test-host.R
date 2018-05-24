@@ -1,14 +1,14 @@
 context("Host")
 
 describe("Host", {
-  h <- Host$new()
+  host <- Host$new()
 
   it("is a class", {
-    expect_equal(class(h)[1], "Host")
+    expect_equal(class(host)[1], "Host")
   })
 
   it("has a manifest() method", {
-    manifest <- h$manifest()
+    manifest <- host$manifest()
     expect_equal(manifest$stencila$package, "r")
     expect_equal(manifest$stencila$version, version)
     expect_equal(length(manifest$urls), 0)
@@ -17,52 +17,65 @@ describe("Host", {
   })
 
   it("has a register() method", {
-    h$register()
-    manifest <- h$manifest(complete = FALSE)
+    host$register()
+    manifest <- host$manifest(complete = FALSE)
     expect_equal(
       manifest,
-      from_json(file.path(h$user_dir(), "hosts", "r.json"))
+      from_json(file.path(host$user_dir(), "hosts", "r.json"))
     )
   })
 
-  it("has a post() method", {
-    id1 <- h$post("RContext")
-    id2 <- h$post("RContext")
+  it("has a create() method", {
+    id1 <- host$create("RContext")
+    id2 <- host$create("RContext")
     expect_true(id1 != id2)
 
-    expect_error(h$post("Foo"), "Unknown type")
+    expect_error(host$create("Foo"), "Unknown type")
   })
 
   it("has a get() method", {
-    id <- h$post("RContext")
-    expect_true(inherits(h$get(id), "RContext"))
+    id <- host$create("RContext")
+    expect_true(inherits(host$get(id), "RContext"))
 
-    expect_error(h$get("foo"), "Unknown instance")
+    expect_error(host$get("foo"), "Unknown instance")
   })
 
-  it("has a put() method", {
-    id <- h$post("RContext")
-    expect_equal(h$put(id, "execute", "6*7")$type, "cell")
-    expect_error(h$put(id, "fooBar"), "Unknown method")
-    expect_error(h$put("foo", "bar"), "Unknown instance")
+  it("has a call() method", {
+    id <- host$create("RContext")
+    expect_equal(host$call(id, "execute", "6*7")$type, "cell")
+    expect_error(host$call(id, "fooBar"), "Unknown method")
+    expect_error(host$call("foo", "bar"), "Unknown instance")
   })
 
   it("has a delete() method", {
-    id <- h$post("RContext")
-    expect_true(inherits(h$get(id), "RContext"))
-    h$delete(id)
-    expect_error(h$delete(id), "Unknown instance")
+    id <- host$create("RContext")
+    expect_true(inherits(host$get(id), "RContext"))
+    host$delete(id)
+    expect_error(host$delete(id), "Unknown instance")
   })
 
   it("has start() and stop() methods", {
-    h$start(quiet = TRUE)
-    expect_equal(names(h$servers), "http")
-    expect_equal(length(h$servers), 1)
-    expect_equal(length(h$manifest()$servers), 1)
-    expect_true(file.exists(h$run_file()))
-    h$stop()
-    expect_equal(length(h$servers), 0)
-    expect_equal(length(h$manifest()$servers), 0)
-    expect_true(!file.exists(h$run_file()))
+    host$start(quiet = TRUE)
+    expect_equal(names(host$servers), "http")
+    expect_equal(length(host$servers), 1)
+    expect_equal(length(host$manifest()$servers), 1)
+    expect_true(file.exists(host$run_file()))
+    host$stop()
+    expect_equal(length(host$servers), 0)
+    expect_equal(length(host$manifest()$servers), 0)
+    expect_true(!file.exists(host$run_file()))
+  })
+
+  it("has generate_token() and authorize_token() methods", {
+    token1 <- host$generate_token()
+    expect_true(host$authorize_token(token1))
+
+    Sys.sleep(1)
+    token2 <- host$generate_token()
+    expect_true(host$authorize_token(token2))
+    expect_false(token1 == token2)
+
+    expect_false(host$authorize_token("not a valid token"))
+    expect_false(host$authorize_token("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1MjY5NjA1Nzl9.pgTAtdDGHZZd05hg-Tmy8Cl_yrWBzBSZMaCTkbztc1E"))
   })
 })

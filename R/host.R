@@ -41,7 +41,12 @@ Host <- R6::R6Class("Host",
     #' Create a new \code{Host}
     initialize = function () {
       private$.id <- paste(c("r-", sample(c(letters, 0:9), 64, replace = TRUE)), collapse = "")
-      private$.key <- paste(sample(c(letters, 0:9), 128, replace = TRUE), collapse = "")
+      if (Sys.getenv("STENCILA_AUTH") == "false") {
+        key <- NULL
+      } else {
+        key <- paste(sample(c(letters, 0:9), 64, replace = TRUE), collapse = "")
+      }
+      private$.key <- key
       private$.servers <- list()
       private$.instances <- list()
     },
@@ -159,8 +164,7 @@ Host <- R6::R6Class("Host",
           process = list(
             pid = Sys.getpid()
           ),
-          servers = self$servers,
-          instances = names(private$.instances)
+          servers = self$servers
         ))
       }
       manifest
@@ -179,13 +183,24 @@ Host <- R6::R6Class("Host",
       cat(
         jsonlite::toJSON(
           self$manifest(complete = FALSE),
-          pretty = TRUE, auto_unbox = TRUE,
+          pretty = TRUE, auto_unbox = TRUE
         ),
         file = file.path(dir, "r.json")
       )
     },
 
-    #' @section post():
+    # TODO: these methods implement edndpoints for
+    # starting and stopping hosts in other environments
+    # (e.g. a Docker container). Currently, only 'local'
+    # environment is supported
+    startup = function (environ) {
+      list(path = "")
+    },
+    shutdown = function (host) {
+      TRUE
+    },
+
+    #' @section create():
     #'
     #' Create a new instance of a type
     #'
@@ -195,7 +210,7 @@ Host <- R6::R6Class("Host",
     #'   \item{name}{Name of new instance. Depreciated but retained for compatability.}
     #'   \item{return}{Address of the newly created instance}
     #' }
-    post = function (type, args = list(), name = NULL) {
+    create = function (type, args = list(), name = NULL) {
       Class <- TYPES[[type]]
       if (!is.null(Class)) {
         # Remove depreciated `name` arg from arguments
@@ -227,7 +242,7 @@ Host <- R6::R6Class("Host",
       }
     },
 
-    #' @section put():
+    #' @section call():
     #'
     #' Call a method of an instance
     #'
@@ -237,7 +252,7 @@ Host <- R6::R6Class("Host",
     #'   \item{arg}{The argument to pass to the method}
     #'   \item{return}{The result of the method call}
     #' }
-    put  = function (id, method, arg = NULL) {
+    call  = function (id, method, arg = NULL) {
       instance <- private$.instances[[id]]
       if (!is.null(instance)) {
         func <- instance[[method]]
@@ -279,10 +294,10 @@ Host <- R6::R6Class("Host",
     #'
     #' Currently, HTTP is the only server available
     #' for hosts. We plan to implement a `HostWebsocketServer` soon.
-    start  = function (address="127.0.0.1", port=2000, authorization=TRUE, quiet=FALSE) {
+    start  = function (address="127.0.0.1", port=2000, quiet=FALSE) {
       if (is.null(private$.servers[["http"]])) {
         # Start HTTP server
-        server <- HostHttpServer$new(self, address, port, authorization)
+        server <- HostHttpServer$new(self, address, port)
         private$.servers[["http"]] <- server
         server$start()
 
@@ -304,7 +319,12 @@ Host <- R6::R6Class("Host",
         cat(self$key, file = key_file)
 
         if (!quiet) {
-          cat("Host has started at:", server$ticketed_url(), "\n")
+          cat("Host HTTP server has started:\n")
+          cat("  URL:", server$url, "\n")
+          cat("  Key:", self$key, "\n")
+          if (is.null(self$key)) {
+            cat("  Warning: authentication has been disabled!\n")
+          }
         }
       }
       invisible(self)
@@ -340,9 +360,9 @@ Host <- R6::R6Class("Host",
     #' }
     #'
     #' Start serving the Stencila host and wait for connections indefinitely
-    run  = function (address="127.0.0.1", port=2000, authorization=TRUE, quiet=FALSE, echo=FALSE) {
+    run  = function (address="127.0.0.1", port=2000, quiet=FALSE, echo=FALSE) {
       if (echo) quiet <- TRUE
-      self$start(address = address, port = port, authorization = authorization, quiet = quiet)
+      self$start(address = address, port = port, quiet = quiet)
 
       if (echo) {
         cat(to_json(list(
@@ -382,8 +402,7 @@ Host <- R6::R6Class("Host",
       origin <- "http://open.stenci.la"
       server <- private$.servers[["http"]]
       peer <- server$url
-      ticket <- server$ticket_create()
-      url <- sprintf("%s/?address=%s&peers=%s/?ticket=%s", origin, address, peer, ticket)
+      url <- sprintf("%s/?address=%s&peers=%s", origin, address, peer)
       # See if there is a `viewer` option (defined by RStudio if we are in RStudio)
       viewer <- getOption("viewer")
       # Currently, force external because Stencila will not run in the older
@@ -400,8 +419,40 @@ Host <- R6::R6Class("Host",
       }
       invisible(self)
       # nocov end
-    }
+    },
 
+    #' @section open():
+    #'
+    #' Generate a request token for a peer host (or this host)
+    #'
+    #' \describe{
+    #'   \item{token}{The request token}
+    #' }
+    generate_token = function (host = NULL) {
+      if (is.null(host)) key <- private$.key
+      else {
+        # TODO Support token generation for peers based on held keys
+        stop("Generation of tokens for peer hosts is not yet supported") # nocov
+      }
+      jose::jwt_encode_hmac(jose::jwt_claim(), secret = charToRaw(key))
+    },
+
+    #' @section open():
+    #'
+    #' Authorize a request token.
+    #'
+    #' \describe{
+    #'   \item{token}{The request token}
+    #' }
+    authorize_token = function (token) {
+      body <- tryCatch(
+        jose::jwt_decode_hmac(token, secret = charToRaw(private$.key)),
+        error = identity
+      )
+      # TODO Test request sequence order if `hid` (host id) and `seq` (sequence) claims
+      # are in token body. These can, optionally, be set by clients to prevent token replay attacks.
+      if (inherits(body, "error")) FALSE else TRUE
+    }
   ),
 
   active = list(
@@ -428,8 +479,7 @@ Host <- R6::R6Class("Host",
       for (name in names(private$.servers)) {
         server <- private$.servers[[name]]
         servers[[name]] <- list(
-          url = server$url,
-          ticket = server$ticket_create()
+          url = server$url
         )
       }
       servers

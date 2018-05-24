@@ -13,6 +13,7 @@ Imports:
     DBI,
     evaluate,
     httpuv (== 1.4.3),
+    jose (== 0.2),
     jsonlite,
     mime,
     methods,
