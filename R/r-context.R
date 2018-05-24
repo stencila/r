@@ -105,12 +105,12 @@ RContext <- R6::R6Class("RContext",
 
       # Determine inputs (variables that are global to the cell's code)
       expr <- tryCatch(eval(parse(text = paste("substitute({", cell$code, "})"))), error = identity)
-      if (inherits(ast, "error")) {
+      if (!inherits(expr, "error")) {
         global_vars <- globals::globalsOf(expr, mustExist = F)
         global_wheres <- attr(global_vars, "where")
         inputs <- names(global_wheres)[sapply(global_wheres, is.null)]
       } else {
-        inputs <- list()
+        inputs <- c()
       }
 
       # Determine output name
