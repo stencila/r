@@ -15,7 +15,8 @@ to_json <- function(value) {
       na = "null",
       dataframe = "columns",
       digits = NA,
-      auto_unbox = TRUE
+      auto_unbox = TRUE,
+      force = TRUE
     ))
   }
 }

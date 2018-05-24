@@ -12,6 +12,7 @@ Imports:
     base64enc,
     DBI,
     evaluate,
+    globals (== 0.11.0),
     httpuv (== 1.4.3),
     jose (== 0.2),
     jsonlite,

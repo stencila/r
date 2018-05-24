@@ -32,31 +32,7 @@ RContext <- R6::R6Class("RContext",
         setwd(dir)
       }
 
-      # Create a 'packages' environment that contains all the functions available to the context
-      if (closed) packages_env <- new.env(parent = baseenv())
-      else packages_env <- new.env(parent = globalenv())
-      # Assign names in package namespaces to the package environment
-      for (package in RContext$packages) {
-        namespace <- getNamespace(package)
-        for (name in ls(namespace)) {
-          assign(name, get(name, envir = namespace), envir = packages_env)
-        }
-      }
-
-      # Create a global environment for the context (utilised by `runCode()`)
-      if (local) env <- new.env(parent = packages_env) # Can't pollute global env
-      else env <- globalenv() # Can pollute global env
-      private$.global_env <- env
-
-      # Create a function environment for the context (utilised by `callCode()`)
-      # Note that this intentionally does not have access to context's global namespace
-      # Ensures no leakage between runCode and callCode (either way)
-      env <- new.env(parent = packages_env)
-      private$.func_env <- env
-
-      # Global variable names that should be ignored when determining inputs
-      # in `analyseCode()`
-      private$.globals <- ls(getNamespace("base"))
+      private$.variables <- new.env(parent=emptyenv())
     },
 
     #' @section compile():
@@ -71,15 +47,33 @@ RContext <- R6::R6Class("RContext",
     compile = function(cell) {
       cell <- super$compile(cell)
 
-      code <- cell$source$data
-      inputs <- list()
-      output <- NULL
-      messages <- list()
+      # Ensure this is an R cell
+      if (!is.null(cell$lang)) {
+        if (cell$lang != "r") {
+          cell$messages[[length(cell$messages) + 1]] <- list(
+            type = "error",
+            message = "Cell code must be R code"
+          )
+          return(cell)
+        }
+      } else cell$lang <- "r"
 
-      # Parse the code
-      ast <- tryCatch(parse(text = code), error = identity)
+      if (cell$code == "") return(cell)
+
+      # Parse the code and catch any syntax errors
+      ast <- tryCatch(parse(text = cell$code), error = identity)
       if (inherits(ast, "error")) {
-        messages[[length(messages) + 1]] <- ast
+        match <- str_match(ast$message, "<text>:(\\d):(\\d):(.+)")
+        column <- as.integer(match[, 2])
+        line <- as.integer(match[, 3])
+        message <- match[, 4]
+        cell$messages[[length(cell$messages) + 1]] <- list(
+          type = "error",
+          message = message,
+          line = line,
+          column = column
+        )
+        return(cell)
       }
 
       # Is an expression an assignment?
@@ -91,7 +85,7 @@ RContext <- R6::R6Class("RContext",
         FALSE
       }
 
-      if (length(messages) == 0 & cell$expr) {
+      if (cell$expr) {
         # Check for single, simple expression
         fail <- FALSE
         if (length(ast) != 1) fail <- TRUE
@@ -101,60 +95,51 @@ RContext <- R6::R6Class("RContext",
           if (is.assignment(expr)) fail <- TRUE
         }
         if (fail) {
-          messages[[length(messages) + 1]] <- list(
-            line = 0,
-            column = 0,
+          cell$messages[[length(cell$messages) + 1]] <- list(
             type = "error",
             message = "Code is not a single, simple expression"
           )
+          return(cell)
         }
       }
 
-      if (length(messages) == 0) {
-        # Determine which names are declared and which are used
-        declared <- NULL
-        for (expr in ast) {
-          if (is.assignment(expr)) {
-            if (is.name(expr[[2]])) declared <- c(declared, as.character(expr[[2]]))
-          }
-          used <- all.vars(expr)
-          undeclared <- !(used %in% declared) & !(used %in% private$.globals)
-          if (any(undeclared)) inputs <- c(inputs, used[undeclared])
-        }
+      # Determine inputs (variables that are global to the cell's code)
+      expr <- tryCatch(eval(parse(text = paste("substitute({", cell$code, "})"))), error = identity)
+      if (inherits(ast, "error")) {
+        global_vars <- globals::globalsOf(expr, mustExist = F)
+        global_wheres <- attr(global_vars, "where")
+        inputs <- names(global_wheres)[sapply(global_wheres, is.null)]
+      } else {
+        inputs <- list()
+      }
 
-        if (length(ast) > 0) {
-          last <- ast[[length(ast)]]
-          if (is.assignment(last)) {
-            if (is.name(last[[2]])) {
-              output <- as.character(last[[2]])
-            }
-          } else if (is.name(last)) {
-            output <- as.character(last)
-          }
+      # Determine output name
+      output <- NULL
+      last <- ast[[length(ast)]]
+      if (is.assignment(last)) {
+        if (is.name(last[[2]])) {
+          output <- as.character(last[[2]])
         }
       }
 
       # Ensure no circular dependency i.e. output is not in inputs
       # (This can happen if a user types a variable into a cell
       # just because they want to see it's value)
-      if (!is.null(output)) {
-        if (output %in% inputs) {
-          messages[[length(messages) + 1]] <- list(
-            line = 0,
-            column = 0,
-            type = "warning",
-            message = "Ignoring attempt to use a cell input \"x\" as a cell output"
-          )
-          output <- NULL
+      if (length(inputs) & !is.null(output)) {
+        if (output %in% inputs) output <- NULL
+      }
+
+      # Create array of named inputs
+      existing <- sapply(cell$inputs, function(input) input$name)
+      for (input in inputs) {
+        if (!(input %in% existing)) {
+          cell$inputs[[length(cell$inputs) + 1]] <- list(name = input)
         }
       }
 
-      cell$inputs <- lapply(inputs, function(item) list(name = item))
-
+      # Create array on outputs
       if (!is.null(output)) cell$outputs <- list(list(name = output))
       else cell$outputs <- list()
-
-      cell$messages <- messages
 
       cell
     },
@@ -171,28 +156,83 @@ RContext <- R6::R6Class("RContext",
     execute = function(cell) {
       cell <- self$compile(cell)
 
-      for (input in cell$inputs) private$.global_env[[input$name]] <- self$unpack(input$value)
+      env <- new.env(parent = globalenv())
+      for (input in cell$inputs) {
+        name <- input$name
+        value <- input$value
+        if (name %in% ls(private$.variables)) {
+          value <- get(name, envir = private$.variables)
+        } else {
+          value <- self$unpack(value)
+        }
+        env[[input$name]] <- value
+      }
 
       # Do eval and process into a result
-      code <- cell$source$data
       evaluation <- evaluate::evaluate(
-        code,
-        envir = private$.global_env,
+        cell$code,
+        envir = env,
         output_handler = evaluate_output_handler
       )
-      result <- private$.result(evaluation)
 
-      # Need to ensure any output is in value
-      outputs <- cell$outputs
-      if (length(outputs)) {
-        value <- get(outputs[[1]]$name, envir = private$.global_env)
-        outputs[[1]]$value <- self$pack(value)
-      } else {
-        outputs <- list(list(value = result$value))
+      # Extract errors and the last value from an `evaluate` result
+      # Note that not all source items will have a value (e.g. an emptyline)
+      # Also, sometimes lines are sometimes groupd together so we need to count lines
+      line <- 0
+      messages <- list()
+      value <- NULL
+      has_value <- FALSE
+      for (item in evaluation) {
+        if (inherits(item, "source")) {
+          line <- line + max(1, str_count(item, "\n"))
+        } else if (inherits(item, "error")) {
+          cell$messages[[length(cell$messages) + 1]] <- list(
+            type = "error",
+            message = item$message,
+            line = line,
+            column = 0
+          )
+        } else {
+          value <- item
+          has_value <- TRUE
+        }
       }
-      cell$outputs <- outputs
 
-      cell$messages <- result$messages
+      if (!has_value & length(cell$outputs)) {
+        # If the last statement was an assignment then grab that variable
+        name <- cell$outputs[[1]]$name
+        if (!is.null(name)) {
+          value <- get(name, envir = env)
+          has_value <- TRUE
+        }
+      }
+
+      if (has_value) {
+        # Errors can occur in conversion of values e.g. ggplots
+        # so they must be caught here
+        packed <- tryCatch(self$pack(value), error = identity)
+        if (inherits(packed, "error")) {
+          cell$messages[[length(cell$messages) + 1]] <- list(
+            line = 0,
+            column = 0,
+            type = "error",
+            message = packed$message
+          )
+          return(cell)
+        }
+
+        if (length(cell$outputs)) {
+          output <- cell$outputs[[1]]
+          if (!is.null(output$name)) {
+            private$.variables[[output$name]] <- value
+          }
+          cell$outputs[[1]]$value <- packed
+        } else {
+          cell$outputs <- list(list(
+            value = packed
+          ))
+        }
+      }
 
       cell
     },
@@ -223,64 +263,8 @@ RContext <- R6::R6Class("RContext",
     # Context's working directory
     .dir = NULL,
 
-    # Global variable names
-    .globals = NULL,
-
-    # Context's global scope
-    .global_env = NULL,
-
-    # Context's function scope
-    .func_env = NULL,
-
-    # Extract errors and the last value from an `evaluate` result
-    # Note that not all source items will have a value (e.g. an emptyline)
-    # Also, sometimes lines are sometimes groupd together so we need to count lines
-    .result = function (evaluation) {
-
-      line <- 0
-      messages <- list()
-      has_value <- FALSE
-      last_value <- NULL
-      for (item in evaluation) {
-        if (inherits(item, "source")) {
-          line <- line + max(1, str_count(item, "\n"))
-        } else if (inherits(item, "error")) {
-          if (item$message != "~return~") {
-            messages[[length(messages) + 1]] <- list(
-              line = line,
-              column = 0,
-              type = "error",
-              message = item$message
-            )
-          }
-        } else {
-          last_value <- item
-          has_value <- TRUE
-        }
-      }
-
-      if (has_value) {
-        # Errors can occur in conversion of values e.g. ggplots
-        # so they must be caught here
-        output <- tryCatch(self$pack(last_value), error = identity)
-        if (inherits(output, "error")) {
-          messages[[length(messages) + 1]] <- list(
-            line = 0,
-            column = 0,
-            type = "error",
-            message = output$message
-          )
-          output <- NULL
-        }
-      } else {
-        output <- NULL
-      }
-
-      list(
-        value = output,
-        messages = messages
-      )
-    }
+    # Variables that reside in this context
+    .variables = NULL
   )
 )
 
@@ -288,12 +272,6 @@ RContext <- R6::R6Class("RContext",
 RContext$spec <- list(
   name = "RContext",
   client = "ContextHttpClient"
-)
-
-# List of packages made available within a RContext
-RContext$packages <-  c(
-  # Usual base packages (type `search()` in a naked R session)
-  "methods", "datasets", "utils", "grDevices", "graphics", "stats"
 )
 
 # Custom output handler for the `run` and `call` methods

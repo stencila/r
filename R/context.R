@@ -4,26 +4,29 @@ Context <- R6::R6Class("Context",
   public = list(
 
     compile = function(cell) {
+      lang <- NULL
+      code <- ""
       expr <- FALSE
       global <- FALSE
+      inputs <- list()
       if (typeof(cell) == "character") {
-        source <- cell
+        code <- cell
       } else {
-        source <- cell$source$data
+        if (!is.null(cell$code)) code <- cell$code
+        else if (!is.null(cell$source) & !is.null(cell$source$data)) code <- cell$source$data # legacy structure
         if (!is.null(cell$expr)) expr <- cell$expr
         if (!is.null(cell$global)) global <- cell$global
+        if (!is.null(cell$inputs)) inputs <- cell$inputs
       }
 
       list(
         type = "cell",
-        source = list(
-          type = "string",
-          data = source
-        ),
+        lang = lang,
+        code = code,
         expr = expr,
         global = global,
         options = list(),
-        inputs = list(),
+        inputs = inputs,
         outputs = list(),
         messages = list()
       )

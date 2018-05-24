@@ -111,8 +111,8 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
           }
         }
 
-        # Return an empty response (although it seems necessary to have at least one header set)
-        headers <- list("Content-Type" = "text/plain")
+        # Return an empty response
+        headers <- list()
 
         # If an origin has been found and is authorized set CORS headers
         # Without these headers browser XHR request get an error like:
@@ -246,8 +246,9 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
     #' Handle a request to call a host method
     run = function(request, method, ...) {
       args <- list(...)
+      ## The body is always a single final argument
       if (!is.null(request$body) && nchar(request$body) > 0) {
-        args <- c(args, from_json(request$body))
+        args[[length(args) + 1]] <- from_json(request$body)
       }
       result <- do.call(private$.host[[method]], args)
       json <- to_json(result)
