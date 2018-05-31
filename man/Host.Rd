@@ -171,18 +171,24 @@ Start serving the Stencila host and wait for connections indefinitely
 
 
 Open a file in the browser.
-
-
-
-Generate a request token for a peer host (or this host)
-
-\describe{
-  \item{token}{The request token}
 }
 
+\section{generate_token()}{
+
+
+Generate a request token.
+
+\describe{
+  \item{host}{The id of the host}
+}
+}
+
+\section{authorize_token()}{
 
 
 Authorize a request token.
+
+Throws an error if the token is invalid.
 
 \describe{
   \item{token}{The request token}

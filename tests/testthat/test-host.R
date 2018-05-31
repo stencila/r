@@ -68,14 +68,13 @@ describe("Host", {
 
   it("has generate_token() and authorize_token() methods", {
     token1 <- host$generate_token()
-    expect_true(host$authorize_token(token1))
+    host$authorize_token(token1)
 
-    Sys.sleep(1)
     token2 <- host$generate_token()
-    expect_true(host$authorize_token(token2))
-    expect_false(token1 == token2)
+    host$authorize_token(token2)
 
-    expect_false(host$authorize_token("not a valid token"))
-    expect_false(host$authorize_token("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1MjY5NjA1Nzl9.pgTAtdDGHZZd05hg-Tmy8Cl_yrWBzBSZMaCTkbztc1E"))
+    expect_true(token1 != token2)
+    expect_error(host$authorize_token("not a valid token"))
+    expect_error(host$authorize_token("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1MjY5NjA1Nzl9.pgTAtdDGHZZd05hg-Tmy8Cl_yrWBzBSZMaCTkbztc1E"))
   })
 })

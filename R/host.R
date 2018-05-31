@@ -427,47 +427,50 @@ Host <- R6::R6Class("Host",
       # nocov end
     },
 
-    #' @section open():
+    #' @section generate_token():
     #'
-    #' Generate a request token for a peer host (or this host)
+    #' Generate a request token.
     #'
     #' \describe{
-    #'   \item{token}{The request token}
+    #'   \item{host}{The id of the host}
     #' }
     generate_token = function (host = NULL) {
-      if (is.null(host)) key <- private$.key
+      if (is.null(host)) key <- self$key
       else {
         # TODO Support token generation for peers based on held keys
         stop("Generation of tokens for peer hosts is not yet supported") # nocov
       }
-      jose::jwt_encode_hmac(jose::jwt_claim(), secret = charToRaw(key))
+      now <- unclass(Sys.time())
+      payload <- jose::jwt_claim(
+        iat = now,
+        exp = now + 300,
+        iss = self$id,
+        jti = paste(sample(c(letters, 0:9), 32), collapse = "")
+      )
+      jose::jwt_encode_hmac(payload, secret = charToRaw(key))
     },
 
-    #' @section open():
+    #' @section authorize_token():
     #'
     #' Authorize a request token.
+    #'
+    #' Throws an error if the token is invalid.
     #'
     #' \describe{
     #'   \item{token}{The request token}
     #' }
     authorize_token = function (token) {
-      payload <- tryCatch(
-        jose::jwt_decode_hmac(token, secret = charToRaw(private$.key)),
-        error = identity
-      )
-
-      # Is signature valid?
-      if (inherits(payload, "error")) return(FALSE)
+      payload <- jose::jwt_decode_hmac(token, secret = charToRaw(private$.key))
 
       # Has token expired?
       exp <- payload$exp
       if (!is.null(exp)) {
-        if (exp < Sys.time()) return(FALSE)
+        if (exp < Sys.time()) stop("Token has expired")
       }
 
       # TODO Check and store `iss` and `jti` to prevent replay attacks
 
-      return(TRUE)
+      return(payload)
     }
   ),
 
