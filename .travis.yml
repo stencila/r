@@ -13,4 +13,15 @@ cache: packages
 warnings_are_errors: false
 
 after_success:
+  # Run and upload test coverage to codecov.io
   - Rscript -e 'covr::codecov()'
+
+deploy:
+  # Deploy documentation to Github Pages
+  # See https://docs.travis-ci.com/user/deployment/pages/
+  provider: pages
+  skip-cleanup: true
+  github-token: $GITHUB_TOKEN
+  local-dir: docs
+  on:
+    branch: master
