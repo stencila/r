@@ -38,11 +38,11 @@ describe("RContext", {
     # x assigned and then used
     check("x <- 2\nx", list(
       inputs = list(),
-      outputs = list(list(name = "x")),
+      outputs = list(),
       messages = list()
     ))
 
-    # x used and then assigned (this should not be allowed)
+    # x used and then assigned (this will trhow an error when executed)
     check("x\nx <- 2", list(
       inputs = list(list(name = "x")),
       outputs = list(),
@@ -58,6 +58,13 @@ describe("RContext", {
 
     check("plot(1:1000)", list(
       inputs = list(),
+      outputs = list(),
+      messages = list()
+    ))
+
+    # Currently ignoring terms in formulae
+    check("lm(x~y, my_data)", list(
+      inputs = list(list(name = "my_data")),
       outputs = list(),
       messages = list()
     ))
@@ -137,9 +144,9 @@ describe("RContext", {
     )))
 
     r <- context$execute(list(
-      code = "x*10\nfoo\nx*5",
+      code = "y*10\nfoo\ny*5",
       inputs = list(list(
-        name = "x",
+        name = "y",
         value = list(type = "number", data = 1.1)
       ))
     ))

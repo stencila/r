@@ -32,7 +32,7 @@ RContext <- R6::R6Class("RContext",
         setwd(dir)
       }
 
-      private$.variables <- new.env(parent=emptyenv())
+      private$.variables <- new.env(parent = emptyenv())
     },
 
     #' @section compile():
@@ -104,13 +104,55 @@ RContext <- R6::R6Class("RContext",
       }
 
       # Determine inputs (variables that are global to the cell's code)
-      expr <- tryCatch(eval(parse(text = paste("substitute({", cell$code, "})"))), error = identity)
-      if (!inherits(expr, "error")) {
-        global_vars <- globals::globalsOf(expr, mustExist = F)
-        global_wheres <- attr(global_vars, "where")
-        inputs <- names(global_wheres)[sapply(global_wheres, is.null)]
+      if (FALSE) {
+        # Deprecated approach using the globals package
+        expr <- tryCatch(eval(parse(text = paste("substitute({", cell$code, "})"))), error = identity)
+        if (!inherits(expr, "error")) {
+          global_vars <- globals::globalsOf(expr, mustExist = F)
+          global_wheres <- attr(global_vars, "where")
+          inputs <- names(global_wheres)[sapply(global_wheres, is.null)]
+        } else {
+          inputs <- c()
+        }
       } else {
-        inputs <- c()
+        # Walking the AST, determining those variables which are
+        # declared, those that are used, and attempting to deal with
+        # functions that use non-standard evaluation
+        expr <- tryCatch(parse(text = cell$code), error = identity)
+        if (!inherits(expr, "error")) {
+          declared <- NULL
+          used <- NULL
+          visit <- function(node) {
+            if (is.expression(node)) {
+              for (index in seq_along(node)) {
+                visit(node[[index]])
+              }
+            } else if (is.call(node)) {
+              func <- node[[1]]
+              if (func == "<-" | func == "=") {
+                declared <<- c(declared, as.character(node[[2]]))
+              } else if (func != "~") {
+                for (index in seq_along(node)) {
+                  visit(node[[index]])
+                }
+              }
+            } else if (is.name(node)) {
+              name <- as.character(node)
+              if (!(name %in% declared)) {
+                used <<- c(used, name)
+              }
+            }
+          }
+          visit(expr)
+          inputs <- NULL
+          for (name in used) {
+            if (!exists(name)) {
+              inputs <- c(inputs, name)
+            }
+          }
+        } else {
+          inputs <- c()
+        }
       }
 
       # Determine output name
@@ -162,10 +204,10 @@ RContext <- R6::R6Class("RContext",
         value <- input$value
         if (name %in% ls(private$.variables)) {
           value <- get(name, envir = private$.variables)
-        } else {
+        } else if (!is.null(value)) {
           value <- self$unpack(value)
         }
-        env[[input$name]] <- value
+        if (!is.null(value)) env[[input$name]] <- value
       }
 
       # Do eval and process into a result
