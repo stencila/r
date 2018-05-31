@@ -451,13 +451,23 @@ Host <- R6::R6Class("Host",
     #'   \item{token}{The request token}
     #' }
     authorize_token = function (token) {
-      body <- tryCatch(
+      payload <- tryCatch(
         jose::jwt_decode_hmac(token, secret = charToRaw(private$.key)),
         error = identity
       )
-      # TODO Test request sequence order if `hid` (host id) and `seq` (sequence) claims
-      # are in token body. These can, optionally, be set by clients to prevent token replay attacks.
-      if (inherits(body, "error")) FALSE else TRUE
+
+      # Is signature valid?
+      if (inherits(payload, "error")) return(FALSE)
+
+      # Has token expired?
+      exp <- payload$exp
+      if (!is.null(exp)) {
+        if (exp < Sys.time()) return(FALSE)
+      }
+
+      # TODO Check and store `iss` and `jti` to prevent replay attacks
+
+      return(TRUE)
     }
   ),
 
