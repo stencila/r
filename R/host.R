@@ -40,7 +40,7 @@ Host <- R6::R6Class("Host",
     #'
     #' Create a new \code{Host}
     initialize = function () {
-      private$.id <- paste(c("r-", sample(c(letters, 0:9), 64, replace = TRUE)), collapse = "")
+      private$.id <- paste0("r-host-", uuid::UUIDgenerate())
       if (Sys.getenv("STENCILA_AUTH") == "false") {
         key <- NULL
       } else {
@@ -304,19 +304,23 @@ Host <- R6::R6Class("Host",
         # Register as a running host ...
         dir <- file.path(self$temp_dir(), "hosts")
         if (!file.exists(dir)) dir.create(dir, recursive = TRUE)
-        # ...by creating a run file
-        run_file <- file.path(dir, paste0(self$id, ".json"))
-        file.create(run_file)
-        Sys.chmod(run_file, "0600")
+        # ...by creating a manifest file
+        manifest_file <- file.path(dir, paste0(self$id, ".json"))
+        file.create(manifest_file)
+        Sys.chmod(manifest_file, "0600")
         cat(
           jsonlite::toJSON(self$manifest(), pretty = TRUE, auto_unbox = TRUE),
-          file = run_file
+          file = manifest_file
         )
+
         # ...and a key file
         key_file <- file.path(dir, paste0(self$id, ".key"))
         file.create(key_file)
         Sys.chmod(key_file, "0600")
-        cat(self$key, file = key_file)
+        cat(
+          self$key,
+          file = key_file
+        )
 
         if (!quiet) {
           cat("Host HTTP server has started:\n")
@@ -342,8 +346,10 @@ Host <- R6::R6Class("Host",
       }
 
       # Deregister as a running host
-      file <- self$run_file()
-      if (file.exists(file)) file.remove(file)
+      for (file in paste0(self$id, c(".json", ".key"))) {
+        path <- file.path(self$temp_dir(), "hosts", file)
+        if (file.exists(path)) file.remove(path)
+      }
 
       if (!quiet) cat("Host has stopped\n")
 

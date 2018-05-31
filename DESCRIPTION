@@ -25,6 +25,7 @@ Imports:
     stringr,
     tools,
     urltools,
+    uuid,
     xml2
 Remotes:
     klutometis/roxygen@bbf259ddee033a873426ded1e83cdd344b986595
