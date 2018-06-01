@@ -87,7 +87,8 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
           auth_header <- request$headers$Authorization
           if (!is.null(auth_header)) {
             token <- str_match(auth_header, "Bearer (.+)")[, 2]
-            authorized <- private$.host$authorize_token(token)
+            payload <- private$.host$authorize_token(token)
+            authorized <- TRUE
           }
         }
 
