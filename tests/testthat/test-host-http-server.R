@@ -45,20 +45,20 @@ test_that("HostHttpServer$route", {
   expect_equal(s$route("GET", "/v1/hosts", TRUE), c("run", "hosts"))
   expect_equal(s$route("POST", "/v1/hosts/local", TRUE), c("run", "startup", "local"))
   expect_equal(s$route("DELETE", "/v1/hosts/id", TRUE), c("run", "shutdown", "id"))
-  expect_equal(s$route("GET", "/v1/hosts", FALSE), c("error_401", "/v1/hosts"))
+  expect_equal(s$route("GET", "/v1/hosts", FALSE), c("error401", "/v1/hosts"))
 
   expect_equal(s$route("GET", "/v1/instances", TRUE), c("run", "instances"))
-  expect_equal(s$route("GET", "/v1/instances", FALSE), c("error_401", "/v1/instances"))
+  expect_equal(s$route("GET", "/v1/instances", FALSE), c("error401", "/v1/instances"))
 
   expect_equal(s$route("POST", "/v1/instances/Service", TRUE), c("run", "create", "Service"))
-  expect_equal(s$route("POST", "/v1/instances/Service", FALSE), c("error_401", "/v1/instances/Service"))
+  expect_equal(s$route("POST", "/v1/instances/Service", FALSE), c("error401", "/v1/instances/Service"))
 
   expect_equal(s$route("DELETE", "/v1/instances/instance1", TRUE), c("run", "destroy", "instance1"))
 
   expect_equal(s$route("PUT", "/v1/instances/instance1/method", TRUE), c("run", "call", "instance1", "method"))
-  expect_equal(s$route("PUT", "/v1/instances/instance1/method", FALSE), c("error_401", "/v1/instances/instance1/method"))
+  expect_equal(s$route("PUT", "/v1/instances/instance1/method", FALSE), c("error401", "/v1/instances/instance1/method"))
 
-  expect_equal(s$route("PUT", "/v1/foobar", TRUE), c("error_400", "/v1/foobar"))
+  expect_equal(s$route("PUT", "/v1/foobar", TRUE), c("error400", "/v1/foobar"))
 })
 
 test_that("HostHttpServer$handle", {
@@ -119,44 +119,47 @@ test_that("HostHttpServer$handle", {
 })
 
 test_that("HostHttpServer$static", {
-  s <- HostHttpServer$new(host)
+  server <- HostHttpServer$new(host)
+  req <- list()
+  res <- list(status = 200)
 
-  r <- s$static(list(), "logo-name-beta.svg")
-  expect_equal(r$status, 200)
-  expect_equal(r$headers[["Content-Type"]], "image/svg+xml")
-  expect_equal(str_sub(r$body, 1, 54), "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>")
+  res <- server$static(req, res, "logo-name-beta.svg")
+  expect_equal(res$status, 200)
+  expect_equal(res$headers[["Content-Type"]], "image/svg+xml")
+  expect_equal(str_sub(res$body, 1, 54), "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>")
 
-  r <- s$static(list(), "foo.bar")
-  expect_equal(r$status, 404)
+  res <- server$static(req, res, "foo.bar")
+  expect_equal(res$status, 404)
 
-  r <- s$static(list(), "../DESCRIPTION")
-  expect_equal(r$status, 403)
+  res <- server$static(req, res, "../DESCRIPTION")
+  expect_equal(res$status, 403)
 })
 
 test_that("HostHttpServer$run", {
-  s <- HostHttpServer$new(host)
+  server <- HostHttpServer$new(host)
   req <- list()
+  res <- list(status = 200)
 
   # Get manifest
-  r <- s$run(req, "manifest")
-  expect_equal(r$status, 200)
-  expect_equal(r$headers[["Content-Type"]], "application/json")
+  res <- server$run(req, res, "manifest")
+  expect_equal(res$status, 200)
+  expect_equal(res$headers[["Content-Type"]], "application/json")
 
   # Create an RContext
-  r <- s$run(req, "create", "RContext")
-  expect_equal(r$status, 200)
-  expect_equal(r$headers[["Content-Type"]], "application/json")
-  id <- from_json(r$body)
+  res <- server$run(req, res, "create", "RContext")
+  expect_equal(res$status, 200)
+  expect_equal(res$headers[["Content-Type"]], "application/json")
+  id <- from_json(res$body)
 
   # Call a context method
-  r <- s$run(list(body = "\"6*7\""), "call", id, "execute")
-  expect_equal(r$status, 200)
-  expect_equal(r$headers[["Content-Type"]], "application/json")
-  cell <- from_json(r$body)
+  res <- server$run(list(body = "\"6*7\""), res, "call", id, "execute")
+  expect_equal(res$status, 200)
+  expect_equal(res$headers[["Content-Type"]], "application/json")
+  cell <- from_json(res$body)
   expect_equal(cell$type, "cell")
 
   # Delete the context
-  r <- s$run(req, "delete", id)
-  expect_equal(r$status, 200)
-  expect_equal(r$headers[["Content-Type"]], "application/json")
+  res <- server$run(req, res, "delete", id)
+  expect_equal(res$status, 200)
+  expect_equal(res$headers[["Content-Type"]], "application/json")
 })

@@ -69,31 +69,31 @@ Handle a request to call a host method
 Generate an error response
 }
 
-\section{error_400()}{
+\section{error400()}{
 
 
 Generate a 400 error
 }
 
-\section{error_401()}{
+\section{error401()}{
 
 
 Generate a 401 error
 }
 
-\section{error_403()}{
+\section{error403()}{
 
 
 Generate a 403 error
 }
 
-\section{error_404()}{
+\section{error404()}{
 
 
 Generate a 404 error
 }
 
-\section{error_500()}{
+\section{error500()}{
 
 
 Generate a 500 error
