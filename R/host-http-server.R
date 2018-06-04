@@ -151,16 +151,14 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
           # For preflighted CORS OPTIONS requests return an empty response with headers set
           # (https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS#Preflighted_requests)
           return(response)
+        } else {
+          endpoint <- self$route(request$method, request$path, authorized)
+          method_name <- endpoint[1]
+          method_args <- endpoint[2:length(endpoint)]
+          method <- self[[method_name]]
+          response <- do.call(method, c(list(request = request, response = response), method_args))
+          return(response)
         }
-
-        # Create response by routing the request
-        endpoint <- self$route(request$method, request$path, authorized)
-        method_name <- endpoint[1]
-        method_args <- endpoint[2:length(endpoint)]
-        method <- self[[method_name]]
-        response <- do.call(method, c(list(request = request, response = response), method_args))
-        return(response)
-
       }, error = identity) # nolint (end of tryCatch block)
 
       if (inherits(response, "error")) self$error500(request, response)
@@ -252,7 +250,6 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
     #' Handle a request to call a host method
     run = function(request, response, method, ...) {
       args <- list(...)
-      ## The body is always a single final argument
       if (!is.null(request$body) && nchar(request$body) > 0) {
         args[[length(args) + 1]] <- from_json(request$body)
       }
@@ -269,7 +266,7 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
     error = function(request, response, code, name, what = "") {
       response$status = code 
       response$body = paste0(name, ": ", what)
-      response$headers["Content-Type"] = "text/html"
+      response$headers["Content-Type"] = "text/plain"
       response
     },
 
@@ -284,28 +281,28 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
     #'
     #' Generate a 401 error
     error401 = function(request, response, what = "") {
-      self$error(request, response, 401, "Unauthorized ", what)
+      self$error(request, response, 401, "Unauthorized", what)
     },
 
     #' @section error403():
     #'
     #' Generate a 403 error
     error403 = function(request, response, what = "") {
-      self$error(request, response, 403, "Forbidden ", what)
+      self$error(request, response, 403, "Forbidden", what)
     },
 
     #' @section error404():
     #'
     #' Generate a 404 error
     error404 = function(request, response, what = "") {
-      self$error(request, response, 404, "Not found ", what)
+      self$error(request, response, 404, "Not found", what)
     },
 
     #' @section error500():
     #'
     #' Generate a 500 error
     error500 = function(request, response, error) {
-      self$error(request, response, 500, "Internal error ", toString(error))  # nocov
+      self$error(request, response, 500, "Internal error", toString(error))  # nocov
     }
   ),
 
