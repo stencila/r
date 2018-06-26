@@ -33,6 +33,8 @@ RContext <- R6::R6Class("RContext",
       }
 
       private$.variables <- new.env(parent = emptyenv())
+
+      private$.input_collector <- CodeDepends::inputCollector()
     },
 
     #' @section compile():
@@ -103,56 +105,29 @@ RContext <- R6::R6Class("RContext",
         }
       }
 
-      # Determine inputs (variables that are global to the cell's code)
-      if (FALSE) {
-        # Deprecated approach using the globals package
-        expr <- tryCatch(eval(parse(text = paste("substitute({", cell$code, "})"))), error = identity)
-        if (!inherits(expr, "error")) {
-          global_vars <- globals::globalsOf(expr, mustExist = F)
-          global_wheres <- attr(global_vars, "where")
-          inputs <- names(global_wheres)[sapply(global_wheres, is.null)]
-        } else {
-          inputs <- c()
+      # Determine inputs
+      lines <- strsplit(cell$code, "\n")[[1]]
+      script_info <- tryCatch(
+        CodeDepends::getInputs(
+          CodeDepends::readScript(txt = lines),
+          collector = private$.input_collector
+        ),
+        error = identity
+      )
+      inputs <- NULL
+      if (!inherits(script_info, "error")) {
+        assigned <- NULL
+        for (line in script_info) {
+          assigned <- c(assigned, line@outputs)
+          inputs <- c(inputs, line@inputs[!(line@inputs %in% assigned)])
         }
-      } else {
-        # Walking the AST, determining those variables which are
-        # declared, those that are used, and attempting to deal with
-        # functions that use non-standard evaluation
-        expr <- tryCatch(parse(text = cell$code), error = identity)
-        if (!inherits(expr, "error")) {
-          declared <- NULL
-          used <- NULL
-          visit <- function(node) {
-            if (is.expression(node)) {
-              for (index in seq_along(node)) {
-                visit(node[[index]])
-              }
-            } else if (is.call(node)) {
-              func <- node[[1]]
-              if (func == "<-" | func == "=") {
-                declared <<- c(declared, as.character(node[[2]]))
-              } else if (func != "~") {
-                for (index in seq_along(node)) {
-                  visit(node[[index]])
-                }
-              }
-            } else if (is.name(node)) {
-              name <- as.character(node)
-              if (!(name %in% declared)) {
-                used <<- c(used, name)
-              }
-            }
-          }
-          visit(expr)
-          inputs <- NULL
-          for (name in used) {
-            if (!exists(name)) {
-              inputs <- c(inputs, name)
-            }
-          }
-        } else {
-          inputs <- c()
-        }
+      }
+      # Exclude any globally defined variables (ie non-functions) e.g. pi, mtcars
+      if (length(inputs)) {
+        inputs <- inputs[!sapply(inputs, function(input) {
+          global <- tryCatch(get(input, envir = globalenv()), error = identity)
+          if (inherits(global, "error")) FALSE else mode(global) != "function"
+        })]
       }
 
       # Determine output name
@@ -306,7 +281,11 @@ RContext <- R6::R6Class("RContext",
     .dir = NULL,
 
     # Variables that reside in this context
-    .variables = NULL
+    .variables = NULL,
+
+    # Used when collecting variables to keep track of libraries
+    # that have been loaded
+    .input_collector = NULL
   )
 )
 

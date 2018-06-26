@@ -42,7 +42,7 @@ describe("RContext", {
       messages = list()
     ))
 
-    # x used and then assigned (this will trhow an error when executed)
+    # x used and then assigned (this will throw an error when executed)
     check("x\nx <- 2", list(
       inputs = list(list(name = "x")),
       outputs = list(),
@@ -65,6 +65,38 @@ describe("RContext", {
     # Currently ignoring terms in formulae
     check("lm(x~y, my_data)", list(
       inputs = list(list(name = "my_data")),
+      outputs = list(),
+      messages = list()
+    ))
+
+    # Globally available data frame is not an input
+    check("mtcars", list(
+      inputs = list(),
+      outputs = list(),
+      messages = list()
+    ))
+    # ...nor is it's column
+    check("mtcars$cyl", list(
+      inputs = list(),
+      outputs = list(),
+      messages = list()
+    ))
+
+    # NSE functions
+    check("subset(mtcars, cyl < 6)", list(
+      inputs = list(),
+      outputs = list(),
+      messages = list()
+    ))
+    check("library(dplyr)\n filter(mtcars, cyl < 6)", list(
+      inputs = list(),
+      outputs = list(),
+      messages = list()
+    ))
+    # Once dplyr has been library'ed then the
+    # dependency analysis is smart enough to know filter is NSE
+    check("data %>% filter(cyl < 6)", list(
+      inputs = list(list(name = "data")),
       outputs = list(),
       messages = list()
     ))

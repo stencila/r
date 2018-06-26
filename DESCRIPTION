@@ -10,9 +10,9 @@ Version: 0.28.3
 LazyData: TRUE
 Imports:
     base64enc,
+    CodeDepends,
     DBI,
     evaluate,
-    globals (== 0.11.0),
     httpuv (== 1.4.3),
     jose (== 0.2),
     jsonlite,
