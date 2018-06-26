@@ -238,9 +238,9 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
         content <- paste(lines, collapse = "\n")
         close(file_connection)
         mimetype <- mime::guess_type(path)
-        
-        response$body = content
-        response$headers["Content-Type"] = mimetype
+
+        response$body <- content
+        response$headers["Content-Type"] <- mimetype
         response
       }
     },
@@ -254,9 +254,9 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
         args[[length(args) + 1]] <- from_json(request$body)
       }
       result <- do.call(private$.host[[method]], args)
-      
+
       response$body <- to_json(result)
-      response$headers["Content-Type"] = "application/json"
+      response$headers["Content-Type"] <- "application/json"
       response
     },
 
@@ -264,9 +264,9 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
     #'
     #' Generate an error response
     error = function(request, response, code, name, what = "") {
-      response$status = code 
-      response$body = paste0(name, ": ", what)
-      response$headers["Content-Type"] = "text/plain"
+      response$status <- code
+      response$body <- paste0(name, ": ", what)
+      response$headers["Content-Type"] <- "text/plain"
       response
     },
 
