@@ -5,6 +5,9 @@ r:
   - release
   - devel
 
+bioc_packages:
+  - graph
+
 r_github_packages:
   - r-lib/covr
   - r-lib/pkgdown
