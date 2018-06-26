@@ -14,7 +14,12 @@ This package isn't on CRAN yet, but you can install it from this repository usin
 devtools::install_github("stencila/r")
 ```
 
-Alternatively, check the [releases page](https://github.com/stencila/r/releases) for prebuilt versions.
+You may need to install the `graph` package from Bioconductor if you don't already have it:
+
+```r
+source("https://bioconductor.org/biocLite.R")
+biocLite("graph")
+```
 
 Then install the package so that other Stencila packages and applications can detect it:
 
