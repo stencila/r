@@ -62,7 +62,7 @@ To run test files individually, in R use `test_file`:
 
 ```r
 library(testthat)
-test_file('tests/testthat/test-r-context.R')
+testthat::test_file(system.file("tests/testthat/test-r-context.R",package="stencila"))
 ```
 
 To get started, please read our contributor [code of conduct](CONDUCT.md), then [get in touch](https://gitter.im/stencila/stencila) or checkout the [platform-wide, cross-repository kanban board](https://github.com/orgs/stencila/projects/1), or just send in a pull request!
