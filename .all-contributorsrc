@@ -1,0 +1,22 @@
+{
+  "projectName": "r",
+  "projectOwner": "stencila",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": true,
+  "contributors": [
+    {
+      "login": "apawlik",
+      "name": "Aleksandra Pawlik",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/2358535?v=4",
+      "profile": "http://stenci.la",
+      "contributions": [
+        "code"
+      ]
+    }
+  ]
+}
