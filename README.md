@@ -1,5 +1,5 @@
 ## Stencila for R
-[![All Contributors](https://img.shields.io/badge/all_contributors-5-orange.svg?style=flat-square)](#contributors)
+[![All Contributors](https://img.shields.io/badge/all_contributors-6-orange.svg?style=flat-square)](#contributors)
 
 [![Build status](https://travis-ci.org/stencila/r.svg?branch=master)](https://travis-ci.org/stencila/r)
 [![Code coverage](https://codecov.io/gh/stencila/r/branch/master/graph/badge.svg)](https://codecov.io/gh/stencila/r)
@@ -78,8 +78,8 @@ Thanks goes to these wonderful people ([emoji key](https://github.com/kentcdodds
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore -->
-| [<img src="https://avatars2.githubusercontent.com/u/2358535?v=4" width="100px;"/><br /><sub><b>Aleksandra Pawlik</b></sub>](http://stenci.la)<br />[💻](https://github.com/stencila/r/commits?author=apawlik "Code") | [<img src="https://avatars2.githubusercontent.com/u/13207169?v=4" width="100px;"/><br /><sub><b>Danielle Robinson</b></sub>](https://github.com/daniellecrobinson)<br />[📖](https://github.com/stencila/r/commits?author=daniellecrobinson "Documentation") | [<img src="https://avatars2.githubusercontent.com/u/7623019?v=4" width="100px;"/><br /><sub><b>Achintya Rao</b></sub>](https://scholar.social/@RaoOfPhysics)<br />[📖](https://github.com/stencila/r/commits?author=RaoOfPhysics "Documentation") | [<img src="https://avatars1.githubusercontent.com/u/1325054?v=4" width="100px;"/><br /><sub><b>Daniel Nüst</b></sub>](http://nordholmen.net)<br />[💻](https://github.com/stencila/r/commits?author=nuest "Code") | [<img src="https://avatars2.githubusercontent.com/u/5362577?v=4" width="100px;"/><br /><sub><b>HarryZhu</b></sub>](https://github.com/harryprince)<br />[📖](https://github.com/stencila/r/commits?author=harryprince "Documentation") |
-| :---: | :---: | :---: | :---: | :---: |
+| [<img src="https://avatars2.githubusercontent.com/u/2358535?v=4" width="100px;"/><br /><sub><b>Aleksandra Pawlik</b></sub>](http://stenci.la)<br />[💻](https://github.com/stencila/r/commits?author=apawlik "Code") | [<img src="https://avatars2.githubusercontent.com/u/13207169?v=4" width="100px;"/><br /><sub><b>Danielle Robinson</b></sub>](https://github.com/daniellecrobinson)<br />[📖](https://github.com/stencila/r/commits?author=daniellecrobinson "Documentation") | [<img src="https://avatars2.githubusercontent.com/u/7623019?v=4" width="100px;"/><br /><sub><b>Achintya Rao</b></sub>](https://scholar.social/@RaoOfPhysics)<br />[📖](https://github.com/stencila/r/commits?author=RaoOfPhysics "Documentation") | [<img src="https://avatars1.githubusercontent.com/u/1325054?v=4" width="100px;"/><br /><sub><b>Daniel Nüst</b></sub>](http://nordholmen.net)<br />[💻](https://github.com/stencila/r/commits?author=nuest "Code") | [<img src="https://avatars2.githubusercontent.com/u/5362577?v=4" width="100px;"/><br /><sub><b>HarryZhu</b></sub>](https://github.com/harryprince)<br />[📖](https://github.com/stencila/r/commits?author=harryprince "Documentation") | [<img src="https://avatars0.githubusercontent.com/u/1152336?v=4" width="100px;"/><br /><sub><b>Nokome Bentley</b></sub>](https://github.com/nokome)<br />[💻](https://github.com/stencila/r/commits?author=nokome "Code") |
+| :---: | :---: | :---: | :---: | :---: | :---: |
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 This project follows the [all-contributors](https://github.com/kentcdodds/all-contributors) specification. Contributions of any kind welcome!
