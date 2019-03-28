@@ -1,6 +1,6 @@
 ## Stencila for R
-[![All Contributors](https://img.shields.io/badge/all_contributors-6-orange.svg?style=flat-square)](#contributors)
 
+[![All Contributors](https://img.shields.io/badge/all_contributors-6-orange.svg?style=flat-square)](#contributors)
 [![Build status](https://travis-ci.org/stencila/r.svg?branch=master)](https://travis-ci.org/stencila/r)
 [![Code coverage](https://codecov.io/gh/stencila/r/branch/master/graph/badge.svg)](https://codecov.io/gh/stencila/r)
 [![CRAN](http://www.r-pkg.org/badges/version/stencila)](https://cran.r-project.org/package=stencila)
@@ -27,8 +27,6 @@ Then install the package so that other Stencila packages and applications can de
 ```r
 stencila:::register()
 ```
-
-**Note** This package is not yet compatible with Stencila Desktop 0.28.0. We are working on upgrades to make that possible.
 
 **Note** Installing Stencila package for R may take a while as there are a number of dependencies which need to be installed. 
 

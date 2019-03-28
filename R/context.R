@@ -44,7 +44,8 @@ Context <- R6::R6Class("Context",
             type = "table",
             columns = ncol(df),
             rows = nrow(df),
-            data = df
+            # Limit the amount of data actually sent
+            data = head(df, n=100)
           )
         )
       } else if (type == "plot") {

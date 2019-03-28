@@ -161,7 +161,7 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
         }
       }, error = identity) # nolint (end of tryCatch block)
 
-      if (inherits(response, "error")) self$error500(request, response)
+      if (inherits(response, "error")) self$error500(request, error=response)
       else response
     },
 
@@ -301,8 +301,12 @@ HostHttpServer <- R6::R6Class("HostHttpServer",
     #' @section error500():
     #'
     #' Generate a 500 error
-    error500 = function(request, response, error) {
-      self$error(request, response, 500, "Internal error", toString(error))  # nocov
+    error500 = function(request, error) {
+      response <- list(
+        headers = list()
+      )
+      message <- paste(toString(error), .traceback(), collapse='\n')
+      self$error(request, response, 500, "Internal error", message)  # nocov
     }
   ),
 

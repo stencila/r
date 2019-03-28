@@ -13,11 +13,9 @@
 #
 #' @importFrom grDevices dev.off png replayPlot
 #' @import methods
-#' @import roxygen2
 #' @import stringr
 #' @import tools
 #' @importFrom utils capture.output read.csv write.csv
-#' @importFrom xml2 xml_new_root xml_add_child xml_serialize
 NULL
 
 # The following free functions have generic names which may clash with

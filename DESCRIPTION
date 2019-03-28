@@ -19,24 +19,17 @@ Imports:
     mime,
     methods,
     R6,
-    RSQLite,
-    rstudioapi,
-    roxygen2,
     stringr,
     tools,
     urltools,
-    uuid,
-    xml2
-Remotes:
-    klutometis/roxygen@bbf259ddee033a873426ded1e83cdd344b986595
+    uuid
 Suggests:
     covr,
     devtools,
     lintr,
     testthat
 RoxygenNote: 6.1.1.9000
-Collate: 
-    'addins.R'
+Collate:
     'context.R'
     'execute.R'
     'host-http-server.R'
@@ -44,6 +37,4 @@ Collate:
     'host.R'
     'json.R'
     'main.R'
-    'register.R'
-    'sqlite-context.R'
     'type.R'
