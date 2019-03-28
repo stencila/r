@@ -19,7 +19,6 @@ Imports:
     mime,
     methods,
     R6,
-    RSQLite,
     stringr,
     tools,
     urltools,
@@ -30,8 +29,7 @@ Suggests:
     lintr,
     testthat
 RoxygenNote: 6.1.1.9000
-Collate: 
-    'addins.R'
+Collate:
     'context.R'
     'execute.R'
     'host-http-server.R'
@@ -39,5 +37,4 @@ Collate:
     'host.R'
     'json.R'
     'main.R'
-    'sqlite-context.R'
     'type.R'
