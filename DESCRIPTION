@@ -20,7 +20,6 @@ Imports:
     methods,
     R6,
     RSQLite,
-    rstudioapi,
     stringr,
     tools,
     urltools,
