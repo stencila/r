@@ -132,10 +132,12 @@ RContext <- R6::R6Class("RContext",
 
       # Determine output name
       output <- NULL
-      last <- ast[[length(ast)]]
-      if (is.assignment(last)) {
-        if (is.name(last[[2]])) {
-          output <- as.character(last[[2]])
+      if (length(ast) > 0) {
+        last <- ast[[length(ast)]]
+        if (is.assignment(last)) {
+          if (is.name(last[[2]])) {
+            output <- as.character(last[[2]])
+          }
         }
       }
 
@@ -218,7 +220,7 @@ RContext <- R6::R6Class("RContext",
       if (!has_value & length(cell$outputs)) {
         # If the last statement was an assignment then grab that variable
         name <- cell$outputs[[1]]$name
-        if (!is.null(name)) {
+        if (!is.null(name) & name %in% ls(env)) {
           value <- get(name, envir = env)
           has_value <- TRUE
         }
