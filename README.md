@@ -1,13 +1,16 @@
-## Stencila for R
+# 🔵 `r`
+
+**R interpreter for executable documents**
 
 [![All Contributors](https://img.shields.io/badge/all_contributors-6-orange.svg?style=flat-square)](#contributors)
 [![Build status](https://travis-ci.org/stencila/r.svg?branch=master)](https://travis-ci.org/stencila/r)
 [![Code coverage](https://codecov.io/gh/stencila/r/branch/master/graph/badge.svg)](https://codecov.io/gh/stencila/r)
-[![CRAN](http://www.r-pkg.org/badges/version/stencila)](https://cran.r-project.org/package=stencila)
-[![Community](https://img.shields.io/badge/join-community-green.svg)](https://community.stenci.la)
-[![Chat](https://badges.gitter.im/stencila/stencila.svg)](https://gitter.im/stencila/stencila)
 
-### Install
+## ⚠️ Deprecated
+
+This project is deprecated and no longer maintained. At the time of writing, we are instead focussing on using [`tree-sitter`](https://github.com/tree-sitter/tree-sitter) for sematic analysis, and [`IRKernel`](https://github.com/IRkernel/IRkernel#readme) for execution, of R code. Please see, our main repository, [`stencila/stencila`](https://github.com/stencila/stencila) for further information.
+
+## 📦 Install
 
 This package isn't on CRAN yet, but you can install it from this repository using the [`devtools`](https://github.com/hadley/devtools) package,
 
@@ -30,19 +33,17 @@ stencila:::register()
 
 **Note** Installing Stencila package for R may take a while as there are a number of dependencies which need to be installed. 
 
-### Use
+## ⚡ Use
 
 This package lets you run R code from inside Stencila Documents. When you start the [Stencila Desktop](https://github.com/stencila/desktop) it will be automatically detect the installed R package and you'll be able to execute R code cells from within your documents.
 
-Check out what people are doing with Stencila and R - [Giulio Valentino Dalla Riva](https://github.com/gvdr) has created Tiny Open Access Data Samples ([TOADS](https://github.com/gvdr/toads/)). These awesome open datasets teach programming and statistics using Stencila. Check out the TOADS!
+Check out what people are doing with Stencila and R. [Giulio Valentino Dalla Riva](https://github.com/gvdr) has created Tiny Open Access Data Samples ([TOADS](https://github.com/gvdr/toads/)). These awesome open datasets teach programming and statistics using Stencila. Check out the TOADS!
 
 More documentation is available at https://stencila.github.io/r
 
-### Discuss
-
 We love feedback. Create a [new issue](https://github.com/stencila/r/issues/new), add to [existing issues](https://github.com/stencila/r/issues) or [chat](https://gitter.im/stencila/stencila) with members of the community.
 
-### Develop
+## ⚒️ Develop
 
 Most development tasks can be run from R, using `make` shortcuts or RStudio keyboard shortcuts.
 
@@ -70,7 +71,7 @@ Unit tests live in the `tests` folder and are mostly written using `testthat`. D
 
 Tests are run on [Travis](https://travis-ci.org/stencila/r) and code coverage tracked at [Codecov](https://codecov.io/gh/stencila/r).
 
-## Contributors
+## 💖 Contributors
 
 Thanks goes to these wonderful people ([emoji key](https://github.com/kentcdodds/all-contributors#emoji-key)):
 
